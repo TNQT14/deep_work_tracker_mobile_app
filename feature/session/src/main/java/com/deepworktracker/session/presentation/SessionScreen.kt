@@ -64,13 +64,6 @@ fun SessionScreen(
                         textAlign = TextAlign.Center,
                         modifier = Modifier.padding(bottom = 48.dp)
                     )
-
-                    Text(
-                        text = uiState.isTracking.toString(),
-                        style = MaterialTheme.typography.displayLarge,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(bottom = 48.dp)
-                    )
                     
                     Button(
                         onClick = { viewModel.endSession() },
@@ -81,9 +74,6 @@ fun SessionScreen(
                 } else {
                     var goalText by remember { mutableStateOf("") }
                     val recentGoals = uiState.recentSession
-                    val presetGoals = remember {
-                        listOf("Học", "Làm việc", "Đọc sách", "Viết", "Lập trình", "Chơi game", "Tập thể dục", "Thiền")
-                    }
                     Text(
                         text = "What are you focusing on?",
                         style = MaterialTheme.typography.titleLarge,
