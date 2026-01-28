@@ -1,16 +1,16 @@
 -- Merging decision tree log ---
 manifest
-ADDED from /Users/quangthai/Documents/mobileapp/deep_work_tracker_mobile_app/feature/session/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest12846478563108194823.xml:2:13-83
-INJECTED from /Users/quangthai/Documents/mobileapp/deep_work_tracker_mobile_app/feature/session/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest12846478563108194823.xml:2:13-83
+ADDED from /Users/quangthai/Documents/mobileapp/deep_work_tracker_mobile_app/feature/session/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest14715952702071722302.xml:2:13-83
+INJECTED from /Users/quangthai/Documents/mobileapp/deep_work_tracker_mobile_app/feature/session/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest14715952702071722302.xml:2:13-83
 	package
-		INJECTED from /Users/quangthai/Documents/mobileapp/deep_work_tracker_mobile_app/feature/session/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest12846478563108194823.xml
+		INJECTED from /Users/quangthai/Documents/mobileapp/deep_work_tracker_mobile_app/feature/session/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest14715952702071722302.xml
 	xmlns:android
-		ADDED from /Users/quangthai/Documents/mobileapp/deep_work_tracker_mobile_app/feature/session/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest12846478563108194823.xml:2:23-81
+		ADDED from /Users/quangthai/Documents/mobileapp/deep_work_tracker_mobile_app/feature/session/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest14715952702071722302.xml:2:23-81
 uses-sdk
-INJECTED from /Users/quangthai/Documents/mobileapp/deep_work_tracker_mobile_app/feature/session/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest12846478563108194823.xml reason: use-sdk injection requested
-INJECTED from /Users/quangthai/Documents/mobileapp/deep_work_tracker_mobile_app/feature/session/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest12846478563108194823.xml
-INJECTED from /Users/quangthai/Documents/mobileapp/deep_work_tracker_mobile_app/feature/session/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest12846478563108194823.xml
+INJECTED from /Users/quangthai/Documents/mobileapp/deep_work_tracker_mobile_app/feature/session/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest14715952702071722302.xml reason: use-sdk injection requested
+INJECTED from /Users/quangthai/Documents/mobileapp/deep_work_tracker_mobile_app/feature/session/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest14715952702071722302.xml
+INJECTED from /Users/quangthai/Documents/mobileapp/deep_work_tracker_mobile_app/feature/session/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest14715952702071722302.xml
 	android:targetSdkVersion
-		INJECTED from /Users/quangthai/Documents/mobileapp/deep_work_tracker_mobile_app/feature/session/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest12846478563108194823.xml
+		INJECTED from /Users/quangthai/Documents/mobileapp/deep_work_tracker_mobile_app/feature/session/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest14715952702071722302.xml
 	android:minSdkVersion
-		INJECTED from /Users/quangthai/Documents/mobileapp/deep_work_tracker_mobile_app/feature/session/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest12846478563108194823.xml
+		INJECTED from /Users/quangthai/Documents/mobileapp/deep_work_tracker_mobile_app/feature/session/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest14715952702071722302.xml

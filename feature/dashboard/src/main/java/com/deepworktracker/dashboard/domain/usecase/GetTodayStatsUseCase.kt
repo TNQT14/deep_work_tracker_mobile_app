@@ -25,11 +25,9 @@ class GetTodayStatsUseCase @Inject constructor(
             val today = Clock.System.now()
                 .toLocalDateTime(TimeZone.currentSystemDefault())
                 .date
-            
-            // Lấy sessions hôm nay
+
             val sessions = sessionRepository.getSessionsByDate(today).first()
-            
-            // Tính toán stats từ sessions
+
             val totalFocusTime = sessions.sumOf { it.totalDuration }
             val sessionCount = sessions.size
             val completedSessions = sessions.filter { it.endTime != null }
@@ -38,8 +36,7 @@ class GetTodayStatsUseCase @Inject constructor(
             } else {
                 0L
             }
-            
-            // Tính best focus hour (giờ có nhiều focus time nhất)
+
             val hourFocusMap = mutableMapOf<Int, Long>()
             sessions.forEach { session ->
                 val hour = session.startTime
@@ -71,8 +68,8 @@ class GetTodayStatsUseCase @Inject constructor(
  */
 data class TodayStats(
     val date: LocalDate,
-    val totalFocusTime: Long, // milliseconds
+    val totalFocusTime: Long,
     val sessionCount: Int,
-    val averageSessionDuration: Long, // milliseconds
-    val bestFocusHour: Int? // 0-23
+    val averageSessionDuration: Long,
+    val bestFocusHour: Int?
 )

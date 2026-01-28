@@ -11,9 +11,6 @@ import kotlinx.datetime.minus
 import kotlinx.datetime.toLocalDateTime
 import javax.inject.Inject
 
-/**
- * Use case để lấy các sessions gần đây (7 ngày qua)
- */
 class GetRecentSessionsUseCase @Inject constructor(
     private val sessionRepository: SessionRepository
 ) {
@@ -25,10 +22,8 @@ class GetRecentSessionsUseCase @Inject constructor(
             
             val sevenDaysAgo = today.minus(7, kotlinx.datetime.DateTimeUnit.DAY)
             
-            // Lấy sessions trong 7 ngày qua
             val sessions = sessionRepository.getSessionsByDateRange(sevenDaysAgo, today).first()
-            
-            // Sắp xếp theo thời gian bắt đầu (mới nhất trước) và giới hạn số lượng
+
             val sortedSessions = sessions
                 .sortedByDescending { it.startTime }
                 .take(limit)

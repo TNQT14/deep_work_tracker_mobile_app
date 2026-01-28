@@ -16,6 +16,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.deepworktracker.common.time.TimeFormatter
+import com.deepworktracker.dashboard.presentation.chart.FocusTimeBarChart
+import com.deepworktracker.dashboard.presentation.charts.GoalDistributionChart
 import com.deepworktracker.domain.model.FocusSession
 import com.deepworktracker.ui.theme.DeepWorkTrackerTheme
 import kotlin.time.Duration.Companion.milliseconds
@@ -39,7 +41,6 @@ fun DashboardScreen(
             Column(
                 modifier = Modifier.fillMaxSize()
             ) {
-                // Top bar với navigation và refresh
                 TopAppBar(
                     title = { Text("Dashboard") },
                     actions = {
@@ -64,10 +65,8 @@ fun DashboardScreen(
                         }
                     }
                 )
-                
-                // Content
+
                 if (uiState.isLoading && uiState.todayStats == null) {
-                    // Initial loading
                     Box(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
@@ -80,12 +79,18 @@ fun DashboardScreen(
                         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        // Today's Stats Card
                         item {
                             TodayStatsCard(stats = uiState.todayStats)
                         }
-                        
-                        // Recent Sessions Section
+
+                        item {
+                            FocusTimeBarChart(sessions = uiState.recentSessions)
+                        }
+
+                        item {
+                            GoalDistributionChart(sessions = uiState.recentSessions)
+                        }
+
                         item {
                             Text(
                                 text = "Recent Sessions",

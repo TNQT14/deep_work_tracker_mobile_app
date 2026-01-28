@@ -8,14 +8,14 @@ data class Interruption(
     val startTime: Instant,
     val endTime: Instant?,
     val type: InterruptionType,
-    val duration: Long // milliseconds
+    val duration: Long
 ) {
     val isActive: Boolean
         get() = endTime == null
 }
 
 enum class InterruptionType {
-    BACKGROUND,      // App went to background
-    SCREEN_LOCK,     // Screen was locked
-    APP_SWITCH       // User switched to another app
+    BACKGROUND,
+    SCREEN_LOCK,
+    APP_SWITCH
 }
