@@ -7,6 +7,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -100,44 +103,23 @@ fun SessionScreen(
                             .padding(bottom = 8.dp)
                     )
 
-                    Row(
+                    LazyVerticalGrid(
+                        columns = GridCells.Adaptive(minSize = 100.dp),
                         modifier = Modifier
                             .fillMaxWidth()
+                            .heightIn(max = 200.dp)
                             .padding(bottom = 24.dp),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.Top
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Column(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                recentGoals.take(4).forEach { preset ->
-                                    FilterChip(
-                                        selected = goalText == preset,
-                                        onClick = { goalText = preset },
-                                        label = { Text(preset) }
-                                    )
-                                }
-                            }
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                recentGoals.drop(4).forEach { preset ->
-                                    FilterChip(
-                                        selected = goalText == preset,
-                                        onClick = { goalText = preset },
-                                        label = { Text(preset) }
-                                    )
-                                }
-                            }
+                        items(recentGoals) { preset ->
+                            FilterChip(
+                                selected = goalText == preset,
+                                onClick = { goalText = preset },
+                                label = { Text(preset, maxLines = 1) }
+                            )
                         }
                     }
-                    
                     Button(
                         onClick = { 
                             if (goalText.isNotBlank()) {
