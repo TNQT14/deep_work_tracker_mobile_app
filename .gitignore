@@ -1,15 +1,133 @@
-*.iml
-.gradle
-/local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
-.DS_Store
-/build
-/captures
-.externalNativeBuild
-.cxx
+################################
+# Android build outputs
+################################
+*.apk
+*.ap_
+*.aab
+*.apks
+*.dex
+*.class
+
+################################
+# Gradle
+################################
+.gradle/
+**/.gradle/
+build/
+**/build/
+
+################################
+# AGP generated (QUAN TRỌNG)
+################################
+**/intermediates/
+**/.transforms/
+**/generated/
+**/outputs/
+**/tmp/
+**/kotlin/
+**/classes/
+**/libs/
+
+################################
+# Jetpack Compose
+################################
+**/ComposableSingletons*.class
+**/ComposableSingletons*.dex
+
+################################
+# Kapt / Hilt
+################################
+kapt3/
+**/build/generated/source/kapt/
+**/build/generated/source/kaptKotlin/
+
+################################
+# Android specific
+################################
 local.properties
+captures/
+.navigation/
+*.hprof
+
+################################
+# Lint
+################################
+**/lint-results*.xml
+**/lint-results*.html
+**/lint-results*.json
+
+################################
+# Room
+################################
+schema/
+
+################################
+# NDK / Native
+################################
+.externalNativeBuild/
+.cxx/
+obj/
+
+################################
+# IDEs
+################################
+.idea/
+*.iml
+*.ipr
+*.iws
+out/
+
+################################
+# VS Code
+################################
+.vscode/
+
+################################
+# OS files
+################################
+# macOS
+.DS_Store
+._*
+.Spotlight-V100
+.Trashes
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux
+*~
+
+################################
+# Logs & temp
+################################
+*.log
+*.tmp
+*.bak
+*.swp
+*.orig
+*~.nib
+
+################################
+# Kotlin
+################################
+*.kt.swp
+*.kt.bak
+
+################################
+# Tests & coverage
+################################
+**/test-results/
+**/.coverage
+**/coverage/
+
+################################
+# Metadata
+################################
+**/META-INF/*.kotlin_module
+**/desugar_graph.bin
+core/data/build/.transforms/6b19216146a0fd564587f02dd7b1d1d5/transformed/bundleLibRuntimeToDirDebug/com/deepworktracker/data/database/dao/SessionDao_Impl$12.dex
+/core/common/build
+/core/common/build/.transforms
+/core/common/build/kotlin
