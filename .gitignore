@@ -131,3 +131,6 @@ core/data/build/.transforms/6b19216146a0fd564587f02dd7b1d1d5/transformed/bundleL
 /core/common/build
 /core/common/build/.transforms
 /core/common/build/kotlin
+/feature/dashboard/build/.transforms
+*.class
+/feature/dashboard/build
