@@ -1,5 +1,6 @@
 package com.deepworktracker.dashboard.presentation;
 
+import com.deepworktracker.dashboard.domain.usecase.GetAllSessionUseCase;
 import com.deepworktracker.dashboard.domain.usecase.GetRecentSessionsUseCase;
 import com.deepworktracker.dashboard.domain.usecase.GetTodayStatsUseCase;
 import dagger.internal.DaggerGenerated;
@@ -28,25 +29,31 @@ public final class DashboardViewModel_Factory implements Factory<DashboardViewMo
 
   private final Provider<GetRecentSessionsUseCase> getRecentSessionsUseCaseProvider;
 
+  private final Provider<GetAllSessionUseCase> getAllSessionUseCaseProvider;
+
   public DashboardViewModel_Factory(Provider<GetTodayStatsUseCase> getTodayStatsUseCaseProvider,
-      Provider<GetRecentSessionsUseCase> getRecentSessionsUseCaseProvider) {
+      Provider<GetRecentSessionsUseCase> getRecentSessionsUseCaseProvider,
+      Provider<GetAllSessionUseCase> getAllSessionUseCaseProvider) {
     this.getTodayStatsUseCaseProvider = getTodayStatsUseCaseProvider;
     this.getRecentSessionsUseCaseProvider = getRecentSessionsUseCaseProvider;
+    this.getAllSessionUseCaseProvider = getAllSessionUseCaseProvider;
   }
 
   @Override
   public DashboardViewModel get() {
-    return newInstance(getTodayStatsUseCaseProvider.get(), getRecentSessionsUseCaseProvider.get());
+    return newInstance(getTodayStatsUseCaseProvider.get(), getRecentSessionsUseCaseProvider.get(), getAllSessionUseCaseProvider.get());
   }
 
   public static DashboardViewModel_Factory create(
       Provider<GetTodayStatsUseCase> getTodayStatsUseCaseProvider,
-      Provider<GetRecentSessionsUseCase> getRecentSessionsUseCaseProvider) {
-    return new DashboardViewModel_Factory(getTodayStatsUseCaseProvider, getRecentSessionsUseCaseProvider);
+      Provider<GetRecentSessionsUseCase> getRecentSessionsUseCaseProvider,
+      Provider<GetAllSessionUseCase> getAllSessionUseCaseProvider) {
+    return new DashboardViewModel_Factory(getTodayStatsUseCaseProvider, getRecentSessionsUseCaseProvider, getAllSessionUseCaseProvider);
   }
 
   public static DashboardViewModel newInstance(GetTodayStatsUseCase getTodayStatsUseCase,
-      GetRecentSessionsUseCase getRecentSessionsUseCase) {
-    return new DashboardViewModel(getTodayStatsUseCase, getRecentSessionsUseCase);
+      GetRecentSessionsUseCase getRecentSessionsUseCase,
+      GetAllSessionUseCase getAllSessionUseCase) {
+    return new DashboardViewModel(getTodayStatsUseCase, getRecentSessionsUseCase, getAllSessionUseCase);
   }
 }

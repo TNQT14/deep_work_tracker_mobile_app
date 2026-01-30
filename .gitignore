@@ -127,12 +127,3 @@ Desktop.ini
 ################################
 **/META-INF/*.kotlin_module
 **/desugar_graph.bin
-core/data/build/.transforms/6b19216146a0fd564587f02dd7b1d1d5/transformed/bundleLibRuntimeToDirDebug/com/deepworktracker/data/database/dao/SessionDao_Impl$12.dex
-/core/common/build
-/core/common/build/.transforms
-/core/common/build/kotlin
-/feature/dashboard/build/.transforms
-*.class
-/feature/dashboard/build
-/feature/dashboard/build/.transforms
-/feature/dashboard/build

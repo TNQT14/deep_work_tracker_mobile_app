@@ -90,7 +90,7 @@ fun DashboardScreen(
 
                         item {
                             GoalDistributionChart(
-                                sessions = uiState.recentSessions,
+                                sessions = uiState.allSessions,
                                 onGoalClick = onNavigateToGoal
                             )
                         }

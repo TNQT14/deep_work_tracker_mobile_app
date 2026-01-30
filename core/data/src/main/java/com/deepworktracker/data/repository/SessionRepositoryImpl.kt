@@ -8,6 +8,7 @@ import com.deepworktracker.domain.repository.SessionRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.toList
 import kotlinx.datetime.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -17,25 +18,25 @@ class SessionRepositoryImpl @Inject constructor(
     private val sessionDao: SessionDao,
     private val mapper: SessionMapper
 ) : SessionRepository {
-    
+
     override suspend fun getActiveSession(): FocusSession? {
         return sessionDao.getActiveSession()?.let { mapper.toDomain(it) }
     }
-    
+
     override fun observeActiveSession(): Flow<FocusSession?> {
         return sessionDao.observeActiveSession().map { it?.let { mapper.toDomain(it) } }
     }
-    
+
     override suspend fun getSessionById(id: String): FocusSession? {
         return sessionDao.getSessionById(id)?.let { mapper.toDomain(it) }
     }
-    
+
     override fun getSessionsByDate(date: LocalDate): Flow<List<FocusSession>> {
         val dateString = date.toString()
         return sessionDao.getSessionsByDate(dateString)
             .map { entities -> entities.map { mapper.toDomain(it) } }
     }
-    
+
     override fun getSessionsByDateRange(
         startDate: LocalDate,
         endDate: LocalDate
@@ -43,7 +44,7 @@ class SessionRepositoryImpl @Inject constructor(
         return sessionDao.getSessionsByDateRange(startDate.toString(), endDate.toString())
             .map { entities -> entities.map { mapper.toDomain(it) } }
     }
-    
+
     override suspend fun saveSession(session: FocusSession): Result<Unit> {
         return try {
             val entity = mapper.toEntity(session)
@@ -53,7 +54,7 @@ class SessionRepositoryImpl @Inject constructor(
             Result.failure(e)
         }
     }
-    
+
     override suspend fun updateSession(session: FocusSession): Result<Unit> {
         return try {
             val entity = mapper.toEntity(session)
@@ -63,7 +64,7 @@ class SessionRepositoryImpl @Inject constructor(
             Result.failure(e)
         }
     }
-    
+
     override suspend fun deleteSession(id: String): Result<Unit> {
         return try {
             val session = getSessionById(id)
@@ -78,13 +79,24 @@ class SessionRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getRecentGoal(): List<String> {
-        return try{
+        return try {
             val resentSessions = sessionDao.getRecentSessions().first()
-            val uniqueGoals  = resentSessions.map {
+            val uniqueGoals = resentSessions.map {
                 it.goal
             }.distinct().take(5)
             uniqueGoals
-        } catch (e : Exception){
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
+    override suspend fun getAllSessions(): List<FocusSession> {
+        return try {
+            val allSessionEntity = sessionDao.getAllSessions()
+            val allSession = allSessionEntity.first().map { mapper.toDomain(it) }
+            allSession
+
+        } catch (e: Exception) {
             emptyList()
         }
     }
