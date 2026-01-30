@@ -29,7 +29,8 @@ import kotlinx.datetime.toLocalDateTime
 @Composable
 fun DashboardScreen(
     viewModel: DashboardViewModel = hiltViewModel(),
-    onNavigateToSession: () -> Unit = {}
+    onNavigateToSession: () -> Unit = {},
+    onNavigateToGoal: (String) -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     
@@ -88,7 +89,10 @@ fun DashboardScreen(
                         }
 
                         item {
-                            GoalDistributionChart(sessions = uiState.recentSessions)
+                            GoalDistributionChart(
+                                sessions = uiState.recentSessions,
+                                onGoalClick = onNavigateToGoal
+                            )
                         }
 
                         item {

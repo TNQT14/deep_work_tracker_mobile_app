@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.foundation.clickable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -20,7 +21,10 @@ import kotlin.time.Duration.Companion.milliseconds
  * Hoặc dùng simple implementation với progress indicators
  */
 @Composable
-fun GoalDistributionChart(sessions: List<FocusSession>) {
+fun GoalDistributionChart(
+    sessions: List<FocusSession>,
+    onGoalClick: (String) -> Unit = {}
+) {
     // Tính phân bố theo goal
     val goalDistribution = remember(sessions) {
         if (sessions.isEmpty()) {
@@ -82,7 +86,10 @@ fun GoalDistributionChart(sessions: List<FocusSession>) {
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     goalDistribution.forEach { goalData ->
-                        GoalDistributionRow(goalData = goalData)
+                        GoalDistributionRow(
+                            goalData = goalData,
+                            onClick = { onGoalClick(goalData.goal) }
+                        )
                     }
                 }
             }
@@ -91,8 +98,13 @@ fun GoalDistributionChart(sessions: List<FocusSession>) {
 }
 
 @Composable
-fun GoalDistributionRow(goalData: GoalData) {
-    Column(modifier = Modifier.fillMaxWidth()) {
+fun GoalDistributionRow(goalData: GoalData, onClick: () -> Unit = {}) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() }
+            .padding(vertical = 8.dp, horizontal = 4.dp)
+    ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -138,7 +150,7 @@ fun GoalDistributionRow(goalData: GoalData) {
         // Progress bar
         Spacer(modifier = Modifier.height(4.dp))
         LinearProgressIndicator(
-            progress = { goalData.percentage / 100f },
+            progress = goalData.percentage / 100f,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(8.dp),
