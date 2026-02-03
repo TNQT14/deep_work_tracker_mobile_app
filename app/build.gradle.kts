@@ -63,6 +63,7 @@ dependencies {
     
     // Hilt
     implementation(libs.hilt.android)
+    implementation(libs.androidx.compose.foundation.layout)
     kapt(libs.hilt.compiler)
     
     // Features

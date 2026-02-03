@@ -180,7 +180,9 @@ MainActivity
     │
     ├─► @AndroidEntryPoint DashboardScreen
     │       └─► @HiltViewModel DashboardViewModel
-    │               └─► @Inject GetTodayStatsUseCase
+    │               ├─► @Inject GetTodayStatsUseCase
+    │               ├─► @Inject GetRecentSessionsUseCase
+    │               └─► @Inject GetAllSessionUseCase
     │                       └─► @Inject SessionRepository (interface)
     │
     └─► @AndroidEntryPoint SessionScreen
@@ -338,10 +340,12 @@ deep_work_tracker_mobile_app/
 │       └── src/main/java/com/.../dashboard/
 │           ├── domain/usecase/
 │           │   ├── GetTodayStatsUseCase.kt
-│           │   └── GetRecentSessionsUseCase.kt
+│           │   ├── GetRecentSessionsUseCase.kt
+│           │   └── GetAllSessionUseCase.kt  # NEW: Get all sessions
 │           └── presentation/
 │               ├── DashboardScreen.kt
 │               ├── DashboardViewModel.kt
+│               ├── DashboardUiState.kt
 │               ├── GoalDetailScreen.kt      # NEW: Goal drill-down
 │               ├── GoalDetailViewModel.kt   # NEW: Goal analytics
 │               └── chart/
@@ -479,6 +483,47 @@ override suspend fun saveSession(session: FocusSession): Result<Unit> {
 suspend fun getTodayStats(): TodayStatsEntity?
 ```
 **Result**: Database performs aggregation → lighter memory footprint than loading all sessions into memory.
+
+**Pattern 4: One-Shot List Query (Get All Sessions)**
+```kotlin
+// Repository (Data Layer)
+override suspend fun getAllSessions(): List<FocusSession> {
+    return try {
+        sessionDao.getAllSessions().first().map { mapper.toDomain(it) }
+    } catch (e: Exception) {
+        emptyList()
+    }
+}
+
+// Room DAO (returns Flow, converted to List)
+@Query("SELECT * FROM focus_sessions ORDER BY start_time DESC")
+fun getAllSessions(): Flow<List<FocusSessionEntity>>
+
+// Use Case (Domain Layer)
+suspend operator fun invoke(): Result<List<FocusSession>> {
+    return try {
+        val allSessions = sessionRepository.getAllSessions()
+        Result.Success(allSessions)
+    } catch (e: Exception) {
+        Result.Error(e)
+    }
+}
+
+// ViewModel (Presentation Layer)
+fun loadDashboardData() {
+    viewModelScope.launch {
+        when (val result = getAllSessionUseCase()) {
+            is Result.Success -> {
+                _uiState.update { it.copy(allSessions = result.data) }
+            }
+            is Result.Error -> {
+                _uiState.update { it.copy(error = result.exception) }
+            }
+        }
+    }
+}
+```
+**Result**: One-shot query for bulk data retrieval → useful for export, analytics, or filtering operations.
 
 ---
 
@@ -939,8 +984,8 @@ when (val result = useCase(goal)) {
 - Coroutines + Flow for efficient async operations
 
 ### 8. **Consistent Naming Conventions**
-- Use Cases named as operations: `GetTodayStatsUseCase`, `StartSessionUseCase`
-- Repository methods follow CRUD vocabulary: `getSessionById`, `saveSession`, `deleteSession`
+- Use Cases named as operations: `GetTodayStatsUseCase`, `GetRecentSessionsUseCase`, `GetAllSessionUseCase`, `StartSessionUseCase`
+- Repository methods follow CRUD vocabulary: `getSessionById`, `saveSession`, `deleteSession`, `getAllSessions`
 - UI State classes colocated with ViewModels: `DashboardUiState`, `SessionUiState`
 
 ### 9. **Scalable Module Structure**
@@ -1124,7 +1169,7 @@ val sortedSessions by remember {
         private val sessionRepository: SessionRepository
     ) : ExportService {
         override suspend fun exportToCSV(): Result<File> {
-            val sessions = sessionRepository.getAllSessions().first()
+            val sessions = sessionRepository.getAllSessions()
             val csvContent = sessions.joinToString("\n") { session ->
                 "${session.id},${session.goal},${session.startTime},${session.totalDuration}"
             }
