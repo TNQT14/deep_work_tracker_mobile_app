@@ -39,6 +39,9 @@ turbine = "1.1.0"
 truth = "1.4.2"
 vico = "2.0.0-alpha.28"
 foundationLayout = "1.10.2"
+appcompat = "1.7.1"
+material = "1.13.0"
+material3 = "1.4.0"
 
 [libraries]
 # Core Android
@@ -99,6 +102,9 @@ mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 turbine = { group = "app.cash.turbine", name = "turbine", version.ref = "turbine" }
 truth = { group = "com.google.truth", name = "truth", version.ref = "truth" }
 androidx-compose-foundation-layout = { group = "androidx.compose.foundation", name = "foundation-layout", version.ref = "foundationLayout" }
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+androidx-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

@@ -25,11 +25,11 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.tooling.ComposeToolingApi
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.deepworktracker.dashboard.presentation.DashboardScreen
 import com.deepworktracker.dashboard.presentation.GoalDetailScreen
+import com.deepworktracker.profile.presentation.profile_screen.ProfileScreen
 import com.deepworktracker.session.presentation.SessionScreen
 import com.deepworktracker.ui.theme.DeepWorkTrackerTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -98,10 +98,9 @@ class MainActivity : ComponentActivity() {
                             }
 
                             composable("category") {
-
                             }
                             composable("profile") {
-
+                                ProfileScreen()
                             }
 
                             composable("goal/{goal}") { backStackEntry ->
