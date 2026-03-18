@@ -1,4 +1,4 @@
-package com.deepworktracker.dashboard.presentation
+package com.deepworktracker.dashboard.presentation.dashboard
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -20,25 +20,25 @@ class DashboardViewModel @Inject constructor(
     private val getRecentSessionsUseCase: GetRecentSessionsUseCase,
     private val getAllSessionUseCase: GetAllSessionUseCase
 ) : ViewModel() {
-    
+
     private val _uiState = MutableStateFlow(DashboardUiState())
     val uiState: StateFlow<DashboardUiState> = _uiState.asStateFlow()
-    
+
     init {
         loadDashboardData()
     }
-    
+
     fun loadDashboardData() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
-            
+
             // Load today's stats
             when (val statsResult = getTodayStatsUseCase()) {
                 is Result.Success -> {
                     _uiState.update { it.copy(todayStats = statsResult.data) }
                 }
                 is Result.Error -> {
-                    _uiState.update { 
+                    _uiState.update {
                         it.copy(
                             error = statsResult.exception,
                             isLoading = false
@@ -47,11 +47,11 @@ class DashboardViewModel @Inject constructor(
                     return@launch
                 }
             }
-            
+
             // Load recent sessions
             when (val sessionsResult = getRecentSessionsUseCase()) {
                 is Result.Success -> {
-                    _uiState.update { 
+                    _uiState.update {
                         it.copy(
                             recentSessions = sessionsResult.data,
                             isLoading = false
@@ -59,7 +59,7 @@ class DashboardViewModel @Inject constructor(
                     }
                 }
                 is Result.Error -> {
-                    _uiState.update { 
+                    _uiState.update {
                         it.copy(
                             error = sessionsResult.exception,
                             isLoading = false
@@ -88,11 +88,11 @@ class DashboardViewModel @Inject constructor(
             }
         }
     }
-    
+
     fun refresh() {
         loadDashboardData()
     }
-    
+
     fun clearError() {
         _uiState.update { it.copy(error = null) }
     }

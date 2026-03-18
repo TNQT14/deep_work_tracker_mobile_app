@@ -27,8 +27,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.deepworktracker.dashboard.presentation.DashboardScreen
-import com.deepworktracker.dashboard.presentation.GoalDetailScreen
+import com.deepworktracker.dashboard.presentation.dashboard.DashboardScreen
+import com.deepworktracker.dashboard.presentation.goal_detail.GoalDetailScreen
 import com.deepworktracker.profile.presentation.profile_screen.ProfileScreen
 import com.deepworktracker.session.presentation.SessionScreen
 import com.deepworktracker.ui.theme.DeepWorkTrackerTheme

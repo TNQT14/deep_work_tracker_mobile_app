@@ -1,4 +1,6 @@
-package com.deepworktracker.dashboard.presentation
+@file:Suppress("PreviewAnnotationInFunctionWithParameters")
+
+package com.deepworktracker.dashboard.presentation.dashboard
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -13,9 +15,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.deepworktracker.common.time.TimeFormatter
+import com.deepworktracker.dashboard.domain.usecase.TodayStats
+import com.deepworktracker.dashboard.presentation.dashboard.DashboardViewModel
 import com.deepworktracker.dashboard.presentation.chart.FocusTimeBarChart
 import com.deepworktracker.dashboard.presentation.charts.GoalDistributionChart
 import com.deepworktracker.domain.model.FocusSession
@@ -119,7 +125,7 @@ fun DashboardScreen(
                                             text = "No sessions yet.\nStart your first deep work session!",
                                             style = MaterialTheme.typography.bodyLarge,
                                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                                            textAlign = TextAlign.Center
                                         )
                                     }
                                 }
@@ -165,8 +171,9 @@ fun DashboardScreen(
     }
 }
 
+@Preview(showBackground = true)
 @Composable
-fun TodayStatsCard(stats: com.deepworktracker.dashboard.domain.usecase.TodayStats?) {
+fun TodayStatsCard(stats: TodayStats?) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(

@@ -1,4 +1,4 @@
-package com.deepworktracker.dashboard.presentation
+package com.deepworktracker.dashboard.presentation.dashboard
 
 import com.deepworktracker.dashboard.domain.usecase.TodayStats
 import com.deepworktracker.domain.model.FocusSession
