@@ -37,7 +37,9 @@ object DataModule {
             context,
             DeepWorkDatabase::class.java,
             DeepWorkDatabase.DATABASE_NAME
-        ).build()
+        )
+            .addMigrations(DeepWorkDatabase.MIGRATION_1_2)
+            .build()
     }
     
     @Provides
@@ -59,6 +61,11 @@ object DataModule {
     fun provideInsightDao(database: DeepWorkDatabase): InsightDao {
         return database.insightDao()
     }
+
+    @Provides
+    fun provideCategoryRuleDao(database: DeepWorkDatabase): com.deepworktracker.data.database.dao.CategoryRuleDao {
+        return database.categoryRuleDao()
+    }
     
     // Mappers
     @Provides
@@ -72,6 +79,10 @@ object DataModule {
     
     @Provides
     fun provideInsightMapper(): InsightMapper = InsightMapper()
+
+    @Provides
+    fun provideCategoryRuleMapper(): com.deepworktracker.data.mapper.CategoryRuleMapper =
+        com.deepworktracker.data.mapper.CategoryRuleMapper()
     
     // Repository implementations
     @Provides
@@ -110,5 +121,14 @@ object DataModule {
         mapper: InsightMapper
     ): InsightRepository {
         return InsightRepositoryImpl(insightDao, mapper)
+    }
+
+    @Provides
+    @Singleton
+    fun provideCategoryRuleRepository(
+        dao: com.deepworktracker.data.database.dao.CategoryRuleDao,
+        mapper: com.deepworktracker.data.mapper.CategoryRuleMapper
+    ): com.deepworktracker.domain.repository.CategoryRuleRepository {
+        return com.deepworktracker.data.repository.CategoryRuleRepositoryImpl(dao, mapper)
     }
 }

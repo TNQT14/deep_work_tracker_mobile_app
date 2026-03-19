@@ -12,7 +12,11 @@ import javax.inject.Inject
 class StartSessionUseCase @Inject constructor(
     private val sessionRepository: SessionRepository
 ) {
-    suspend operator fun invoke(goal: String): Result<FocusSession> {
+    suspend operator fun invoke(
+        goal: String,
+        category: String?,
+        tag: String?
+    ): Result<FocusSession> {
         return try {
             val activeSession = sessionRepository.observeActiveSession().first()
             if (activeSession != null) {
@@ -23,11 +27,12 @@ class StartSessionUseCase @Inject constructor(
             val session = FocusSession(
                 id = UUID.randomUUID().toString(),
                 goal = goal,
+                category = category,
                 startTime = now,
                 endTime = null,
                 totalDuration = 0L,
                 focusedDuration = 0L,
-                tag = null,
+                tag = tag,
                 note = null
             )
             

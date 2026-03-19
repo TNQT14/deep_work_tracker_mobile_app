@@ -76,7 +76,11 @@ fun SessionScreen(
                     }
                 } else {
                     var goalText by remember { mutableStateOf("") }
+                    var categoryText by remember { mutableStateOf("") }
+                    var tagText by remember { mutableStateOf("") }
                     val recentGoals = uiState.recentSession
+                    val recentCategories = uiState.recentCategories
+                    val recentTags = uiState.recentTags
                     Text(
                         text = "What are you focusing on?",
                         style = MaterialTheme.typography.titleLarge,
@@ -86,13 +90,56 @@ fun SessionScreen(
 
                     OutlinedTextField(
                         value = goalText,
-                        onValueChange = { goalText = it },
+                        onValueChange = {
+                            goalText = it
+                            viewModel.suggestForGoal(it)
+                        },
                         label = { Text("Goal") },
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(bottom = 24.dp),
                         singleLine = true
                     )
+
+                    Spacer(modifier = Modifier.height(4.dp))
+                    OutlinedTextField(
+                        value = categoryText,
+                        onValueChange = { categoryText = it },
+                        label = { Text("Category (optional)") },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 12.dp),
+                        singleLine = true
+                    )
+
+                    OutlinedTextField(
+                        value = tagText,
+                        onValueChange = { tagText = it },
+                        label = { Text("Tag (optional)") },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 16.dp),
+                        singleLine = true
+                    )
+
+                    uiState.suggestedCategory?.let { suggested ->
+                        if (categoryText.isBlank()) {
+                            AssistChip(
+                                onClick = { categoryText = suggested },
+                                label = { Text("Suggested category: $suggested") },
+                                modifier = Modifier.padding(bottom = 12.dp)
+                            )
+                        }
+                    }
+                    uiState.suggestedTag?.let { suggested ->
+                        if (tagText.isBlank()) {
+                            AssistChip(
+                                onClick = { tagText = suggested },
+                                label = { Text("Suggested tag: $suggested") },
+                                modifier = Modifier.padding(bottom = 12.dp)
+                            )
+                        }
+                    }
 
                     Text(
                         text = "Quick choose",
@@ -115,15 +162,80 @@ fun SessionScreen(
                         items(recentGoals) { preset ->
                             FilterChip(
                                 selected = goalText == preset,
-                                onClick = { goalText = preset },
+                                onClick = {
+                                    goalText = preset
+                                    viewModel.suggestForGoal(preset)
+                                },
                                 label = { Text(preset, maxLines = 1) }
                             )
+                        }
+                    }
+
+                    if (recentCategories.isNotEmpty()) {
+                        Text(
+                            text = "Quick category",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 8.dp)
+                        )
+
+                        LazyVerticalGrid(
+                            columns = GridCells.Adaptive(minSize = 120.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .heightIn(max = 160.dp)
+                                .padding(bottom = 16.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            items(recentCategories) { preset ->
+                                FilterChip(
+                                    selected = categoryText == preset,
+                                    onClick = { categoryText = preset },
+                                    label = { Text(preset, maxLines = 1) }
+                                )
+                            }
+                        }
+                    }
+
+                    if (recentTags.isNotEmpty()) {
+                        Text(
+                            text = "Quick tag",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 8.dp)
+                        )
+
+                        LazyVerticalGrid(
+                            columns = GridCells.Adaptive(minSize = 120.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .heightIn(max = 160.dp)
+                                .padding(bottom = 16.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            items(recentTags) { preset ->
+                                FilterChip(
+                                    selected = tagText == preset,
+                                    onClick = { tagText = preset },
+                                    label = { Text(preset, maxLines = 1) }
+                                )
+                            }
                         }
                     }
                     Button(
                         onClick = { 
                             if (goalText.isNotBlank()) {
-                                viewModel.startSession(goalText)
+                                viewModel.startSession(
+                                    goal = goalText,
+                                    category = categoryText.trim().takeIf { it.isNotBlank() },
+                                    tag = tagText.trim().takeIf { it.isNotBlank() }
+                                )
                             }
                         },
                         modifier = Modifier.fillMaxWidth(),

@@ -5,6 +5,7 @@ import kotlinx.datetime.Instant
 data class FocusSession(
     val id: String,
     val goal: String,
+    val category: String?,
     val startTime: Instant,
     val endTime: Instant?,
     val totalDuration: Long, // milliseconds

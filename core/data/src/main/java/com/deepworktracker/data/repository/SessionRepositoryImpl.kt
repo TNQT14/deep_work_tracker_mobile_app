@@ -90,6 +90,28 @@ class SessionRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun getRecentCategories(limit: Int): List<String> {
+        return try {
+            val recent = sessionDao.getRecentSessions().first()
+            recent.mapNotNull { it.category?.takeIf { c -> c.isNotBlank() } }
+                .distinct()
+                .take(limit)
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
+    override suspend fun getRecentTags(limit: Int): List<String> {
+        return try {
+            val recent = sessionDao.getRecentSessions().first()
+            recent.mapNotNull { it.tag?.takeIf { t -> t.isNotBlank() } }
+                .distinct()
+                .take(limit)
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
     override suspend fun getAllSessions(): List<FocusSession> {
         return try {
             val allSessionEntity = sessionDao.getAllSessions()

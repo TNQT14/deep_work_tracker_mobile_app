@@ -14,5 +14,7 @@ interface SessionRepository {
     suspend fun updateSession(session: FocusSession): Result<Unit>
     suspend fun deleteSession(id: String): Result<Unit>
     suspend fun getRecentGoal(): List<String>
+    suspend fun getRecentCategories(limit: Int = 8): List<String>
+    suspend fun getRecentTags(limit: Int = 8): List<String>
     suspend fun getAllSessions(): List<FocusSession>
 }

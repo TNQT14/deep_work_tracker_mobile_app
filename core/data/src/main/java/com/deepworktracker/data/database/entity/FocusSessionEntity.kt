@@ -17,6 +17,8 @@ data class FocusSessionEntity(
     val id: String,
     
     val goal: String,
+
+    val category: String?,
     
     @ColumnInfo(name = "start_time")
     val startTime: Long, // Unix timestamp in milliseconds

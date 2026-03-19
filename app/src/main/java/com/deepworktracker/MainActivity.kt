@@ -28,6 +28,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.deepworktracker.dashboard.presentation.dashboard.DashboardScreen
+import com.deepworktracker.dashboard.presentation.category.CategoryScreen
+import com.deepworktracker.dashboard.presentation.category_detail.CategoryDetailScreen
 import com.deepworktracker.dashboard.presentation.goal_detail.GoalDetailScreen
 import com.deepworktracker.profile.presentation.profile_screen.ProfileScreen
 import com.deepworktracker.session.presentation.SessionScreen
@@ -98,9 +100,23 @@ class MainActivity : ComponentActivity() {
                             }
 
                             composable("category") {
+                                CategoryScreen(
+                                    onNavigateToCategoryDetail = { category ->
+                                        navController.navigate("category/${Uri.encode(category)}")
+                                    }
+                                )
                             }
                             composable("profile") {
                                 ProfileScreen()
+                            }
+
+                            composable("category/{category}") { backStackEntry ->
+                                val encoded = backStackEntry.arguments?.getString("category") ?: ""
+                                val category = Uri.decode(encoded)
+                                CategoryDetailScreen(
+                                    category = category,
+                                    onBack = { navController.popBackStack() }
+                                )
                             }
 
                             composable("goal/{goal}") { backStackEntry ->

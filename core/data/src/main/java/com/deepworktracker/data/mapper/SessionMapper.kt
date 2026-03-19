@@ -13,6 +13,7 @@ class SessionMapper {
         return FocusSession(
             id = entity.id,
             goal = entity.goal,
+            category = entity.category,
             startTime = Instant.fromEpochMilliseconds(entity.startTime),
             endTime = entity.endTime?.let { Instant.fromEpochMilliseconds(it) },
             totalDuration = entity.totalDuration,
@@ -30,6 +31,7 @@ class SessionMapper {
         return FocusSessionEntity(
             id = domain.id,
             goal = domain.goal,
+            category = domain.category,
             startTime = domain.startTime.toEpochMilliseconds(),
             endTime = domain.endTime?.toEpochMilliseconds(),
             totalDuration = domain.totalDuration,
