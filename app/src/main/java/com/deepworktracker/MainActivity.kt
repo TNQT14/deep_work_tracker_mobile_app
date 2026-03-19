@@ -107,7 +107,10 @@ class MainActivity : ComponentActivity() {
                                 val encoded =
                                     backStackEntry.arguments?.getString("goal") ?: ""
                                 val goal = Uri.decode(encoded)
-                                GoalDetailScreen(goal = goal)
+                                GoalDetailScreen(
+                                    goal = goal,
+                                    onBack = { navController.popBackStack() }
+                                )
                             }
                         }
                     }
