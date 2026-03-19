@@ -5,13 +5,18 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
@@ -30,12 +35,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextAlign
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.deepworktracker.common.time.TimeFormatter
 import com.deepworktracker.dashboard.presentation.chart.AggregateBarChart
 import com.deepworktracker.dashboard.presentation.dashboard.SessionCard
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.datetime.LocalDate
+import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -66,11 +74,38 @@ fun GoalDetailScreen(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 item {
-                    Text(
-                        text = "Total: ${TimeFormatter.formatDurationShort(uiState.totalDuration.milliseconds)}",
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
+                    Card(
+                        modifier = Modifier
+                            .fillMaxSize(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surface
+                        ),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(16.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center,
+
+                            ) {
+                            Text(
+                                textAlign = TextAlign.Center,
+                                text = "Tổng thời gian",
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                            )
+                            Spacer(Modifier.height(6.dp))
+                            Text(
+                                text = TimeFormatter.formatDurationShort(uiState.totalDuration.milliseconds),
+                                style = MaterialTheme.typography.headlineSmall,
+                            )
+                        }
+                    }
+                }
+                item {
+                    uiState.metrics?.let { metric -> GoalMetricsSection(
+                        metrics = metric,
+                    ) }
                 }
                 item {
                     SingleChoiceSegmentedButtonRow(
@@ -94,13 +129,13 @@ fun GoalDetailScreen(
                         0 -> AggregateBarChart(
                             title = "Focus theo ngày",
                             subtitle = "Phút focus 30 ngày gần nhất",
-                            valuesMinutes = uiState.chartByDay.map { it.second / 3600_000 }
+                            valuesMinutes = uiState.chartByDay.map { it.second / 60_000 }
                         )
 
                         1 -> AggregateBarChart(
                             title = "Focus theo tuần",
-                            subtitle = "Phút focus theo từng tuần trong ngày",
-                            valuesMinutes = uiState.chartByHour.map { it / 60_000 }
+                            subtitle = "Phút focus theo tuần (12 tuần gần nhất)",
+                            valuesMinutes = uiState.chartByWeek.map { it.second / 60_000 }
                         )
 
                         2 -> AggregateBarChart(
@@ -119,6 +154,112 @@ fun GoalDetailScreen(
                 items(uiState.sessions) { session ->
                     SessionCard(session = session)
                 }
+            }
+        }
+    }
+}
+
+//@Composable
+@Composable
+private fun GoalMetricsSection(
+    metrics: GoalMetrics,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        Text(
+            text = "Key metrics (90 ngày gần nhất)",
+            style = MaterialTheme.typography.titleSmall,
+        )
+        Text(
+            text = " Nhìn nhanh chất lượng tập trung, điều độ và thói quen theo ngày/giờ.",
+            style = MaterialTheme.typography.bodySmall,
+        )
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            MetricCard(
+                title = "Variability",
+                value = "CV ${(metrics.dailyCv * 100).roundToInt()}",
+                hint = "Dao động theo ngày",
+                modifier = Modifier.weight(1f)
+            )
+            MetricCard(
+                title = "Peak hour",
+                value = metrics.peakHour?.let { "${it}h" } ?: "—",
+                hint = metrics.hourEntropy?.let { "Entropy ${(it * 100).roundToInt()}" } ?: "—",
+                modifier = Modifier.weight(1f)
+            )
+        }
+
+        AggregateBarChart(
+            title = "Nhịp học theo thứ",
+            subtitle = "Tổng phút theo Mon–Sun (90 ngày)",
+            valuesMinutes = metrics.weekdayMinutes
+        )
+        AggregateBarChart(
+            title = "Độ dài phiên học",
+            subtitle = "Số phiên theo nhóm: 0–15, 15–30, 30–60, 60–90, 90+ phút",
+            valuesMinutes = metrics.sessionLengthHistogram
+        )
+    }
+}
+
+@Composable
+private fun MetricCard(
+    title: String,
+    value: String,
+    hint: String,
+    progress: Float? = null,
+    emphasize: Boolean = false,
+    modifier: Modifier = Modifier,
+) {
+    Card(
+        modifier = modifier,
+        colors = CardDefaults.cardColors(
+            containerColor = if (emphasize) {
+                MaterialTheme.colorScheme.primaryContainer
+            } else {
+                MaterialTheme.colorScheme.surfaceVariant
+            }
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = if (emphasize) 2.dp else 0.dp),
+    ) {
+        Column(modifier = Modifier.padding(12.dp)) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f),
+            )
+            Spacer(Modifier.height(6.dp))
+            Text(
+                text = value,
+                style = MaterialTheme.typography.titleLarge,
+            )
+            Spacer(Modifier.height(4.dp))
+            Text(
+                text = hint,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+            )
+            if (progress != null) {
+                Spacer(Modifier.height(10.dp))
+                LinearProgressIndicator(
+                    progress = { progress.coerceIn(0f, 1f) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(7.dp),
+                    color = if (emphasize) {
+                        MaterialTheme.colorScheme.onPrimaryContainer
+                    } else {
+                        MaterialTheme.colorScheme.primary
+                    },
+                    trackColor = MaterialTheme.colorScheme.surface,
+                )
             }
         }
     }

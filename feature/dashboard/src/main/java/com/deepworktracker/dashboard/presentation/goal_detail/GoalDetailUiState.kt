@@ -12,5 +12,6 @@ data class GoalDetailUiState(
     val chartByDay: List<Pair<LocalDate, Long>> = emptyList(),
     val chartByWeek: List<Pair<String, Long>> = emptyList(),
     val chartByMonth: List<Pair<String, Long>> = emptyList(),
-    val chartByYear: List<Pair<Int, Long>> = emptyList()
+    val chartByYear: List<Pair<Int, Long>> = emptyList(),
+    val metrics: GoalMetrics? = null,
 )
