@@ -14,6 +14,7 @@ import androidx.navigation.compose.rememberNavController
 import android.net.Uri
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Checklist
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
@@ -33,6 +34,7 @@ import com.deepworktracker.dashboard.presentation.category_detail.CategoryDetail
 import com.deepworktracker.dashboard.presentation.goal_detail.GoalDetailScreen
 import com.deepworktracker.profile.presentation.profile_screen.ProfileScreen
 import com.deepworktracker.session.presentation.SessionScreen
+import com.deepworktracker.todo.presentation.TodoListScreen
 import com.deepworktracker.ui.theme.DeepWorkTrackerTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -88,6 +90,14 @@ class MainActivity : ComponentActivity() {
                                 )
                             }
 
+                            composable("todo") {
+                                TodoListScreen(
+                                    onNavigateToDashboard = {
+                                        navController.navigate("todo")
+                                    }
+                                )
+                            }
+
                             composable("dashboard") {
                                 DashboardScreen(
                                     onNavigateToSession = {
@@ -101,8 +111,8 @@ class MainActivity : ComponentActivity() {
 
                             composable("category") {
                                 CategoryScreen(
-                                    onNavigateToCategoryDetail = { category ->
-                                        navController.navigate("category/${Uri.encode(category)}")
+                                    onNavigateToCategoryDetail = { goal ->
+                                        navController.navigate("category/${Uri.encode(goal)}")
                                     }
                                 )
                             }
@@ -112,9 +122,9 @@ class MainActivity : ComponentActivity() {
 
                             composable("category/{category}") { backStackEntry ->
                                 val encoded = backStackEntry.arguments?.getString("category") ?: ""
-                                val category = Uri.decode(encoded)
+                                val goal = Uri.decode(encoded)
                                 CategoryDetailScreen(
-                                    category = category,
+                                    goal = goal,
                                     onBack = { navController.popBackStack() }
                                 )
                             }
@@ -144,6 +154,7 @@ fun BottomBar(
 ){
   val items = listOf(
       BottomNavItem.Session,
+      BottomNavItem.Todo,
       BottomNavItem.Dashboard,
       BottomNavItem.Category,
       BottomNavItem.Profile
@@ -175,7 +186,8 @@ sealed class  BottomNavItem(
     val icon: ImageVector
 ){
     object Session: BottomNavItem("Session", "session", Icons.Default.Home)
-    object Category: BottomNavItem("Category", "category", Icons.Default.Star)
+    object Todo: BottomNavItem("Todo", "todo", Icons.Default.Checklist)
+    object Category: BottomNavItem("Goal", "category", Icons.Default.Star)
     object Dashboard: BottomNavItem("Dashboard", "dashboard", Icons.Default.Search)
     object Profile: BottomNavItem("Profile", "profile", Icons.Default.Person)
 }

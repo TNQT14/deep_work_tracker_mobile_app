@@ -1,0 +1,12 @@
+package com.example.todo.presentation.todolist
+
+import android.se.omapi.Session
+import com.deepworktracker.domain.model.FocusSession
+import com.deepworktracker.domain.model.Todo
+
+data class TodoListUiState (
+    val isLoading: Boolean = false,
+    val error: Throwable ?= null,
+    val todos: List<Todo> = emptyList(),
+    val session: List<FocusSession> = emptyList()
+)

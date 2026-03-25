@@ -54,6 +54,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
     
@@ -64,12 +65,13 @@ dependencies {
     // Hilt
     implementation(libs.hilt.android)
     implementation(libs.androidx.compose.foundation.layout)
-    implementation(project(":feature:profile"))
     kapt(libs.hilt.compiler)
     
     // Features
     implementation(project(":feature:session"))
     implementation(project(":feature:dashboard"))
+    implementation(project(":feature:profile"))
+    implementation(project(":feature:todo"))
     
     // Core modules
     implementation(project(":core:ui"))

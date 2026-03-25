@@ -2,6 +2,7 @@ package com.deepworktracker.dashboard.presentation.category_detail
 
 import com.deepworktracker.dashboard.presentation.goal_detail.GoalMetrics
 import com.deepworktracker.domain.model.FocusSession
+import com.deepworktracker.domain.model.Todo
 import kotlinx.datetime.LocalDate
 
 data class CategoryDetailUiState(
@@ -15,6 +16,7 @@ data class CategoryDetailUiState(
     val chartByMonth: List<Pair<String, Long>> = emptyList(),
     val metrics: GoalMetrics? = null,
     val compare30d: PeriodCompare? = null,
+    val todos: List<Todo> = emptyList(),
 )
 
 data class PeriodCompare(

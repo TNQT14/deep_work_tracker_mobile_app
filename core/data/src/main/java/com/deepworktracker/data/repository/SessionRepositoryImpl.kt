@@ -1,17 +1,13 @@
 package com.deepworktracker.data.repository
 
 import com.deepworktracker.data.database.dao.SessionDao
-import com.deepworktracker.data.database.entity.FocusSessionEntity
 import com.deepworktracker.data.mapper.SessionMapper
 import com.deepworktracker.domain.model.FocusSession
 import com.deepworktracker.domain.repository.SessionRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.toList
 import kotlinx.datetime.LocalDate
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
 class SessionRepositoryImpl @Inject constructor(

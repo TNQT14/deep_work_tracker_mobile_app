@@ -76,10 +76,9 @@ fun SessionScreen(
                     }
                 } else {
                     var goalText by remember { mutableStateOf("") }
-                    var categoryText by remember { mutableStateOf("") }
+                    var goalGroupText by remember { mutableStateOf("") }
                     var tagText by remember { mutableStateOf("") }
-                    val recentGoals = uiState.recentSession
-                    val recentCategories = uiState.recentCategories
+                    val recentGoals = uiState.recentCategories
                     val recentTags = uiState.recentTags
                     Text(
                         text = "What are you focusing on?",
@@ -103,9 +102,9 @@ fun SessionScreen(
 
                     Spacer(modifier = Modifier.height(4.dp))
                     OutlinedTextField(
-                        value = categoryText,
-                        onValueChange = { categoryText = it },
-                        label = { Text("Category (optional)") },
+                        value = goalGroupText,
+                        onValueChange = { goalGroupText = it },
+                        label = { Text("Goal group (optional)") },
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(bottom = 12.dp),
@@ -123,10 +122,10 @@ fun SessionScreen(
                     )
 
                     uiState.suggestedCategory?.let { suggested ->
-                        if (categoryText.isBlank()) {
+                        if (goalGroupText.isBlank()) {
                             AssistChip(
-                                onClick = { categoryText = suggested },
-                                label = { Text("Suggested category: $suggested") },
+                                onClick = { goalGroupText = suggested },
+                                label = { Text("Suggested goal group: $suggested") },
                                 modifier = Modifier.padding(bottom = 12.dp)
                             )
                         }
@@ -171,9 +170,9 @@ fun SessionScreen(
                         }
                     }
 
-                    if (recentCategories.isNotEmpty()) {
+                    if (recentGoals.isNotEmpty()) {
                         Text(
-                            text = "Quick category",
+                            text = "Quick goals",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                             modifier = Modifier
@@ -190,10 +189,10 @@ fun SessionScreen(
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            items(recentCategories) { preset ->
+                            items(recentGoals) { preset ->
                                 FilterChip(
-                                    selected = categoryText == preset,
-                                    onClick = { categoryText = preset },
+                                    selected = goalGroupText == preset,
+                                    onClick = { goalGroupText = preset },
                                     label = { Text(preset, maxLines = 1) }
                                 )
                             }
@@ -233,7 +232,7 @@ fun SessionScreen(
                             if (goalText.isNotBlank()) {
                                 viewModel.startSession(
                                     goal = goalText,
-                                    category = categoryText.trim().takeIf { it.isNotBlank() },
+                                    category = goalGroupText.trim().takeIf { it.isNotBlank() },
                                     tag = tagText.trim().takeIf { it.isNotBlank() }
                                 )
                             }

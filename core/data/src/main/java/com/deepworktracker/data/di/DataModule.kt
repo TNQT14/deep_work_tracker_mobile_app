@@ -7,18 +7,22 @@ import com.deepworktracker.data.database.dao.InterruptionDao
 import com.deepworktracker.data.database.dao.SessionDao
 import com.deepworktracker.data.database.dao.StatsDao
 import com.deepworktracker.data.database.dao.InsightDao
+import com.deepworktracker.data.database.dao.TodoDao
 import com.deepworktracker.data.mapper.InterruptionMapper
 import com.deepworktracker.data.mapper.SessionMapper
 import com.deepworktracker.data.mapper.StatsMapper
 import com.deepworktracker.data.mapper.InsightMapper
+import com.deepworktracker.data.mapper.TodoMapper
 import com.deepworktracker.data.repository.InterruptionRepositoryImpl
 import com.deepworktracker.data.repository.SessionRepositoryImpl
 import com.deepworktracker.data.repository.StatsRepositoryImpl
 import com.deepworktracker.data.repository.InsightRepositoryImpl
+import com.deepworktracker.data.repository.TodoRepositoryImpl
 import com.deepworktracker.domain.repository.InterruptionRepository
 import com.deepworktracker.domain.repository.SessionRepository
 import com.deepworktracker.domain.repository.StatsRepository
 import com.deepworktracker.domain.repository.InsightRepository
+import com.deepworktracker.domain.repository.TodoRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -38,7 +42,12 @@ object DataModule {
             DeepWorkDatabase::class.java,
             DeepWorkDatabase.DATABASE_NAME
         )
-            .addMigrations(DeepWorkDatabase.MIGRATION_1_2)
+            .addMigrations(
+                DeepWorkDatabase.MIGRATION_1_2,
+                DeepWorkDatabase.MIGRATION_2_3,
+                DeepWorkDatabase.MIGRATION_3_4,
+                DeepWorkDatabase.MIGRATION_4_5,
+            )
             .build()
     }
     
@@ -131,4 +140,22 @@ object DataModule {
     ): com.deepworktracker.domain.repository.CategoryRuleRepository {
         return com.deepworktracker.data.repository.CategoryRuleRepositoryImpl(dao, mapper)
     }
+
+    @Provides
+    fun provideTodoDao(database: DeepWorkDatabase): TodoDao {
+        return database.todoDao()
+    }
+
+    @Provides
+    fun provideTodoMapper(): TodoMapper = TodoMapper()
+
+    @Provides
+    @Singleton
+    fun provideTodoRepository(
+        dao: TodoDao,
+        mapper: TodoMapper
+    ): TodoRepository{
+        return TodoRepositoryImpl(dao, mapper)
+    }
+
 }

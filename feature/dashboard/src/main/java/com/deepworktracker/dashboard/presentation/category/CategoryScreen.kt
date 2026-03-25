@@ -55,7 +55,7 @@ fun CategoryScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Category") },
+                title = { Text("Goal") },
                 actions = {
                     androidx.compose.material3.IconButton(
                         onClick = { viewModel.refresh() },
@@ -90,7 +90,7 @@ fun CategoryScreen(
         ) {
             item {
                 Text(
-                    text = "Top categories",
+                    text = "Top goals",
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold
                 )
@@ -289,7 +289,7 @@ private fun RulesSection(
 
             if (rules.isEmpty()) {
                 Text(
-                    text = "Chưa có rule. Thêm rule để auto-gợi ý/auto-gán category theo keyword/giờ.",
+                    text = "Chưa có rule. Thêm rule để auto-gợi ý/auto-gán goal theo keyword/giờ.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                 )
@@ -349,7 +349,7 @@ private fun AddRuleDialog(
                 OutlinedTextField(
                     value = category,
                     onValueChange = { category = it },
-                    label = { Text("Category") },
+                    label = { Text("Goal") },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )

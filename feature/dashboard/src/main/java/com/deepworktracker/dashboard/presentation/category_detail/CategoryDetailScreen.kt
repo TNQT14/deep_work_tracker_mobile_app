@@ -38,20 +38,20 @@ import kotlin.time.Duration.Companion.milliseconds
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CategoryDetailScreen(
-    category: String,
+    goal: String,
     onBack: () -> Unit = {},
     viewModel: CategoryDetailViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    LaunchedEffect(category) {
-        viewModel.loadCategory(category)
+    LaunchedEffect(goal) {
+        viewModel.loadCategory(goal)
     }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(category) },
+                title = { Text(goal) },
                 navigationIcon = {
                     androidx.compose.material3.IconButton(onClick = onBack) {
                         androidx.compose.material3.Icon(
@@ -167,11 +167,15 @@ fun CategoryDetailScreen(
                     valuesMinutes = uiState.chartByMonth.map { it.second / 60_000 }
                 )
             }
+            item {
+                CategoryTasksSection(goal = goal)
+            }
 
             items(uiState.sessions) { session ->
                 SessionCard(session = session)
             }
         }
+
     }
 }
 

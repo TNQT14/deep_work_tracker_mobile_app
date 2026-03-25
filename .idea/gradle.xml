@@ -20,6 +20,7 @@
             <option value="$PROJECT_DIR$/feature/dashboard" />
             <option value="$PROJECT_DIR$/feature/profile" />
             <option value="$PROJECT_DIR$/feature/session" />
+            <option value="$PROJECT_DIR$/feature/todo" />
           </set>
         </option>
       </GradleProjectSettings>
