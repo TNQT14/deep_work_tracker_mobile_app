@@ -36,6 +36,7 @@ import com.deepworktracker.profile.presentation.profile_screen.ProfileScreen
 import com.deepworktracker.session.presentation.SessionScreen
 import com.deepworktracker.todo.presentation.TodoListScreen
 import com.deepworktracker.ui.theme.DeepWorkTrackerTheme
+import com.example.todo.presentation.tododetail.TodoDetailScreen
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -92,9 +93,17 @@ class MainActivity : ComponentActivity() {
 
                             composable("todo") {
                                 TodoListScreen(
-                                    onNavigateToDashboard = {
-                                        navController.navigate("todo")
+                                    onNavigateToTodoDetail = {
+                                        todoId -> navController.navigate("todo/$todoId")
                                     }
+                                )
+                            }
+
+                            composable ("todo/{todoId}"){
+                                val todoId = backStackEntry?.arguments?.getString("todoId").orEmpty()
+                                TodoDetailScreen(
+                                    todoId = todoId,
+                                    onBack = { navController.popBackStack() }
                                 )
                             }
 
@@ -116,10 +125,6 @@ class MainActivity : ComponentActivity() {
                                     }
                                 )
                             }
-                            composable("profile") {
-                                ProfileScreen()
-                            }
-
                             composable("category/{category}") { backStackEntry ->
                                 val encoded = backStackEntry.arguments?.getString("category") ?: ""
                                 val goal = Uri.decode(encoded)
@@ -128,7 +133,6 @@ class MainActivity : ComponentActivity() {
                                     onBack = { navController.popBackStack() }
                                 )
                             }
-
                             composable("goal/{goal}") { backStackEntry ->
                                 val encoded =
                                     backStackEntry.arguments?.getString("goal") ?: ""
@@ -138,6 +142,14 @@ class MainActivity : ComponentActivity() {
                                     onBack = { navController.popBackStack() }
                                 )
                             }
+                            composable("profile") {
+                                ProfileScreen()
+                            }
+
+
+
+
+
                         }
                     }
                 }

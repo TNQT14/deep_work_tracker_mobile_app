@@ -1,6 +1,7 @@
 package com.deepworktracker.todo.presentation
 
 import android.util.Log
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.lazy.LazyColumn
@@ -64,7 +65,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TodoListScreen(
-    onNavigateToDashboard: () -> Unit = {}
+    onNavigateToTodoDetail: (String) -> Unit = {}
 ) {
     val viewModel: TodoListViewModel = hiltViewModel()
     val uiState by viewModel.uiState.collectAsState()
@@ -205,9 +206,7 @@ fun TodoListScreen(
                                     TodoRow(
                                         todo = todo,
                                         done = todo.status == TodoStatus.DONE,
-                                        onTap = {
-                                            //View detail
-                                        },
+                                        onTap = { onNavigateToTodoDetail(todo.id) },
                                         onToggle = { viewModel.updateTodo(todo) },
                                         onDelete = { viewModel.deleteTodo(todo) }
 
@@ -296,7 +295,7 @@ private fun TodoRow(
     onToggle: () -> Unit,
     onDelete: () -> Unit,
 ) {
-    Card(modifier = Modifier.fillMaxWidth()) {
+    Card(modifier = Modifier.fillMaxWidth().clickable{onTap()}) {
         Row(
             modifier = Modifier.padding(14.dp),
             verticalAlignment = Alignment.CenterVertically
@@ -311,18 +310,18 @@ private fun TodoRow(
             ) {
                 Row {
                     Text(
-                        text =  todo.title
+                        text = todo.title
                     )
                     Spacer(Modifier.weight(1f))
                     Text(
-                        text =  todo.goal,
+                        text = todo.goal,
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurface
                     )
                 }
                 Spacer(Modifier.padding(0.dp))
                 Text(
-                    text =  todo.description,
+                    text = todo.description,
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.65f)
                 )
