@@ -34,9 +34,8 @@ import com.deepworktracker.dashboard.presentation.category_detail.CategoryDetail
 import com.deepworktracker.dashboard.presentation.goal_detail.GoalDetailScreen
 import com.deepworktracker.profile.presentation.profile_screen.ProfileScreen
 import com.deepworktracker.session.presentation.SessionScreen
-import com.deepworktracker.todo.presentation.TodoListScreen
 import com.deepworktracker.ui.theme.DeepWorkTrackerTheme
-import com.example.todo.presentation.tododetail.TodoDetailScreen
+import com.example.todo.navigation.todoGraph
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -91,21 +90,7 @@ class MainActivity : ComponentActivity() {
                                 )
                             }
 
-                            composable("todo") {
-                                TodoListScreen(
-                                    onNavigateToTodoDetail = {
-                                        todoId -> navController.navigate("todo/$todoId")
-                                    }
-                                )
-                            }
-
-                            composable ("todo/{todoId}"){
-                                val todoId = backStackEntry?.arguments?.getString("todoId").orEmpty()
-                                TodoDetailScreen(
-                                    todoId = todoId,
-                                    onBack = { navController.popBackStack() }
-                                )
-                            }
+                            todoGraph(navController)
 
                             composable("dashboard") {
                                 DashboardScreen(
