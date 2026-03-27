@@ -16,8 +16,13 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Sort
+import androidx.compose.material.icons.filled.Abc
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Sort
+import androidx.compose.material.icons.filled.SortByAlpha
 import androidx.compose.material.icons.filled.TaskAlt
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -29,6 +34,8 @@ import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.IconButtonColors
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
@@ -45,11 +52,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.deepworktracker.domain.model.Todo
 import com.deepworktracker.domain.model.TodoStatus
 import com.example.todo.presentation.todolist.TodoListViewModel
+import com.example.todo.presentation.todolist.TodoSortType
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -115,14 +124,14 @@ fun TodoListScreen(
                         confirmButton = {
                             TextButton(onClick = {
                                 Log.d("TodoListScreen", "TodoListScreen: $goal $title $description")
-                                    viewModel.addTodo(
-                                        goal = goal,
-                                        title = title,
-                                        description = description
-                                    )
-                                    title = ""
-                                    description = ""
-                                    showForm = false
+                                viewModel.addTodo(
+                                    goal = goal,
+                                    title = title,
+                                    description = description
+                                )
+                                title = ""
+                                description = ""
+                                showForm = false
 
                             }) { Text("Add") }
                         },
@@ -147,10 +156,37 @@ fun TodoListScreen(
 
                     else -> {
                         Spacer(Modifier.height(16.dp))
-                        Text(
-                            text = "Danh sách (${uiState.todos.size})",
-                            style = MaterialTheme.typography.titleMedium
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(8.dp)
+                        ) {
+                            Text(
+                                text = "Danh sách (${uiState.todos.size})",
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                            Spacer(Modifier.weight(1f))
+                            IconButton(onClick = { viewModel.onSortTypeChange(TodoSortType.NAME) }) {
+                                Icon(
+                                    imageVector = Icons.Filled.SortByAlpha,
+                                    contentDescription = "Sort alphabetically",
+                                    tint = Color.Black
+                                )
+                            }
+                            IconButton(onClick = { viewModel.onSortTypeChange(TodoSortType.CREATED_AT) }) {
+                                Icon(
+                                    imageVector = Icons.Filled.DateRange,
+                                    contentDescription = "Sort alphabetically",
+                                    tint = Color.Black
+                                )
+                            }
+                            IconButton(onClick = { viewModel.onSortTypeChange(TodoSortType.GOAL) }) {
+                                Icon(
+                                    imageVector = Icons.Filled.Sort,
+                                    contentDescription = "Sort alphabetically",
+                                    tint = Color.Black
+                                )
+                            }
+                        }
                         Spacer(Modifier.height(8.dp))
                         if (uiState.todos.isEmpty()) {
                             Text(
@@ -273,16 +309,23 @@ private fun TodoRow(
                 modifier = Modifier.weight(1f)
 
             ) {
-                Text(
-                    text = todo.title
-                )
+                Row {
+                    Text(
+                        text =  todo.title
+                    )
+                    Spacer(Modifier.weight(1f))
+                    Text(
+                        text =  todo.goal,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
                 Spacer(Modifier.padding(0.dp))
                 Text(
-                    text = todo.goal,
+                    text =  todo.description,
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.65f)
                 )
-
                 Spacer(Modifier.padding(0.dp))
 
                 Text(

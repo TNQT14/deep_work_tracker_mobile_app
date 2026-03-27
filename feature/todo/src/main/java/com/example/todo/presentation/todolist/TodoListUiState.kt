@@ -8,5 +8,6 @@ data class TodoListUiState (
     val isLoading: Boolean = false,
     val error: Throwable ?= null,
     val todos: List<Todo> = emptyList(),
-    val session: List<FocusSession> = emptyList()
+    val session: List<FocusSession> = emptyList(),
+    val sortType: TodoSortType = TodoSortType.CREATED_AT
 )

@@ -24,6 +24,8 @@ class TodoListViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(TodoListUiState(isLoading = true))
     val uiState: StateFlow<TodoListUiState> = _uiState
+    var _rawTodos : List<Todo>  = emptyList()
+
 
     init {
         observeTodos()
@@ -38,6 +40,8 @@ class TodoListViewModel @Inject constructor(
                         isLoading = false, error = null, todos = list
                     )
                 }
+                _rawTodos = list
+                applySort()
             }
 
         }
@@ -116,6 +120,23 @@ class TodoListViewModel @Inject constructor(
                     it.copy(isLoading = false, error = e)
                 }
             }
+        }
+    }
+
+    fun onSortTypeChange(type: TodoSortType){
+        _uiState.update { it.copy(sortType = type) }
+        applySort()
+    }
+
+    private fun applySort(){
+        val sorted = when(_uiState.value.sortType){
+            TodoSortType.NAME -> _rawTodos.sortedBy { it.title }
+            TodoSortType.CREATED_AT -> _rawTodos.sortedByDescending { it.createdAt }
+            TodoSortType.GOAL -> _rawTodos.sortedBy { it.goal }
+        }
+
+        _uiState.update {
+            it.copy(todos = sorted)
         }
     }
 
