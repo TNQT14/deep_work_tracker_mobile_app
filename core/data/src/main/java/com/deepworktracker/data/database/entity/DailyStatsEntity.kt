@@ -11,10 +11,10 @@ import androidx.room.PrimaryKey
 )
 data class DailyStatsEntity(
     @PrimaryKey
-    val date: String, // YYYY-MM-DD format
+    val date: String,
     
     @ColumnInfo(name = "total_focus_time")
-    val totalFocusTime: Long, // milliseconds
+    val totalFocusTime: Long,
     
     @ColumnInfo(name = "session_count")
     val sessionCount: Int,
@@ -23,10 +23,10 @@ data class DailyStatsEntity(
     val interruptionCount: Int,
     
     @ColumnInfo(name = "average_session_duration")
-    val averageSessionDuration: Long, // milliseconds
+    val averageSessionDuration: Long,
     
     @ColumnInfo(name = "best_focus_hour")
-    val bestFocusHour: Int?, // 0-23, hour with most focus time
+    val bestFocusHour: Int?,
     
     @ColumnInfo(name = "updated_at")
     val updatedAt: Long = System.currentTimeMillis()

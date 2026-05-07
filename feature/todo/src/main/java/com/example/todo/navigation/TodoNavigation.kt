@@ -10,7 +10,6 @@ import com.example.todo.presentation.tododetail.TodoDetailScreen
 object TodoDestinations {
     const val LIST_ROUTE = "todo"
     const val DETAIL_ROUTE = "todo/{todoId}"
-
     fun detailRoute(todoId: String): String = "todo/${Uri.encode(todoId)}"
 }
 

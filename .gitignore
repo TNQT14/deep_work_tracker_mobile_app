@@ -128,3 +128,4 @@ Desktop.ini
 **/META-INF/*.kotlin_module
 **/desugar_graph.bin
 /feature/session/build/.transforms
+.gitnexus
