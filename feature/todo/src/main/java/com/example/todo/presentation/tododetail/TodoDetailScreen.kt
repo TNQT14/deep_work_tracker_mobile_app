@@ -1,22 +1,19 @@
 package com.example.todo.presentation.tododetail
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.selection.selectable
-import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -25,7 +22,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.RadioButton
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -41,7 +39,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -183,6 +180,68 @@ fun TodoDetailScreen(
 }
 
 @Composable
+private fun StatusDropdownRow(
+    currentLabel: String,
+    enabled: Boolean,
+    isSavingStatus: Boolean,
+    onSetStatus: (TodoStatus) -> Unit,
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    LaunchedEffect(enabled) {
+        if (!enabled) expanded = false
+    }
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Text(
+            text = "Trạng thái:",
+            style = MaterialTheme.typography.labelLarge,
+        )
+        Box {
+            OutlinedButton(
+                onClick = { expanded = true },
+                enabled = enabled,
+            ) {
+                Text(
+                    text = currentLabel,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                Icon(
+                    imageVector = Icons.Default.ArrowDropDown,
+                    contentDescription = "Chọn trạng thái",
+                    modifier = Modifier.padding(start = 4.dp),
+                )
+            }
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false },
+            ) {
+                TodoStatusDropdownOptions.forEach { (status, label) ->
+                    DropdownMenuItem(
+                        text = { Text(label) },
+                        onClick = {
+                            expanded = false
+                            onSetStatus(status)
+                        },
+                    )
+                }
+            }
+        }
+        if (isSavingStatus) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(18.dp),
+                strokeWidth = 2.dp,
+            )
+        }
+    }
+}
+
+@Composable
 private fun TodoDetailContent(
     modifier: Modifier = Modifier,
     todo: Todo,
@@ -203,10 +262,11 @@ private fun TodoDetailContent(
             overflow = TextOverflow.Ellipsis,
         )
 
-        AssistChip(
-            onClick = {},
-            enabled = false,
-            label = { Text(todo.status.toDisplayLabel()) },
+        StatusDropdownRow(
+            currentLabel = todo.status.toDisplayLabel(),
+            enabled = !isSavingStatus && !isDeleting,
+            isSavingStatus = isSavingStatus,
+            onSetStatus = onSetStatus,
         )
 
         Text(
@@ -243,53 +303,6 @@ private fun TodoDetailContent(
             )
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            Text(
-                text = "Trạng thái",
-                style = MaterialTheme.typography.labelLarge,
-            )
-            if (isSavingStatus) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(18.dp),
-                    strokeWidth = 2.dp,
-                )
-            }
-        }
-        Column(modifier = Modifier.selectableGroup()) {
-            TodoStatusRadioOptions.forEach { (status, label) ->
-                val enabled = !isSavingStatus && !isDeleting
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(48.dp)
-                        .selectable(
-                            selected = todo.status == status,
-                            enabled = enabled,
-                            onClick = { onSetStatus(status) },
-                            role = Role.RadioButton,
-                        )
-                        .padding(horizontal = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    RadioButton(
-                        selected = todo.status == status,
-                        onClick = null,
-                        enabled = enabled,
-                    )
-                    Text(
-                        text = label,
-                        style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.padding(start = 8.dp),
-                    )
-                }
-            }
-        }
-
         OutlinedButton(
             onClick = onDeleteClick,
             enabled = !isSavingStatus && !isDeleting,
@@ -320,7 +333,7 @@ private fun TodoStatus.toDisplayLabel(): String = when (this) {
     TodoStatus.DONE -> "Hoàn thành"
 }
 
-private val TodoStatusRadioOptions: List<Pair<TodoStatus, String>> = listOf(
+private val TodoStatusDropdownOptions: List<Pair<TodoStatus, String>> = listOf(
     TodoStatus.TODO to "Chưa làm",
     TodoStatus.IN_PROGRESS to "Đang làm",
     TodoStatus.PAUSED to "Tạm dừng",
