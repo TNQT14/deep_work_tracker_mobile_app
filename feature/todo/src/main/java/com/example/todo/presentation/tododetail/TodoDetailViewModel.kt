@@ -46,39 +46,44 @@ class TodoDetailViewModel @Inject constructor(
         viewModelScope.launch {
             todoRepository.observeAllTodo().map { list -> list.firstOrNull { it.id == todoId } }
                 .collectLatest { todo ->
-                    _uiState.update {
-                        it.copy(
+                    _uiState.update { state ->
+                        state.copy(
                             isLoading = false,
-                            error = null,
-                            todo = todo
+                            todo = todo,
                         )
                     }
                 }
         }
     }
 
-    fun advanceStatus() {
+    fun setStatus(target: TodoStatus) {
         val current = _uiState.value.todo ?: return
-        val nextStatus = current.status.nextInDetailWorkflow()
+        if (current.status == target) return
+        val now = Clock.System.now()
         val updated = current.copy(
-            status = nextStatus,
-            updatedAt = Clock.System.now(),
-            completedAt = when (nextStatus) {
-                TodoStatus.DONE -> Clock.System.now()
-                else -> null
-            },
+            status = target,
+            updatedAt = now,
+            completedAt = if (target == TodoStatus.DONE) now else null,
         )
         viewModelScope.launch {
+            _uiState.update { it.copy(isSavingStatus = true) }
             val result = todoRepository.updateTodo(updated)
-            if (result.isFailure) {
-                _uiState.update { it.copy(error = result.exceptionOrNull()) }
+            _uiState.update {
+                it.copy(
+                    isSavingStatus = false,
+                    error = result.exceptionOrNull(),
+                )
             }
         }
     }
 
+
     fun deletedTodo() {
+        if (todoId.isEmpty()) return
         viewModelScope.launch {
+            _uiState.update { it.copy(isDeleting = true) }
             val result = todoRepository.deleteTodo(todoId)
+            _uiState.update { it.copy(isDeleting = false) }
             if (result.isSuccess) {
                 _deleted.send(Unit)
             } else {
@@ -87,10 +92,7 @@ class TodoDetailViewModel @Inject constructor(
         }
     }
 
-    private fun TodoStatus.nextInDetailWorkflow(): TodoStatus = when (this) {
-        TodoStatus.TODO -> TodoStatus.IN_PROGRESS
-        TodoStatus.IN_PROGRESS -> TodoStatus.DONE
-        TodoStatus.DONE -> TodoStatus.TODO
-        TodoStatus.PAUSED -> TodoStatus.IN_PROGRESS
+    fun consumeError() {
+        _uiState.update { it.copy(error = null) }
     }
 }

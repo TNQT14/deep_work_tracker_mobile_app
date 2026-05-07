@@ -129,3 +129,5 @@ Desktop.ini
 **/desugar_graph.bin
 /feature/session/build/.transforms
 .gitnexus
+/.claude/skills/gitnexus/gitnexus-cli/SKILL.md
+/.claude/
