@@ -26,13 +26,8 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -51,6 +46,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.deepworktracker.domain.model.Todo
 import com.deepworktracker.domain.model.TodoStatus
 import com.deepworktracker.ui.theme.DeepWorkTrackerTheme
+import com.example.todo.presentation.components.TodoForm
+import com.example.todo.presentation.components.TodoFormGoalField
 import com.example.todo.presentation.todolist.TodoListViewModel
 import com.example.todo.presentation.todolist.TodoSortType
 
@@ -94,22 +91,12 @@ fun TodoListScreen(
                             Column {
                                 TodoForm(
                                     goal = goal,
-                                    goalOptions = goalOptions,
                                     title = title,
                                     description = description,
+                                    goalField = TodoFormGoalField.Selectable(goalOptions),
                                     onGoalChange = { goal = it },
                                     onTitleChange = { title = it },
                                     onDescriptionChange = { description = it },
-                                    onSubmit = {
-                                        viewModel.addTodo(
-                                            goal = goal,
-                                            title = title,
-                                            description = description
-                                        )
-                                        title = ""
-                                        description = ""
-                                        showForm = false
-                                    }
                                 )
                             }
 
@@ -214,69 +201,6 @@ fun TodoListScreen(
         }
 
     }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun TodoForm(
-    goal: String,
-    goalOptions: List<String>,
-    title: String,
-    description: String,
-    onGoalChange: (String) -> Unit,
-    onTitleChange: (String) -> Unit,
-    onDescriptionChange: (String) -> Unit,
-    onSubmit: () -> Unit,
-) {
-    var expanded by remember { mutableStateOf(false) }
-
-    OutlinedTextField(
-        value = title,
-        onValueChange = onTitleChange,
-        label = { Text("Title") },
-        singleLine = true,
-        modifier = Modifier.fillMaxWidth()
-    )
-    Spacer(Modifier.height(12.dp))
-    OutlinedTextField(
-        value = description,
-        onValueChange = onDescriptionChange,
-        label = { Text("Description") },
-        singleLine = true,
-        modifier = Modifier.fillMaxWidth()
-    )
-    Spacer(Modifier.height(12.dp))
-    ExposedDropdownMenuBox(
-        expanded = expanded,
-        onExpandedChange = { expanded = !expanded },
-    ) {
-        OutlinedTextField(
-            value = goal,
-            onValueChange = {},
-            readOnly = true,
-            label = { Text("Goal") },
-            singleLine = true,
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-            modifier = Modifier
-                .fillMaxWidth()
-                .menuAnchor()
-        )
-        DropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false }
-        ) {
-            goalOptions.forEach { option ->
-                DropdownMenuItem(
-                    text = { Text(option) },
-                    onClick = {
-                        onGoalChange(option)
-                        expanded = false
-                    }
-                )
-            }
-        }
-    }
-    Spacer(Modifier.height(8.dp))
 }
 
 @Composable

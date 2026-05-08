@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.deepworktracker.domain.model.TodoStatus
+import com.deepworktracker.domain.repository.SessionRepository
 import com.deepworktracker.domain.repository.TodoRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -21,6 +22,7 @@ import javax.inject.Inject
 @HiltViewModel
 class TodoDetailViewModel @Inject constructor(
     private val todoRepository: TodoRepository,
+    private val sessionRepository: SessionRepository,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
@@ -39,6 +41,17 @@ class TodoDetailViewModel @Inject constructor(
             )
         } else {
             observeTodo()
+            loadGoalOptions()
+        }
+    }
+
+    private fun loadGoalOptions() {
+        viewModelScope.launch {
+            runCatching { sessionRepository.getAllSessions() }
+                .onSuccess { sessions ->
+                    val goals = sessions.map { it.goal }.distinct().sorted()
+                    _uiState.update { it.copy(goalOptions = goals) }
+                }
         }
     }
 
@@ -77,6 +90,28 @@ class TodoDetailViewModel @Inject constructor(
         }
     }
 
+    suspend fun updateTodo(goal: String, title: String, description: String): Boolean {
+        val current = _uiState.value.todo ?: return false
+        val g = goal.trim()
+        val t = title.trim()
+        if (g.isEmpty() || t.isEmpty()) return false
+        val now = Clock.System.now()
+        val updated = current.copy(
+            goal = g,
+            title = t,
+            description = description,
+            updatedAt = now,
+        )
+        _uiState.update { it.copy(isSavingEdit = true, error = null) }
+        val result = todoRepository.updateTodo(updated)
+        _uiState.update {
+            it.copy(
+                isSavingEdit = false,
+                error = result.exceptionOrNull(),
+            )
+        }
+        return result.isSuccess
+    }
 
     fun deletedTodo() {
         if (todoId.isEmpty()) return

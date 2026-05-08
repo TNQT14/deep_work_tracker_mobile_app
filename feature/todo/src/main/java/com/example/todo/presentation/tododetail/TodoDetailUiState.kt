@@ -4,6 +4,8 @@ import com.deepworktracker.domain.model.Todo
 
 data class TodoDetailUiState(
     val isLoading: Boolean = false,
+    val isSavingEdit: Boolean = false,
+    val goalOptions: List<String> = emptyList(),
     val isSavingStatus: Boolean = false,
     val isDeleting: Boolean = false,
     val error: Throwable? = null,
