@@ -48,6 +48,9 @@ fun TodoDetailScreen(
     var showDeleteConfirm by remember { mutableStateOf(false) }
     var showEditDialog by remember { mutableStateOf(false) }
 
+    val openEditDialog = remember { { showEditDialog = true } }
+    val openDeleteConfirm = remember { { showDeleteConfirm = true } }
+
     LaunchedEffect(Unit) {
         viewModel.deleted.collect {
             onBack()
@@ -69,7 +72,11 @@ fun TodoDetailScreen(
             snackbarHost = { SnackbarHost(snackbarHostState) },
             topBar = {
                 TopAppBar(
-                    title = { Text(text = "Chi tiết todo") },
+                    title = { Text(text = when{
+                        uiState.todo != null -> uiState.todo!!.title
+                        uiState.isLoading -> "Đang tải"
+                        else -> "Todo"
+                    }) },
                     navigationIcon = {
                         IconButton(onClick = onBack) {
                             Icon(
@@ -138,8 +145,8 @@ fun TodoDetailScreen(
                         isSavingEdit = uiState.isSavingEdit,
                         isDeleting = uiState.isDeleting,
                         onSetStatus = viewModel::setStatus,
-                        onEditClick = { showEditDialog = true },
-                        onDeleteClick = { showDeleteConfirm = true },
+                        onEditClick = openEditDialog,
+                        onDeleteClick = openDeleteConfirm,
                     )
 
                     if (showEditDialog) {
