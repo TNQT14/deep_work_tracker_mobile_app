@@ -1,8 +1,9 @@
 package com.example.todo.presentation.tododetail.component
 
+
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentWidth
@@ -18,6 +20,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.outlined.CalendarToday
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -28,6 +32,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -37,11 +42,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.deepworktracker.common.datetime.toDdMmYyyyCompact
 import com.deepworktracker.common.datetime.toDdMmYyyyCompactOrNull
 import com.deepworktracker.domain.model.Todo
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import com.deepworktracker.domain.model.TodoStatus
 import com.example.todo.presentation.utils.TodoStatusDropdownOptions
 import com.example.todo.presentation.utils.toChipColor
@@ -58,6 +67,7 @@ internal fun TodoDetailContent(
     onSetStatus: (TodoStatus) -> Unit,
     onEditClick: () -> Unit,
     onDeleteClick: () -> Unit,
+    onDeadlineEditClick: () -> Unit,
 ) {
     val scroll = rememberScrollState()
     val actionsEnabled = !isSavingStatus && !isDeleting && !isSavingEdit
@@ -74,11 +84,14 @@ internal fun TodoDetailContent(
             onSetStatus = onSetStatus,
         )
 
-        TodoDateDetail(todo = todo)
+        TodoDateDetail(
+            todo = todo,
+            enabled = actionsEnabled,
+            onEditClick = onEditClick,
+            onDeadlineEditClick = onDeadlineEditClick,
+        )
 
         TodoDetailGoal(goal = todo.goal)
-
-
 
         TodoDetailEditButton(
             enabled = actionsEnabled,
@@ -95,30 +108,177 @@ internal fun TodoDetailContent(
 }
 
 @Composable
-private fun TodoDateDetail(todo: Todo) {
-    if (todo.status == TodoStatus.DONE) {
+private fun TodoDateDetail(
+    todo: Todo,
+    enabled: Boolean,
+    onEditClick: () -> Unit,
+    onDeadlineEditClick: () -> Unit,
+) {
+    val scheme = MaterialTheme.colorScheme
+    val primary = scheme.primary
+    val iconBackdrop = primary.copy(alpha = 0.12f)
 
-        Text(
-            text = "Ngày hoàn thành: " + todo.completedAt.toDdMmYyyyCompactOrNull(),
-        )
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = scheme.surface),
+        border = BorderStroke(1.dp, scheme.outlineVariant.copy(alpha = 0.55f)),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+    ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            when (todo.status) {
+                TodoStatus.DONE -> {
+                    TodoDateDetailRow(
+                        modifier = Modifier.fillMaxWidth(),
+                        calendarIconBackground = iconBackdrop,
+                        label = "Ngày hoàn thành",
+                        valueText = todo.completedAt.toDdMmYyyyCompactOrNull() ?: "—",
+                        valueHighlighted = true,
+                        onEditClick = onEditClick,
+                        editEnabled = false,
+                    )
+                }
 
-    } else {
-        Column {
-            Text(
-                text = "Ngày tạo: " + todo.createdAt.toDdMmYyyyCompact(),
-                style = MaterialTheme.typography.headlineSmall,
-                maxLines = 3,
-                overflow = TextOverflow.Ellipsis,
+                else -> {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.Top,
+                    ) {
+                        Box(modifier = Modifier.weight(1f)) {
+                            TodoDateDetailRow(
+                                modifier = Modifier.fillMaxWidth(),
+                                calendarIconBackground = iconBackdrop,
+                                label = "Ngày tạo",
+                                valueText = todo.createdAt.toDdMmYyyyCompact(),
+                                valueHighlighted = true,
+                                onEditClick = onEditClick,
+                                editEnabled = false,
+                            )
+                        }
+                        VerticalDivider(
+                            modifier = Modifier
+                                .padding(vertical = 8.dp)
+                                .heightIn(min = 48.dp),
+                            color = scheme.outlineVariant.copy(alpha = 0.45f),
+                        )
+                        val hasDue = todo.dueAt != null
+                        Box(modifier = Modifier.weight(1f)) {
+                            TodoDateDetailRow(
+                                modifier = Modifier.fillMaxWidth(),
+                                calendarIconBackground = iconBackdrop,
+                                label = "Ngày hết hạn",
+                                valueText = if (hasDue) {
+                                    requireNotNull(todo.dueAt).toDdMmYyyyCompactOrNull() ?: "—"
+                                } else {
+                                    "Chưa có deadline"
+                                },
+                                valueHighlighted = hasDue,
+                                onEditClick = onDeadlineEditClick,
+                                editEnabled = enabled,
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun TodoDateDetailRow(
+    calendarIconBackground: Color,
+    label: String,
+    valueText: String,
+    valueHighlighted: Boolean,
+    onEditClick: () -> Unit,
+    editEnabled: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    val scheme = MaterialTheme.colorScheme
+    val primary = scheme.primary
+
+    Column(modifier = modifier) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(36.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(calendarIconBackground),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.CalendarToday,
+                    contentDescription = null,
+                    modifier = Modifier.size(20.dp),
+                    tint = primary,
+                )
+            }
+
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(horizontal = 8.dp),
+            ) {
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = scheme.onSurface,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                Text(
+                    text = valueText,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = if (valueHighlighted) {
+                        scheme.onSurface
+                    } else {
+                        scheme.onSurfaceVariant
+                    },
+                    fontWeight = if (valueHighlighted) FontWeight.Bold else FontWeight.Normal,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+        }
+        OutlinedButton(
+            onClick = onEditClick,
+            enabled = editEnabled,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp, vertical = 4.dp),
+            shape = RoundedCornerShape(10.dp),
+            border = if (editEnabled) {
+                BorderStroke(1.dp, primary)
+            } else {
+                BorderStroke(1.dp, Color.Transparent)
+            },
+            colors = ButtonDefaults.outlinedButtonColors(
+                containerColor = Color.Transparent,
+                contentColor = primary,
+                disabledContainerColor = Color.Transparent,
+                disabledContentColor = scheme.onSurfaceVariant.copy(alpha = 0.5f),
+            ),
+            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 6.dp),
+        ) {
+            Icon(
+                imageVector = Icons.Filled.Edit,
+                contentDescription = null,
+                modifier = Modifier.size(14.dp),
             )
             Text(
-                text = "Ngày hết hạn: " + todo.dueAt.toDdMmYyyyCompactOrNull(),
-                style = MaterialTheme.typography.headlineSmall,
-                maxLines = 3,
+                text = "Chỉnh sửa",
+                modifier = Modifier.padding(start = 4.dp),
+                style = MaterialTheme.typography.labelSmall,
+                maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
         }
     }
-
 }
 
 @Composable

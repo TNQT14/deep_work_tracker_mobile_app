@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
 import javax.inject.Inject
 
 @HiltViewModel
@@ -101,6 +102,40 @@ class TodoDetailViewModel @Inject constructor(
             title = t,
             description = description,
             updatedAt = now,
+        )
+        _uiState.update { it.copy(isSavingEdit = true, error = null) }
+        val result = todoRepository.updateTodo(updated)
+        _uiState.update {
+            it.copy(
+                isSavingEdit = false,
+                error = result.exceptionOrNull(),
+            )
+        }
+        return result.isSuccess
+    }
+
+    suspend fun updateDeadline(deadline: Instant): Boolean {
+        val current = _uiState.value.todo ?: return false
+        val updated = current.copy(
+            dueAt = deadline,
+            updatedAt = Clock.System.now(),
+        )
+        _uiState.update{it.copy(isSavingEdit = true, error = null)}
+        val result = todoRepository.updateTodo(updated)
+        _uiState.update {
+            it.copy(
+                isSavingEdit = false,
+                error = result.exceptionOrNull(),
+            )
+        }
+        return result.isSuccess
+    }
+
+    suspend fun clearDeadline(): Boolean {
+        val current = _uiState.value.todo ?: return false
+        val updated = current.copy(
+            dueAt = null,
+            updatedAt = Clock.System.now(),
         )
         _uiState.update { it.copy(isSavingEdit = true, error = null) }
         val result = todoRepository.updateTodo(updated)

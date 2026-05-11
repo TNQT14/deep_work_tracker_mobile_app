@@ -30,6 +30,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.todo.presentation.tododetail.component.TodoDeadlineDialog
 import com.example.todo.presentation.tododetail.component.TodoDetailContent
 import com.example.todo.presentation.tododetail.component.TodoEditDialog
 import com.deepworktracker.ui.theme.DeepWorkTrackerTheme
@@ -47,9 +48,11 @@ fun TodoDetailScreen(
 
     var showDeleteConfirm by remember { mutableStateOf(false) }
     var showEditDialog by remember { mutableStateOf(false) }
+    var showDeadlineDialog by remember { mutableStateOf(false) }
 
     val openEditDialog = remember { { showEditDialog = true } }
     val openDeleteConfirm = remember { { showDeleteConfirm = true } }
+    val openDeadlineDialog = remember { { showDeadlineDialog = true } }
 
     LaunchedEffect(Unit) {
         viewModel.deleted.collect {
@@ -147,7 +150,19 @@ fun TodoDetailScreen(
                         onSetStatus = viewModel::setStatus,
                         onEditClick = openEditDialog,
                         onDeleteClick = openDeleteConfirm,
+                        onDeadlineEditClick = openDeadlineDialog,
                     )
+
+                    if (showDeadlineDialog) {
+                        TodoDeadlineDialog(
+                            initialDueAt = todo.dueAt,
+                            isSaving = uiState.isSavingEdit,
+                            onDismiss = { if (!uiState.isSavingEdit) showDeadlineDialog = false },
+                            onSave = viewModel::updateDeadline,
+                            onClear = viewModel::clearDeadline,
+                            onSaved = { showDeadlineDialog = false },
+                        )
+                    }
 
                     if (showEditDialog) {
                         TodoEditDialog(
