@@ -49,8 +49,6 @@ import androidx.compose.ui.unit.dp
 import com.deepworktracker.common.datetime.toDdMmYyyyCompact
 import com.deepworktracker.common.datetime.toDdMmYyyyCompactOrNull
 import com.deepworktracker.domain.model.Todo
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
 import com.deepworktracker.domain.model.TodoStatus
 import com.example.todo.presentation.utils.TodoStatusDropdownOptions
 import com.example.todo.presentation.utils.toChipColor
@@ -66,7 +64,6 @@ internal fun TodoDetailContent(
     isDeleting: Boolean,
     onSetStatus: (TodoStatus) -> Unit,
     onEditClick: () -> Unit,
-    onDeleteClick: () -> Unit,
     onDeadlineEditClick: () -> Unit,
 ) {
     val scroll = rememberScrollState()
@@ -92,18 +89,6 @@ internal fun TodoDetailContent(
         )
 
         TodoDetailGoal(goal = todo.goal)
-
-        TodoDetailEditButton(
-            enabled = actionsEnabled,
-            isSavingEdit = isSavingEdit,
-            onClick = onEditClick,
-        )
-
-        TodoDetailDeleteButton(
-            enabled = actionsEnabled,
-            isDeleting = isDeleting,
-            onClick = onDeleteClick,
-        )
     }
 }
 
@@ -283,40 +268,81 @@ private fun TodoDateDetailRow(
 
 @Composable
 private fun TodoDetailGoal(goal: String) {
-    Text(
-        text = "Goal",
-        style = MaterialTheme.typography.labelLarge,
-    )
-    Text(
-        text = goal,
-        style = MaterialTheme.typography.bodyLarge,
-    )
+    val scheme = MaterialTheme.colorScheme
+    Card (
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        border = BorderStroke(1.dp, scheme.outlineVariant.copy(alpha = 0.55f)),
+        colors = CardDefaults.cardColors(containerColor = scheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+    ){
+        Column (
+            Modifier.padding(16.dp)
+        ){
+            Text(
+                text = "Mục tiêu",
+                style = MaterialTheme.typography.labelLarge,
+            )
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                ),
+            ) {
+                Text(
+                    text = goal.ifBlank {
+                        "Chưa có mục tiêu"
+                    },
+                    modifier = Modifier.padding(16.dp),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = if (goal.isBlank()) {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    } else {
+                        MaterialTheme.colorScheme.onSurface
+                    },
+                )
+            }
+        }
+    }
 }
 
 @Composable
 private fun TodoDetailDescriptionCard(description: String) {
-    Text(
-        text = "Mô tả",
-        style = MaterialTheme.typography.labelLarge,
-    )
-    Card(
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-        ),
-    ) {
-        Text(
-            text = description.ifBlank {
-                "Chưa có mô tả"
-            },
-            modifier = Modifier.padding(16.dp),
-            style = MaterialTheme.typography.bodyLarge,
-            color = if (description.isBlank()) {
-                MaterialTheme.colorScheme.onSurfaceVariant
-            } else {
-                MaterialTheme.colorScheme.onSurface
-            },
-        )
-    }
+    val scheme = MaterialTheme.colorScheme
+   Card (
+       modifier = Modifier.fillMaxWidth(),
+       shape = RoundedCornerShape(12.dp),
+       border = BorderStroke(1.dp, scheme.outlineVariant.copy(alpha = 0.55f)),
+       colors = CardDefaults.cardColors(containerColor = scheme.surface),
+       elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+   ){
+       Column (
+           Modifier.padding(16.dp)
+       ){
+           Text(
+               text = "Mô tả",
+               style = MaterialTheme.typography.labelLarge,
+           )
+           Card(
+               colors = CardDefaults.cardColors(
+                   containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+               ),
+           ) {
+               Text(
+                   text = description.ifBlank {
+                       "Chưa có mô tả"
+                   },
+                   modifier = Modifier.padding(16.dp),
+                   style = MaterialTheme.typography.bodyLarge,
+                   color = if (description.isBlank()) {
+                       MaterialTheme.colorScheme.onSurfaceVariant
+                   } else {
+                       MaterialTheme.colorScheme.onSurface
+                   },
+               )
+           }
+       }
+   }
 }
 
 @Composable
