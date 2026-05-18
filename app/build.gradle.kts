@@ -76,6 +76,9 @@ dependencies {
     // Core modules
     implementation(project(":core:ui"))
     implementation(project(":core:common"))
+    implementation(project(":core:network"))
+
+    implementation(project(":feature:auth"))
     
     // Logging
     implementation(libs.timber)

@@ -34,6 +34,8 @@ import com.deepworktracker.dashboard.presentation.category_detail.CategoryDetail
 import com.deepworktracker.dashboard.presentation.goal_detail.GoalDetailScreen
 import com.deepworktracker.profile.presentation.profile_screen.ProfileScreen
 import com.deepworktracker.session.presentation.SessionScreen
+import com.deepworktracker.auth.navigation.LOGIN_ROUTE
+import com.deepworktracker.auth.navigation.authGraph
 import com.deepworktracker.ui.theme.DeepWorkTrackerTheme
 import com.example.todo.navigation.todoGraph
 import dagger.hilt.android.AndroidEntryPoint
@@ -53,7 +55,9 @@ class MainActivity : ComponentActivity() {
 
                 Scaffold(
                     bottomBar = {
-                        if (currentRoute != "goal") {
+                        val hideBottomBar =
+                            currentRoute?.startsWith("auth") == true || currentRoute == "goal"
+                        if (!hideBottomBar) {
                             BottomBar(
                                 currentRoute = currentRoute,
                                 onNavigate = { route ->
@@ -79,8 +83,15 @@ class MainActivity : ComponentActivity() {
 
                         NavHost(
                             navController = navController,
-                            startDestination = "session"
+                            startDestination = LOGIN_ROUTE
                         ) {
+
+                            authGraph(navController) {
+                                navController.navigate("session") {
+                                    popUpTo(LOGIN_ROUTE) { inclusive = true }
+                                    launchSingleTop = true
+                                }
+                            }
 
                             composable("session") {
                                 SessionScreen(
