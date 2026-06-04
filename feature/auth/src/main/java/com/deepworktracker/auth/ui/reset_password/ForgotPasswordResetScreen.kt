@@ -1,4 +1,4 @@
-package com.deepworktracker.auth.ui
+package com.deepworktracker.auth.ui.reset_password
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -29,41 +29,49 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.deepworktracker.auth.ui.AuthUiState
+import com.deepworktracker.auth.ui.forgot_password.ForgotPasswordViewModel
 
 @Composable
-fun LoginRoute(
-    onLoginSuccess: () -> Unit,
-    onNavigateToRegister: () -> Unit,
-    onNavigateToForgotPassword: () -> Unit,
-    viewModel: AuthViewModel = hiltViewModel(),
+fun ForgotPasswordResetRoute(
+    email: String,
+    onResetSuccess: () -> Unit,
+    onNavigateBack: () -> Unit,
+    viewModel: ForgotPasswordViewModel = hiltViewModel(),
 ) {
-    val state by viewModel.loginState.collectAsStateWithLifecycle()
+    val state by viewModel.resetState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(email) {
+        viewModel.bindVerifiedEmailFromNavigation(email)
+    }
 
     LaunchedEffect(state) {
         if (state is AuthUiState.Success) {
-            onLoginSuccess()
-            viewModel.consumeLoginSuccess()
+            onResetSuccess()
+            viewModel.consumeResetSuccess()
         }
     }
 
-    LoginScreen(
+    ForgotPasswordResetScreen(
+        email = email,
         state = state,
-        onLogin = { email, password -> viewModel.login(email, password) },
-        onNavigateToRegister = onNavigateToRegister,
-        onNavigateToForgotPassword = onNavigateToForgotPassword,
+        onReset = { password, confirm ->
+            viewModel.resetPassword(email, password, confirm)
+        },
+        onNavigateBack = onNavigateBack,
     )
 }
 
 @Composable
-fun LoginScreen(
+fun ForgotPasswordResetScreen(
+    email: String,
     state: AuthUiState<*>,
-    onLogin: (email: String, password: String) -> Unit,
-    onNavigateToRegister: () -> Unit,
-    onNavigateToForgotPassword: ()-> Unit,
+    onReset: (password: String, confirmPassword: String) -> Unit,
+    onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var email by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
+    var confirmPassword by rememberSaveable { mutableStateOf("") }
 
     Column(
         modifier = modifier
@@ -72,27 +80,36 @@ fun LoginScreen(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text("Sign in", style = MaterialTheme.typography.headlineMedium)
-        Spacer(Modifier.height(24.dp))
-
-        OutlinedTextField(
-            modifier = Modifier.fillMaxWidth(),
-            value = email,
-            onValueChange = { email = it },
-            label = { Text("Email") },
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+        Text("New password", style = MaterialTheme.typography.headlineMedium)
+        Spacer(Modifier.height(8.dp))
+        Text(
+            text = email,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(24.dp))
 
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
             value = password,
             onValueChange = { password = it },
-            label = { Text("Password") },
+            label = { Text("New password") },
             singleLine = true,
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+            enabled = state !is AuthUiState.Loading,
+        )
+        Spacer(Modifier.height(12.dp))
+
+        OutlinedTextField(
+            modifier = Modifier.fillMaxWidth(),
+            value = confirmPassword,
+            onValueChange = { confirmPassword = it },
+            label = { Text("Confirm password") },
+            singleLine = true,
+            visualTransformation = PasswordVisualTransformation(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+            enabled = state !is AuthUiState.Loading,
         )
         Spacer(Modifier.height(16.dp))
 
@@ -106,35 +123,29 @@ fun LoginScreen(
         }
 
         Button(
-            onClick = { onLogin(email.trim(), password) },
+            onClick = { onReset(password, confirmPassword) },
             modifier = Modifier.fillMaxWidth(),
             enabled = state !is AuthUiState.Loading &&
-                email.isNotBlank() &&
-                password.isNotBlank(),
+                password.isNotBlank() &&
+                confirmPassword.isNotBlank(),
         ) {
             if (state is AuthUiState.Loading) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center,
-                ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(22.dp),
                         strokeWidth = 2.dp,
                     )
                     Spacer(Modifier.size(8.dp))
-                    Text("Signing in…")
+                    Text("Updating…")
                 }
             } else {
-                Text("Log in")
+                Text("Reset password")
             }
         }
+
         Spacer(Modifier.height(8.dp))
-        TextButton(onClick = onNavigateToForgotPassword) {
-            Text("Forgot password?")
-        }
-        Spacer(Modifier.height(8.dp))
-        TextButton(onClick = onNavigateToRegister) {
-            Text("Create an account")
+        TextButton(onClick = onNavigateBack) {
+            Text("Back")
         }
     }
 }
