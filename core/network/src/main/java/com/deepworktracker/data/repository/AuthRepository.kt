@@ -4,6 +4,7 @@ import com.deepworktracker.data.remote.api.AuthApi
 import com.deepworktracker.data.remote.model.request.ForgotPasswordResetRequest
 import com.deepworktracker.data.remote.model.request.ForgotPasswordVerifyEmailRequest
 import com.deepworktracker.data.remote.model.request.LoginRequest
+import com.deepworktracker.data.remote.model.request.LogoutRequest
 import com.deepworktracker.data.remote.model.request.RegisterRequest
 import com.deepworktracker.data.remote.model.response.ApiEnvelope
 import com.deepworktracker.data.remote.model.response.AuthResponse
@@ -43,5 +44,11 @@ class AuthRepository @Inject constructor(
         newPassword: String
     ): NetworkResult<ApiEnvelope<MessageData>> = safeApiCall(gson) {
         api.forgotPasswordReset(ForgotPasswordResetRequest(email, newPassword))
+    }
+
+    suspend fun logout(
+        accessToken: String,
+    ): NetworkResult<ApiEnvelope<MessageData>> = safeApiCall(gson) {
+        api.logout(LogoutRequest(accessToken = accessToken))
     }
 }

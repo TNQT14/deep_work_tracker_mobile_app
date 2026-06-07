@@ -6,40 +6,66 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.deepworktracker.common.time.TimeFormatter
+import com.deepworktracker.profile.presentation.LogoutState
+import com.deepworktracker.profile.presentation.ProfileUiState
 import com.deepworktracker.profile.presentation.ProfileViewModel
 import com.deepworktracker.ui.theme.DeepWorkTrackerTheme
 import kotlin.time.Duration.Companion.milliseconds
 
+@Composable
+fun ProfileRoute(
+    onLogoutSuccess: () -> Unit,
+    viewModel: ProfileViewModel = hiltViewModel(),
+) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(uiState.logoutState) {
+        if (uiState.logoutState is LogoutState.Success) {
+            onLogoutSuccess()
+            viewModel.consumeLogoutSuccess()
+        }
+    }
+
+    ProfileScreen(
+        uiState = uiState,
+        onRefresh = viewModel::refresh,
+        onClearError = viewModel::clearError,
+        onLogout = viewModel::logout,
+    )
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
-    viewModel: ProfileViewModel = hiltViewModel()
+    uiState: ProfileUiState,
+    onRefresh: () -> Unit,
+    onClearError: () -> Unit,
+    onLogout: () -> Unit,
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val isLoggingOut = uiState.logoutState is LogoutState.Loading
 
     DeepWorkTrackerTheme {
         Surface(
-//            modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background
         ) {
             Column(
                 modifier = Modifier.fillMaxSize()
             ) {
-                // Top App Bar
                 TopAppBar(
                     title = { Text("Profile") },
                     actions = {
                         IconButton(
-                            onClick = { viewModel.refresh() },
-                            enabled = !uiState.isLoading
+                            onClick = onRefresh,
+                            enabled = !uiState.isLoading && !isLoggingOut
                         ) {
                             if (uiState.isLoading) {
                                 CircularProgressIndicator(
@@ -56,11 +82,11 @@ fun ProfileScreen(
                     }
                 )
 
-                // Content
                 if (uiState.isLoading && uiState.totalSessions == 0) {
-                    // Loading state - show centered spinner
                     Box(
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxWidth(),
                         contentAlignment = Alignment.Center
                     ) {
                         CircularProgressIndicator()
@@ -68,11 +94,11 @@ fun ProfileScreen(
                 } else {
                     Column(
                         modifier = Modifier
-                            .fillMaxSize()
-                            .padding(24.dp),
+                            .weight(1f)
+                            .fillMaxWidth()
+                            .padding(horizontal = 24.dp, vertical = 16.dp),
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        // Profile Header Card
                         Card(
                             modifier = Modifier.fillMaxWidth(),
                             colors = CardDefaults.cardColors(
@@ -103,7 +129,6 @@ fun ProfileScreen(
                             }
                         }
 
-                        // Statistics Card
                         Card(
                             modifier = Modifier.fillMaxWidth()
                         ) {
@@ -134,7 +159,6 @@ fun ProfileScreen(
                             }
                         }
 
-                        // Settings Card (Placeholder)
                         Card(
                             modifier = Modifier.fillMaxWidth()
                         ) {
@@ -157,19 +181,34 @@ fun ProfileScreen(
                                 )
                             }
                         }
-
-//                        OutlinedButton(
-//                            onClick =
-//                        ) { }
                     }
                 }
 
-                // Error message
+                OutlinedButton(
+                    onClick = onLogout,
+                    enabled = !isLoggingOut,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp, vertical = 16.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = MaterialTheme.colorScheme.error,
+                    ),
+                ) {
+                    if (isLoggingOut) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(20.dp),
+                            strokeWidth = 2.dp,
+                        )
+                    } else {
+                        Text("Logout")
+                    }
+                }
+
                 uiState.error?.let { error ->
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(16.dp),
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
                         colors = CardDefaults.cardColors(
                             containerColor = MaterialTheme.colorScheme.errorContainer
                         )
@@ -187,7 +226,7 @@ fun ProfileScreen(
                                 style = MaterialTheme.typography.bodyMedium,
                                 modifier = Modifier.weight(1f)
                             )
-                            TextButton(onClick = { viewModel.clearError() }) {
+                            TextButton(onClick = onClearError) {
                                 Text("Dismiss")
                             }
                         }

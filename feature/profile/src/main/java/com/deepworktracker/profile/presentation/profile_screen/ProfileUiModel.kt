@@ -2,6 +2,9 @@ package com.deepworktracker.profile.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.deepworktracker.data.remote.network.NetworkResult
+import com.deepworktracker.data.repository.AuthRepository
+import com.deepworktracker.data.remote.token.TokenStore
 import com.deepworktracker.domain.repository.SessionRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,7 +16,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
-    private val sessionRepository: SessionRepository
+    private val sessionRepository: SessionRepository,
+    private val authRepository: AuthRepository,
+    private val tokenStore: TokenStore,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ProfileUiState())
@@ -59,5 +64,35 @@ class ProfileViewModel @Inject constructor(
 
     fun clearError() {
         _uiState.update { it.copy(error = null) }
+    }
+
+    fun logout() {
+        viewModelScope.launch {
+            val accessToken = tokenStore.getAccessToken()
+            if (accessToken.isNullOrBlank()) {
+                tokenStore.clear()
+                _uiState.update { it.copy(logoutState = LogoutState.Success) }
+                return@launch
+            }
+
+            _uiState.update { it.copy(logoutState = LogoutState.Loading) }
+
+            when (val result = authRepository.logout(accessToken)) {
+                is NetworkResult.Success -> {
+                    tokenStore.clear()
+                    _uiState.update { it.copy(logoutState = LogoutState.Success) }
+                }
+
+                else -> {
+                    // Offline / 401 / 5xx: vẫn xóa token local (best-effort logout)
+                    tokenStore.clear()
+                    _uiState.update { it.copy(logoutState = LogoutState.Success) }
+                }
+            }
+        }
+    }
+
+    fun consumeLogoutSuccess() {
+        _uiState.update { it.copy(logoutState = LogoutState.Idle) }
     }
 }

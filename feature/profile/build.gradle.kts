@@ -52,6 +52,9 @@ dependencies {
     
     // Data
     implementation(project(":core:data"))
+
+    // Network (AuthRepository, TokenStore for logout)
+    implementation(project(":core:network"))
     
     // UI - QUAN TRỌNG: Cần dependency này để import DeepWorkTrackerTheme
     implementation(project(":core:ui"))

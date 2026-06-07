@@ -3,6 +3,7 @@ package com.deepworktracker.data.remote.api
 import com.deepworktracker.data.remote.model.request.ForgotPasswordResetRequest
 import com.deepworktracker.data.remote.model.request.ForgotPasswordVerifyEmailRequest
 import com.deepworktracker.data.remote.model.request.LoginRequest
+import com.deepworktracker.data.remote.model.request.LogoutRequest
 import com.deepworktracker.data.remote.model.request.RegisterRequest
 import com.deepworktracker.data.remote.model.response.ApiEnvelope
 import com.deepworktracker.data.remote.model.response.AuthResponse
@@ -31,5 +32,10 @@ interface AuthApi {
     @POST("api/v1/auth/forgot-password/reset")
     suspend fun forgotPasswordReset(
         @Body body: ForgotPasswordResetRequest,
+    ): Response<ApiEnvelope<MessageData>>
+
+    @POST("api/v1/auth/logout")
+    suspend fun logout(
+        @Body body: LogoutRequest,
     ): Response<ApiEnvelope<MessageData>>
 }

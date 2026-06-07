@@ -32,7 +32,7 @@ import com.deepworktracker.dashboard.presentation.dashboard.DashboardScreen
 import com.deepworktracker.dashboard.presentation.category.CategoryScreen
 import com.deepworktracker.dashboard.presentation.category_detail.CategoryDetailScreen
 import com.deepworktracker.dashboard.presentation.goal_detail.GoalDetailScreen
-import com.deepworktracker.profile.presentation.profile_screen.ProfileScreen
+import com.deepworktracker.profile.presentation.profile_screen.ProfileRoute
 import com.deepworktracker.session.presentation.SessionScreen
 import com.deepworktracker.auth.navigation.LOGIN_ROUTE
 import com.deepworktracker.auth.navigation.authGraph
@@ -139,7 +139,14 @@ class MainActivity : ComponentActivity() {
                                 )
                             }
                             composable("profile") {
-                                ProfileScreen()
+                                ProfileRoute(
+                                    onLogoutSuccess = {
+                                        navController.navigate(LOGIN_ROUTE) {
+                                            popUpTo(0) { inclusive = true }
+                                            launchSingleTop = true
+                                        }
+                                    },
+                                )
                             }
 
 
