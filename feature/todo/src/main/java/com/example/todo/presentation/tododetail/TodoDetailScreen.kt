@@ -39,7 +39,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.todo.presentation.tododetail.component.TodoDeadlineDialog
 import com.example.todo.presentation.tododetail.component.TodoDetailContent
 import com.example.todo.presentation.tododetail.component.TodoEditDialog
-import com.deepworktracker.ui.theme.DeepWorkTrackerTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Suppress("UNUSED_PARAMETER")
@@ -83,9 +82,8 @@ fun TodoDetailScreen(
         }
     }
 
-    DeepWorkTrackerTheme {
-        Scaffold(
-            snackbarHost = { SnackbarHost(snackbarHostState) },
+    Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
             topBar = {
                 TopAppBar(
                     title = {
@@ -263,4 +261,3 @@ fun TodoDetailScreen(
             }
         }
     }
-}

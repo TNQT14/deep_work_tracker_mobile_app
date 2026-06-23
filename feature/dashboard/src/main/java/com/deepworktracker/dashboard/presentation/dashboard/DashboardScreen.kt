@@ -25,7 +25,6 @@ import com.deepworktracker.dashboard.presentation.dashboard.DashboardViewModel
 import com.deepworktracker.dashboard.presentation.chart.FocusTimeBarChart
 import com.deepworktracker.dashboard.presentation.charts.GoalDistributionChart
 import com.deepworktracker.domain.model.FocusSession
-import com.deepworktracker.ui.theme.DeepWorkTrackerTheme
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
@@ -39,12 +38,11 @@ fun DashboardScreen(
     onNavigateToGoal: (String) -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    
-    DeepWorkTrackerTheme {
-        Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = MaterialTheme.colorScheme.background
-        ) {
+
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background
+    ) {
             Column(
                 modifier = Modifier.fillMaxSize()
             ) {
@@ -163,7 +161,6 @@ fun DashboardScreen(
                             TextButton(onClick = { viewModel.clearError() }) {
                                 Text("Dismiss")
                             }
-                        }
                     }
                 }
             }

@@ -1,0 +1,23 @@
+<resources>
+    <string name="profile_title">Profile</string>
+    <string name="profile_refresh_content_description">Refresh</string>
+    <string name="profile_avatar_content_description">Profile</string>
+    <string name="profile_default_user">User</string>
+    <string name="profile_statistics">Statistics</string>
+    <string name="profile_total_sessions">Total Sessions</string>
+    <string name="profile_total_focus_time">Total Focus Time</string>
+    <string name="profile_settings">Settings</string>
+    <string name="profile_settings_coming_soon">Settings options coming soon…</string>
+    <string name="profile_open_settings">Open settings</string>
+    <string name="profile_logout">Logout</string>
+    <string name="profile_dismiss">Dismiss</string>
+    <string name="profile_error_generic">An error occurred</string>
+    <string name="settings_appearance">Appearance</string>
+    <string name="settings_language">Language</string>
+    <string name="settings_language_system">System default</string>
+    <string name="settings_language_english">English</string>
+    <string name="settings_language_vietnamese">Vietnamese</string>
+    <string name="settings_theme_system">System default</string>
+    <string name="settings_theme_light">Light</string>
+    <string name="settings_theme_dark">Dark</string>
+</resources>

@@ -1,0 +1,7 @@
+<resources>
+    <string name="todo_status_todo">To do</string>
+    <string name="todo_status_in_progress">In progress</string>
+    <string name="todo_status_paused">Paused</string>
+    <string name="todo_status_done">Done</string>
+    <string name="todo_status_picker_content_description">Select status</string>
+</resources>

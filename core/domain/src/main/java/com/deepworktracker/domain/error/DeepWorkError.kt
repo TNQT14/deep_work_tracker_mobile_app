@@ -16,5 +16,13 @@ sealed class DeepWorkError : Throwable() {
     object NetworkError : DeepWorkError() {
         override val message: String = "Network error"
     }
+
+    object PreferencePresistencesError: DeepWorkError(){
+        override val message: String = "Preference persistences error"
+    }
+
+    object UnsupportedLocale: DeepWorkError(){
+        override val message: String = "Unsupported locale"
+    }
     data class UnknownError(override val message: String) : DeepWorkError()
 }

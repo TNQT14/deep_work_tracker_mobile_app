@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Deep Work Tracker</string>
+
+    <string name="nav_session">Phiên</string>
+    <string name="nav_todo">Việc cần làm</string>
+    <string name="nav_goal">Mục tiêu</string>
+    <string name="nav_dashboard">Bảng điều khiển</string>
+    <string name="nav_profile">Hồ sơ</string>
+</resources>

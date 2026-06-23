@@ -13,16 +13,19 @@ import com.deepworktracker.data.mapper.SessionMapper
 import com.deepworktracker.data.mapper.StatsMapper
 import com.deepworktracker.data.mapper.InsightMapper
 import com.deepworktracker.data.mapper.TodoMapper
+import com.deepworktracker.data.preferences.PreferencesLocalDataSource
 import com.deepworktracker.data.repository.InterruptionRepositoryImpl
 import com.deepworktracker.data.repository.SessionRepositoryImpl
 import com.deepworktracker.data.repository.StatsRepositoryImpl
 import com.deepworktracker.data.repository.InsightRepositoryImpl
 import com.deepworktracker.data.repository.TodoRepositoryImpl
+import com.deepworktracker.data.repository.UserPreferencesRepositoryImpl
 import com.deepworktracker.domain.repository.InterruptionRepository
 import com.deepworktracker.domain.repository.SessionRepository
 import com.deepworktracker.domain.repository.StatsRepository
 import com.deepworktracker.domain.repository.InsightRepository
 import com.deepworktracker.domain.repository.TodoRepository
+import com.deepworktracker.domain.repository.UserPreferencesRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -156,6 +159,14 @@ object DataModule {
         mapper: TodoMapper
     ): TodoRepository{
         return TodoRepositoryImpl(dao, mapper)
+    }
+
+    @Provides
+    @Singleton
+    fun provideUserPreferencesRepository(
+        localDataSource: PreferencesLocalDataSource,
+    ): UserPreferencesRepository {
+        return UserPreferencesRepositoryImpl(localDataSource)
     }
 
 }

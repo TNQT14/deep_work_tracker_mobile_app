@@ -52,7 +52,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.deepworktracker.domain.model.Todo
 import com.deepworktracker.domain.model.TodoStatus
-import com.deepworktracker.ui.theme.DeepWorkTrackerTheme
 import com.example.todo.presentation.components.TodoForm
 import com.example.todo.presentation.components.TodoFormGoalField
 import com.example.todo.presentation.todolist.TodoListViewModel
@@ -70,8 +69,7 @@ fun TodoListScreen(
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
     var showForm by remember { mutableStateOf(false) }
-    DeepWorkTrackerTheme {
-        Scaffold(topBar = {
+    Scaffold(topBar = {
             TopAppBar(
                 title = { Text(text = "Todo List") })
         }, floatingActionButton = {
@@ -244,15 +242,11 @@ fun TodoListScreen(
                                 }
 
                             }
-                        }
                     }
                 }
             }
-
-
         }
     }
-
 }
 
 @Composable

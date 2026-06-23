@@ -1,36 +1,37 @@
 package com.example.todo.presentation.utils
 
-import androidx.compose.ui.graphics.Color
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import com.deepworktracker.domain.model.TodoStatus
+import com.deepworktracker.ui.theme.tokens.ComponentColors
+import com.example.todo.R
 
+@Composable
 internal fun TodoStatus.toDisplayLabel(): String = when (this) {
-    TodoStatus.TODO -> "Chưa làm"
-    TodoStatus.IN_PROGRESS -> "Đang làm"
-    TodoStatus.PAUSED -> "Tạm dừng"
-    TodoStatus.DONE -> "Hoàn thành"
+    TodoStatus.TODO -> stringResource(R.string.todo_status_todo)
+    TodoStatus.IN_PROGRESS -> stringResource(R.string.todo_status_in_progress)
+    TodoStatus.PAUSED -> stringResource(R.string.todo_status_paused)
+    TodoStatus.DONE -> stringResource(R.string.todo_status_done)
 }
 
-internal val TodoStatusDropdownOptions: List<Pair<TodoStatus, String>> = listOf(
-    TodoStatus.TODO to "Chưa làm",
-    TodoStatus.IN_PROGRESS to "Đang làm",
-    TodoStatus.PAUSED to "Tạm dừng",
-    TodoStatus.DONE to "Hoàn thành",
-)
+@Composable
+internal fun todoStatusDropdownOptions(): List<Pair<TodoStatus, String>> =
+    TodoStatus.entries.map { status -> status to status.toDisplayLabel() }
 
 @Composable
-internal fun TodoStatus.toChipColor(): Color =  when(this){
+internal fun TodoStatus.toChipColor(): Color = when (this) {
     TodoStatus.TODO -> MaterialTheme.colorScheme.outline
-    TodoStatus.IN_PROGRESS -> Color(0xFF1E88E5)
-    TodoStatus.PAUSED -> Color(0xFFF9A825)
-    TodoStatus.DONE -> Color(0xFF43A047)
-}
-@Composable
-internal fun TodoStatus.toChipColorBackground(): Color =  when (this) {
-    TodoStatus.TODO -> MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
-    TodoStatus.IN_PROGRESS -> Color(0xFF1E88E5).copy(alpha = 0.2f)
-    TodoStatus.PAUSED -> Color(0xFFF9A825).copy(alpha = 0.2f)
-    TodoStatus.DONE -> Color(0xFF43A047).copy(alpha = 0.2f)
+    TodoStatus.IN_PROGRESS -> ComponentColors.todoInProgress
+    TodoStatus.PAUSED -> ComponentColors.todoPaused
+    TodoStatus.DONE -> ComponentColors.todoDone
 }
 
+@Composable
+internal fun TodoStatus.toChipColorBackground(): Color = when (this) {
+    TodoStatus.TODO -> MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
+    TodoStatus.IN_PROGRESS -> ComponentColors.todoInProgressBackground()
+    TodoStatus.PAUSED -> ComponentColors.todoPausedBackground()
+    TodoStatus.DONE -> ComponentColors.todoDoneBackground()
+}

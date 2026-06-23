@@ -1,0 +1,23 @@
+<resources>
+    <string name="profile_title">Hồ sơ</string>
+    <string name="profile_refresh_content_description">Làm mới</string>
+    <string name="profile_avatar_content_description">Hồ sơ</string>
+    <string name="profile_default_user">Người dùng</string>
+    <string name="profile_statistics">Thống kê</string>
+    <string name="profile_total_sessions">Tổng số phiên</string>
+    <string name="profile_total_focus_time">Tổng thời gian tập trung</string>
+    <string name="profile_settings">Cài đặt</string>
+    <string name="profile_settings_coming_soon">Tùy chọn cài đặt sắp ra mắt…</string>
+    <string name="profile_open_settings">Mở cài đặt</string>
+    <string name="profile_logout">Đăng xuất</string>
+    <string name="profile_dismiss">Đóng</string>
+    <string name="profile_error_generic">Đã xảy ra lỗi</string>
+    <string name="settings_appearance">Giao diện</string>
+    <string name="settings_language">Ngôn ngữ</string>
+    <string name="settings_language_system">Ngôn ngữ theo hệ thống</string>
+    <string name="settings_language_english">Tiếng Anh</string>
+    <string name="settings_language_vietnamese">Tiếng Việt</string>
+    <string name="settings_theme_system">Mặc định hệ thống</string>
+    <string name="settings_theme_light">Sáng</string>
+    <string name="settings_theme_dark">Tối</string>
+</resources>

@@ -24,6 +24,8 @@ coroutines = "1.9.0"
 # Work Manager
 workManager = "2.9.1"
 
+datastore = "1.1.1"
+
 # Logging
 timber = "5.0.1"
 
@@ -51,10 +53,13 @@ workRuntimeKtx = "2.11.1"
 # Networking (pinned per network module contract)
 retrofit = "2.9.0"
 okhttp = "4.12.0"
+runtimeVersion = "1.11.2"
 
 [libraries]
 # Core Android
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+
+androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
 
 # Compose
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
@@ -125,6 +130,7 @@ retrofit-converter-gson = { group = "com.squareup.retrofit2", name = "converter-
 okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
 okhttp-logging = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp" }
 mockwebserver = { group = "com.squareup.okhttp3", name = "mockwebserver", version.ref = "okhttp" }
+androidx-runtime = { group = "androidx.compose.runtime", name = "runtime", version.ref = "runtimeVersion" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

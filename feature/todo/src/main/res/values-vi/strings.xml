@@ -1,0 +1,7 @@
+<resources>
+    <string name="todo_status_todo">Chưa làm</string>
+    <string name="todo_status_in_progress">Đang làm</string>
+    <string name="todo_status_paused">Tạm dừng</string>
+    <string name="todo_status_done">Hoàn thành</string>
+    <string name="todo_status_picker_content_description">Chọn trạng thái</string>
+</resources>

@@ -45,6 +45,9 @@ dependencies {
     
     // Common
     implementation(project(":core:common"))
+
+    //Data Store
+    implementation(libs.androidx.datastore.preferences)
     
     // Date/Time
     implementation(libs.kotlinx.datetime)

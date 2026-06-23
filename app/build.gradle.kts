@@ -65,6 +65,7 @@ dependencies {
     // Hilt
     implementation(libs.hilt.android)
     implementation(libs.androidx.compose.foundation.layout)
+    implementation(libs.androidx.appcompat)
     kapt(libs.hilt.compiler)
     
     // Features
@@ -77,7 +78,8 @@ dependencies {
     implementation(project(":core:ui"))
     implementation(project(":core:common"))
     implementation(project(":core:network"))
-
+    implementation(project(":core:domain"))
+    implementation(project(":core:data"))
     implementation(project(":feature:auth"))
     
     // Logging

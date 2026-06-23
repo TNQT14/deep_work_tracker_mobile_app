@@ -1,3 +1,10 @@
 <resources>
-    <string name="app_name">deep_work_tracker_mobile_app</string>
+    <string name="app_name">Deep Work Tracker</string>
+
+    <string name="nav_session">Session</string>
+    <string name="nav_todo">Todo</string>
+    <string name="nav_goal">Goal</string>
+    <string name="nav_dashboard">Dashboard</string>
+    <string name="nav_profile">Profile</string>
 </resources>
+

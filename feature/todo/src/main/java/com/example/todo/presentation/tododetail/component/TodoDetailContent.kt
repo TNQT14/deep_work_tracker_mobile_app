@@ -50,10 +50,12 @@ import com.deepworktracker.common.datetime.toDdMmYyyyCompact
 import com.deepworktracker.common.datetime.toDdMmYyyyCompactOrNull
 import com.deepworktracker.domain.model.Todo
 import com.deepworktracker.domain.model.TodoStatus
-import com.example.todo.presentation.utils.TodoStatusDropdownOptions
+import androidx.compose.ui.res.stringResource
+import com.example.todo.R
 import com.example.todo.presentation.utils.toChipColor
 import com.example.todo.presentation.utils.toChipColorBackground
 import com.example.todo.presentation.utils.toDisplayLabel
+import com.example.todo.presentation.utils.todoStatusDropdownOptions
 
 @Composable
 internal fun TodoDetailContent(
@@ -471,7 +473,7 @@ private fun StatusDropdownRow(
                 )
                 Icon(
                     imageVector = Icons.Default.ArrowDropDown,
-                    contentDescription = "Chọn trạng thái",
+                    contentDescription = stringResource(R.string.todo_status_picker_content_description),
                     modifier = Modifier.padding(start = 4.dp),
                 )
             }
@@ -479,7 +481,7 @@ private fun StatusDropdownRow(
                 expanded = expanded,
                 onDismissRequest = { expanded = false },
             ) {
-                TodoStatusDropdownOptions.forEach { (optionStatus, label) ->
+                todoStatusDropdownOptions().forEach { (optionStatus, label) ->
                     DropdownMenuItem(
                         text = {
                             val statusColor = optionStatus.toChipColor()

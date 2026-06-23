@@ -15,7 +15,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.deepworktracker.common.time.TimeFormatter
-import com.deepworktracker.ui.theme.DeepWorkTrackerTheme
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -24,12 +23,11 @@ fun SessionScreen(
     onNavigateToDashboard: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    
-    DeepWorkTrackerTheme {
-        Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = MaterialTheme.colorScheme.background
-        ) {
+
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background
+    ) {
             Column(
                 modifier = Modifier.fillMaxSize()
             ) {
@@ -260,4 +258,4 @@ fun SessionScreen(
             }
         }
     }
-}}
+}
