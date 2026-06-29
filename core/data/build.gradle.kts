@@ -29,6 +29,7 @@ dependencies {
     
     // Hilt
     implementation(libs.hilt.android)
+    implementation(libs.androidx.security.crypto)
     kapt(libs.hilt.compiler)
     
     // Room
@@ -45,7 +46,9 @@ dependencies {
     
     // Common
     implementation(project(":core:common"))
-
+    // Network
+    implementation(project(":core:network"))
+    implementation(libs.retrofit)
     //Data Store
     implementation(libs.androidx.datastore.preferences)
     

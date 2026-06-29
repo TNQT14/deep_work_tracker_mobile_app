@@ -1,59 +1,32 @@
 package com.deepworktracker.data.remote.interceptor
 
-import com.deepworktracker.data.remote.api.TokenRefreshApi
-import com.deepworktracker.data.remote.model.request.RefreshTokenRequest
-import com.deepworktracker.data.remote.token.TokenStore
+import com.deepworktracker.data.remote.auth.RefreshResult
+import com.deepworktracker.data.remote.auth.RefreshTokenCoordinator
 import kotlinx.coroutines.runBlocking
 import okhttp3.Authenticator
 import okhttp3.Request
 import okhttp3.Response
 import okhttp3.Route
 
-/**
- * On 401 for requests that already carry Authorization, attempts refresh synchronously
- * (see backend `POST /api/v1/auth/refresh`). Skips when no refresh token is stored.
- */
 class TokenAuthenticator(
-    private val tokenStore: TokenStore,
-    private val tokenRefreshApi: TokenRefreshApi,
+    private val refreshTokenCoordinator: RefreshTokenCoordinator,
 ) : Authenticator {
 
     override fun authenticate(route: Route?, response: Response): Request? {
-        if (response.request.header("Authorization").isNullOrBlank()) {
-            return null
-        }
-        if (responseCount(response) >= 3) {
-            return null
-        }
-        val refresh = tokenStore.getRefreshToken().orEmpty()
-        if (refresh.isBlank()) {
-            return null
+        val previousAuth = response.request.header("Authorization")
+        if (previousAuth.isNullOrBlank()) return null
+        if (responseCount(response) >= 3) return null
+
+        val previousAccess = previousAuth.removePrefix("Bearer ").trim()
+
+        val result = runBlocking {
+            refreshTokenCoordinator.refreshAccessToken(previousAccess)
         }
 
-        val tokens = runBlocking {
-            try {
-                val refreshResponse = tokenRefreshApi.refresh(
-                    RefreshTokenRequest(refreshToken = refresh),
-                )
-                if (refreshResponse.isSuccessful) {
-                    refreshResponse.body()
-                } else {
-                    null
-                }
-            } catch (_: Exception) {
-                null
-            }
-        } ?: return null
-
-        val newAccess = tokens.accessToken.orEmpty()
-        if (newAccess.isBlank()) {
-            return null
+        val newAccess = when (result) {
+            is RefreshResult.Success -> result.accessToken
+            else -> return null
         }
-
-        tokenStore.setTokens(
-            access = newAccess,
-            refresh = tokens.refreshToken ?: refresh,
-        )
 
         return response.request.newBuilder()
             .removeHeader("Authorization")

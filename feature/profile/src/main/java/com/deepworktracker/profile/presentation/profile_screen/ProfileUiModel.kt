@@ -2,6 +2,7 @@ package com.deepworktracker.profile.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.deepworktracker.data.remote.auth.AuthSessionRepository
 import com.deepworktracker.data.remote.network.NetworkResult
 import com.deepworktracker.data.repository.AuthRepository
 import com.deepworktracker.data.remote.token.TokenStore
@@ -19,6 +20,7 @@ class ProfileViewModel @Inject constructor(
     private val sessionRepository: SessionRepository,
     private val authRepository: AuthRepository,
     private val tokenStore: TokenStore,
+    private val authSessionRepository: AuthSessionRepository,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ProfileUiState())
@@ -70,22 +72,22 @@ class ProfileViewModel @Inject constructor(
         viewModelScope.launch {
             val accessToken = tokenStore.getAccessToken()
             if (accessToken.isNullOrBlank()) {
-                tokenStore.clear()
+                authSessionRepository.logout()
                 _uiState.update { it.copy(logoutState = LogoutState.Success) }
                 return@launch
             }
 
             _uiState.update { it.copy(logoutState = LogoutState.Loading) }
 
-            when (val result = authRepository.logout(accessToken)) {
+            when (authRepository.logout(accessToken)) {
                 is NetworkResult.Success -> {
-                    tokenStore.clear()
+                    authSessionRepository.logout()
                     _uiState.update { it.copy(logoutState = LogoutState.Success) }
                 }
 
                 else -> {
                     // Offline / 401 / 5xx: vẫn xóa token local (best-effort logout)
-                    tokenStore.clear()
+                    authSessionRepository.logout()
                     _uiState.update { it.copy(logoutState = LogoutState.Success) }
                 }
             }

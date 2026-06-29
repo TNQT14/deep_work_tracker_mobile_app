@@ -6,6 +6,7 @@ import com.deepworktracker.data.remote.model.request.LoginRequest
 import com.deepworktracker.data.remote.model.request.RegisterRequest
 import com.deepworktracker.data.remote.model.response.AuthResponse
 import com.deepworktracker.data.remote.network.NetworkResult
+import com.deepworktracker.data.remote.auth.AuthSessionRepository
 import com.deepworktracker.data.repository.AuthRepository
 import com.deepworktracker.data.remote.token.TokenStore
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -26,6 +27,7 @@ sealed interface AuthUiState<out T> {
 class AuthViewModel @Inject constructor(
     private val authRepository: AuthRepository,
     private val tokenStore: TokenStore,
+    private val authSessionRepository: AuthSessionRepository,
 ) : ViewModel() {
 
     private val _loginState = MutableStateFlow<AuthUiState<AuthResponse>>(AuthUiState.Idle)
@@ -155,5 +157,6 @@ class AuthViewModel @Inject constructor(
     private fun persistTokensIfPresent(data: AuthResponse) {
         val access = data.accessToken ?: return
         tokenStore.setTokens(access = access, refresh = data.refreshToken)
+        authSessionRepository.onLoginSuccess()
     }
 }

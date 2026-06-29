@@ -20,6 +20,7 @@ const val FORGOT_RESET_ROUTE = "auth/forgot-password/reset/{email}"
 fun NavGraphBuilder.authGraph(
     navController: NavHostController,
     onAuthenticated: () -> Unit,
+    sessionExpiredMessage: String? = null,
 ) {
     composable(LOGIN_ROUTE) {
         LoginRoute(
@@ -27,7 +28,8 @@ fun NavGraphBuilder.authGraph(
             onNavigateToRegister = { navController.navigate(REGISTER_ROUTE) },
             onNavigateToForgotPassword = {
                 navController.navigate(FORGOT_VERIFY_ROUTE)
-            }
+            },
+            sessionExpiredMessage = sessionExpiredMessage,
         )
     }
     composable(REGISTER_ROUTE) {

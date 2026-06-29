@@ -6,5 +6,12 @@
     <string name="nav_goal">Goal</string>
     <string name="nav_dashboard">Dashboard</string>
     <string name="nav_profile">Profile</string>
+
+    <string name="bootstrap_error_title">Can\'t reach the server</string>
+    <string name="bootstrap_error_message">We couldn\'t restore your session. Check your connection and try again.</string>
+    <string name="bootstrap_error_retry">Retry</string>
+    <string name="bootstrap_error_login">Sign in instead</string>
+
+    <string name="session_expired_message">Your session has expired. Please sign in again.</string>
 </resources>
 

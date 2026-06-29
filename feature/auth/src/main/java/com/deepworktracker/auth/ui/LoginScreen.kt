@@ -35,6 +35,7 @@ fun LoginRoute(
     onLoginSuccess: () -> Unit,
     onNavigateToRegister: () -> Unit,
     onNavigateToForgotPassword: () -> Unit,
+    sessionExpiredMessage: String? = null,
     viewModel: AuthViewModel = hiltViewModel(),
 ) {
     val state by viewModel.loginState.collectAsStateWithLifecycle()
@@ -48,6 +49,7 @@ fun LoginRoute(
 
     LoginScreen(
         state = state,
+        sessionExpiredMessage = sessionExpiredMessage,
         onLogin = { email, password -> viewModel.login(email, password) },
         onNavigateToRegister = onNavigateToRegister,
         onNavigateToForgotPassword = onNavigateToForgotPassword,
@@ -60,6 +62,7 @@ fun LoginScreen(
     onLogin: (email: String, password: String) -> Unit,
     onNavigateToRegister: () -> Unit,
     onNavigateToForgotPassword: ()-> Unit,
+    sessionExpiredMessage: String? = null,
     modifier: Modifier = Modifier,
 ) {
     var email by rememberSaveable { mutableStateOf("") }
@@ -74,6 +77,15 @@ fun LoginScreen(
     ) {
         Text("Sign in", style = MaterialTheme.typography.headlineMedium)
         Spacer(Modifier.height(24.dp))
+
+        if (!sessionExpiredMessage.isNullOrBlank()) {
+            Text(
+                text = sessionExpiredMessage,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodyMedium,
+            )
+            Spacer(Modifier.height(12.dp))
+        }
 
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),

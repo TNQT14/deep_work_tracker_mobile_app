@@ -3,11 +3,11 @@ package com.deepworktracker.data.di
 import android.content.Context
 import com.deepworktracker.data.remote.api.AuthApi
 import com.deepworktracker.data.remote.api.TokenRefreshApi
+import com.deepworktracker.data.remote.auth.RefreshTokenCoordinator
 import com.deepworktracker.data.remote.interceptor.AuthInterceptor
 import com.deepworktracker.data.remote.interceptor.RetryInterceptor
 import com.deepworktracker.data.remote.interceptor.TokenAuthenticator
 import com.deepworktracker.data.remote.network.RetrofitClient
-import com.deepworktracker.data.remote.token.InMemoryTokenStore
 import com.deepworktracker.data.remote.token.TokenStore
 import com.deepworktracker.network.BuildConfig
 import com.google.gson.Gson
@@ -33,10 +33,6 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideTokenStore(impl: InMemoryTokenStore): TokenStore = impl
-
-    @Provides
-    @Singleton
     fun provideHttpCache(
         @ApplicationContext context: Context,
     ): Cache = RetrofitClient.createCache(context)
@@ -50,7 +46,6 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideRetryInterceptor(): RetryInterceptor = RetryInterceptor()
-
     @Provides
     @Singleton
     fun provideAuthInterceptor(
@@ -60,9 +55,8 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideTokenAuthenticator(
-        tokenStore: TokenStore,
-        tokenRefreshApi: TokenRefreshApi,
-    ): TokenAuthenticator = TokenAuthenticator(tokenStore, tokenRefreshApi)
+        refreshTokenCoordinator: RefreshTokenCoordinator,
+    ): TokenAuthenticator = TokenAuthenticator(refreshTokenCoordinator)
 
     @Provides
     @Singleton

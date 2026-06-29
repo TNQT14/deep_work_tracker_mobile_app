@@ -6,4 +6,11 @@
     <string name="nav_goal">Mục tiêu</string>
     <string name="nav_dashboard">Bảng điều khiển</string>
     <string name="nav_profile">Hồ sơ</string>
+
+    <string name="bootstrap_error_title">Không kết nối được máy chủ</string>
+    <string name="bootstrap_error_message">Không thể khôi phục phiên đăng nhập. Vui lòng kiểm tra kết nối và thử lại.</string>
+    <string name="bootstrap_error_retry">Thử lại</string>
+    <string name="bootstrap_error_login">Đăng nhập lại</string>
+
+    <string name="session_expired_message">Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.</string>
 </resources>

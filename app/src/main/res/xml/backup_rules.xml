@@ -6,8 +6,6 @@
    See https://developer.android.com/about/versions/12/backup-restore
 -->
 <full-backup-content>
-    <!--
-   <include domain="sharedpref" path="."/>
-   <exclude domain="sharedpref" path="device.xml"/>
--->
+    <!-- Encrypted refresh token: never back up (Keystore key is device-bound). -->
+    <exclude domain="sharedpref" path="auth_secure_prefs.xml"/>
 </full-backup-content>
