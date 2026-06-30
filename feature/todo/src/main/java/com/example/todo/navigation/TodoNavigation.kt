@@ -5,12 +5,15 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import com.deepworktracker.todo.presentation.TodoListScreen
+import com.example.todo.presentation.countdown.TodoCountdownScreen
 import com.example.todo.presentation.tododetail.TodoDetailScreen
 
 object TodoDestinations {
     const val LIST_ROUTE = "todo"
     const val DETAIL_ROUTE = "todo/{todoId}"
+    const val COUNTDOWN_ROUTE = "todo/{todoId}/countdown"
     fun detailRoute(todoId: String): String = "todo/${Uri.encode(todoId)}"
+    fun countdownRoute(todoId: String): String = "todo/${Uri.encode(todoId)}/countdown"
 }
 
 fun NavGraphBuilder.todoGraph(navController: NavHostController) {
@@ -26,7 +29,16 @@ fun NavGraphBuilder.todoGraph(navController: NavHostController) {
         val todoId = backStackEntry.arguments?.getString("todoId").orEmpty()
         TodoDetailScreen(
             todoId = Uri.decode(todoId),
-            onBack = { navController.popBackStack() }
+            onBack = { navController.popBackStack() },
+            onNavigateToCountdown = { id ->
+                navController.navigate(TodoDestinations.countdownRoute(id))
+            },
+        )
+    }
+
+    composable(TodoDestinations.COUNTDOWN_ROUTE) {
+        TodoCountdownScreen(
+            onBack = { navController.popBackStack() },
         )
     }
 }

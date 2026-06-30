@@ -35,5 +35,8 @@ data class TodoEntity(
     val updatedAt: Long,
 
     @ColumnInfo(name = "completed_at")
-    val completedAt: Long?
+    val completedAt: Long?,
+
+    @ColumnInfo(name = "estimated_minutes")
+    val estimatedMinutes: Int? = null,
 )

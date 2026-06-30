@@ -46,6 +46,7 @@ import com.example.todo.presentation.tododetail.component.TodoEditDialog
 fun TodoDetailScreen(
     todoId: String,
     onBack: () -> Unit = {},
+    onNavigateToCountdown: (todoId: String) -> Unit = {},
 ) {
     val viewModel: TodoDetailViewModel = hiltViewModel()
     val uiState by viewModel.uiState.collectAsState()
@@ -208,6 +209,7 @@ fun TodoDetailScreen(
                         onSetStatus = viewModel::setStatus,
                         onEditClick = openEditDialog,
                         onDeadlineEditClick = openDeadlineDialog,
+                        onStartCountdown = { onNavigateToCountdown(todoId) },
                     )
 
                     if (showDeadlineDialog) {

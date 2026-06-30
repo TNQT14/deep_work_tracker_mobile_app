@@ -4,4 +4,17 @@
     <string name="todo_status_paused">Tạm dừng</string>
     <string name="todo_status_done">Hoàn thành</string>
     <string name="todo_status_picker_content_description">Chọn trạng thái</string>
+
+    <string name="countdown_default_title">Tập trung</string>
+    <string name="countdown_back_content_description">Quay lại</string>
+    <string name="countdown_remaining_label">còn lại</string>
+    <string name="countdown_start">Bắt đầu</string>
+    <string name="countdown_pause">Tạm dừng</string>
+    <string name="countdown_end_early">Kết thúc sớm</string>
+    <string name="countdown_resume">Tiếp tục</string>
+    <string name="countdown_end">Kết thúc</string>
+    <string name="countdown_finish_dialog_title">Hoàn thành!</string>
+    <string name="countdown_finish_dialog_message">Bạn đã hoàn thành phiên tập trung. Đánh dấu task này là DONE?</string>
+    <string name="countdown_mark_done">Đánh dấu DONE</string>
+    <string name="countdown_dismiss">Không</string>
 </resources>

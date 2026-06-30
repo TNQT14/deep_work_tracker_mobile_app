@@ -19,5 +19,6 @@ data class Todo(
     val dueAt: Instant? = null,
     val createdAt: Instant,
     val updatedAt: Instant,
-    val completedAt: Instant? = null
+    val completedAt: Instant? = null,
+    val estimatedMinutes: Int? = null,
 )

@@ -4,4 +4,17 @@
     <string name="todo_status_paused">Paused</string>
     <string name="todo_status_done">Done</string>
     <string name="todo_status_picker_content_description">Select status</string>
+
+    <string name="countdown_default_title">Focus</string>
+    <string name="countdown_back_content_description">Navigate back</string>
+    <string name="countdown_remaining_label">remaining</string>
+    <string name="countdown_start">Start</string>
+    <string name="countdown_pause">Pause</string>
+    <string name="countdown_end_early">End early</string>
+    <string name="countdown_resume">Resume</string>
+    <string name="countdown_end">End</string>
+    <string name="countdown_finish_dialog_title">Session complete!</string>
+    <string name="countdown_finish_dialog_message">You\'ve completed the focus session. Mark this task as done?</string>
+    <string name="countdown_mark_done">Mark as done</string>
+    <string name="countdown_dismiss">No</string>
 </resources>

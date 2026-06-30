@@ -50,6 +50,7 @@ object DataModule {
                 DeepWorkDatabase.MIGRATION_2_3,
                 DeepWorkDatabase.MIGRATION_3_4,
                 DeepWorkDatabase.MIGRATION_4_5,
+                DeepWorkDatabase.MIGRATION_5_6,
             )
             .build()
     }
