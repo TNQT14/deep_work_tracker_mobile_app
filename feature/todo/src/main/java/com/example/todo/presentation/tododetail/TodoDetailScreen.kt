@@ -229,7 +229,9 @@ fun TodoDetailScreen(
                             goalOptions = goalOptionsForForm,
                             isSaving = uiState.isSavingEdit,
                             onDismiss = { if (!uiState.isSavingEdit) showEditDialog = false },
-                            onSave = viewModel::updateTodo,
+                            onSave = { goal, title, description, estimatedMinutes ->
+                                viewModel.updateTodo(goal, title, description, estimatedMinutes)
+                            },
                             onSaved = { showEditDialog = false },
                         )
                     }

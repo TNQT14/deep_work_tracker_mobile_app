@@ -91,7 +91,12 @@ class TodoDetailViewModel @Inject constructor(
         }
     }
 
-    suspend fun updateTodo(goal: String, title: String, description: String): Boolean {
+    suspend fun updateTodo(
+        goal: String,
+        title: String,
+        description: String,
+        estimatedMinutes: Int? = null,
+    ): Boolean {
         val current = _uiState.value.todo ?: return false
         val g = goal.trim()
         val t = title.trim()
@@ -101,6 +106,7 @@ class TodoDetailViewModel @Inject constructor(
             goal = g,
             title = t,
             description = description,
+            estimatedMinutes = estimatedMinutes,
             updatedAt = now,
         )
         _uiState.update { it.copy(isSavingEdit = true, error = null) }
