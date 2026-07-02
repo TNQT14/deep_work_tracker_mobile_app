@@ -15,7 +15,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -53,43 +53,51 @@ class TodoCountdownViewModel @Inject constructor(
 
     private fun observeTodo() {
         viewModelScope.launch {
-            todoRepository.observeAllTodo()
+            val todoFlow = todoRepository.observeAllTodo()
                 .map { list -> list.firstOrNull { it.id == todoId } }
-                .collectLatest { todo ->
-                    val saved = stateStore.load()
-                    if (saved != null && saved.todoId == todoId) {
-                        val nowMillis = Clock.System.now().toEpochMilliseconds()
-                        val remaining = ((saved.endEpochMillis - nowMillis) / 1000).toInt()
-                        if (remaining > 0) {
-                            activeSessionId = saved.sessionId
-                            _uiState.update {
-                                it.copy(
-                                    todo = todo,
-                                    totalSeconds = saved.totalSeconds,
-                                    remainingSeconds = remaining,
-                                    isRunning = true,
-                                    isPaused = false,
-                                    isLoading = false,
-                                )
-                            }
-                            startTimer()
-                            return@collectLatest
-                        } else {
-                            stateStore.clear()
-                            notificationHelper.cancel()
-                        }
-                    }
-                    val minutes = todo?.estimatedMinutes ?: DEFAULT_MINUTES
-                    val totalSec = minutes * 60
+
+            val initialTodo = todoFlow.first()
+            val saved = stateStore.load()
+
+            if (saved != null && saved.todoId == todoId) {
+                val remaining = ((saved.endEpochMillis - Clock.System.now().toEpochMilliseconds()) / 1000).toInt()
+                if (remaining > 0) {
+                    activeSessionId = saved.sessionId
                     _uiState.update {
                         it.copy(
-                            todo = todo,
-                            totalSeconds = totalSec,
-                            remainingSeconds = totalSec,
+                            todo = initialTodo,
+                            totalSeconds = saved.totalSeconds,
+                            remainingSeconds = remaining,
+                            isRunning = true,
+                            isPaused = false,
                             isLoading = false,
                         )
                     }
+                    startTimer()
+                } else {
+                    stateStore.clear()
+                    notificationHelper.cancel()
+                    setInitialTiming(initialTodo)
                 }
+            } else {
+                setInitialTiming(initialTodo)
+            }
+
+            todoFlow.collect { todo ->
+                _uiState.update { it.copy(todo = todo) }
+            }
+        }
+    }
+
+    private fun setInitialTiming(todo: com.deepworktracker.domain.model.Todo?) {
+        val totalSec = (todo?.estimatedMinutes ?: DEFAULT_MINUTES) * 60
+        _uiState.update {
+            it.copy(
+                todo = todo,
+                totalSeconds = totalSec,
+                remainingSeconds = totalSec,
+                isLoading = false,
+            )
         }
     }
 
