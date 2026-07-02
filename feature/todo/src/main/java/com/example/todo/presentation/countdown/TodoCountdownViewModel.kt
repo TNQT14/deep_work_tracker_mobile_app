@@ -146,7 +146,15 @@ class TodoCountdownViewModel @Inject constructor(
     fun pause() {
         timerJob?.cancel()
         notificationHelper.cancel()
-        viewModelScope.launch { stateStore.clear() }
+        viewModelScope.launch {
+            stateStore.clear()
+            val todo = _uiState.value.todo
+            if (todo != null && todo.status == TodoStatus.IN_PROGRESS) {
+                todoRepository.updateTodo(
+                    todo.copy(status = TodoStatus.PAUSED, updatedAt = Clock.System.now())
+                )
+            }
+        }
         _uiState.update { it.copy(isPaused = true, isRunning = false) }
     }
 
@@ -161,6 +169,12 @@ class TodoCountdownViewModel @Inject constructor(
                 endEpochMillis = endEpoch,
                 totalSeconds = totalSec,
             )
+            val todo = _uiState.value.todo
+            if (todo != null && todo.status == TodoStatus.PAUSED) {
+                todoRepository.updateTodo(
+                    todo.copy(status = TodoStatus.IN_PROGRESS, updatedAt = Clock.System.now())
+                )
+            }
         }
         _uiState.update { it.copy(isPaused = false, isRunning = true) }
         startTimer()

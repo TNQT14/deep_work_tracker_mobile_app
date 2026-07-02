@@ -21,6 +21,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.SuggestionChip
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.Add
@@ -47,6 +48,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -55,6 +57,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.deepworktracker.domain.model.Todo
 import com.deepworktracker.domain.model.TodoStatus
+import kotlinx.datetime.Clock
 import com.example.todo.presentation.components.TodoForm
 import com.example.todo.presentation.components.TodoFormGoalField
 import com.example.todo.presentation.todolist.TodoListViewModel
@@ -310,11 +313,13 @@ private fun TodoRow(
     onDelete: () -> Unit,
     shape: CornerBasedShape = MaterialTheme.shapes.medium,
 ) {
+    val isOverdue = todo.dueAt?.let { it < Clock.System.now() } == true && todo.status != TodoStatus.DONE
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onTap() },
-        shape = shape,) {
+        shape = shape,
+    ) {
         Row(
             modifier = Modifier.padding(14.dp),
             verticalAlignment = Alignment.CenterVertically
@@ -325,13 +330,21 @@ private fun TodoRow(
             )
             Column(
                 modifier = Modifier.weight(1f)
-
             ) {
-                Row {
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        text = todo.title
+                        text = todo.title,
+                        color = if (isOverdue) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface,
                     )
                     Spacer(Modifier.weight(1f))
+                    if (isOverdue) {
+                        Text(
+                            text = "Quá hạn",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.error,
+                        )
+                        Spacer(Modifier.padding(horizontal = 4.dp))
+                    }
                     Text(
                         text = todo.goal,
                         style = MaterialTheme.typography.labelMedium,
@@ -357,11 +370,9 @@ private fun TodoRow(
                     Text(
                         text = "Ngày tới hạn: " + todo.dueAt.toString(),
                         style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.65f)
+                        color = if (isOverdue) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.65f)
                     )
                 }
-
-
             }
             if (done) {
                 Icon(
