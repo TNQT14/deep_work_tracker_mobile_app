@@ -35,12 +35,12 @@ fun AggregateBarChart(
     valuesMinutes: List<Long>,
     modifier: Modifier = Modifier,
 ) {
-    val modelProducer = remember { CartesianChartModelProducer.build() }
+    val modelProducer = remember { CartesianChartModelProducer() }
     val data = valuesMinutes.map { it.toFloat() }
 
     LaunchedEffect(valuesMinutes) {
         withContext(Dispatchers.Default) {
-            modelProducer.tryRunTransaction {
+            modelProducer.runTransaction {
                 columnSeries { series(data) }
             }
         }

@@ -150,7 +150,7 @@ fun GoalDistributionRow(goalData: GoalData, onClick: () -> Unit = {}) {
         // Progress bar
         Spacer(modifier = Modifier.height(4.dp))
         LinearProgressIndicator(
-            progress = goalData.percentage / 100f,
+            progress = { goalData.percentage / 100f },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(8.dp),

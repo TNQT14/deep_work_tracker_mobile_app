@@ -25,7 +25,7 @@ import kotlinx.datetime.toLocalDateTime
 
 @Composable
 fun FocusTimeBarChart(sessions: List<FocusSession>){
-    val modelProducer = remember { CartesianChartModelProducer.build() }
+    val modelProducer = remember { CartesianChartModelProducer() }
 
     LaunchedEffect(sessions) {
         withContext(
@@ -39,7 +39,7 @@ fun FocusTimeBarChart(sessions: List<FocusSession>){
 
             val data = (0..23).map { hour -> hourlyData[hour] ?: 0 }
 
-            modelProducer.tryRunTransaction {
+            modelProducer.runTransaction {
                 columnSeries { series(data) }
             }
         }

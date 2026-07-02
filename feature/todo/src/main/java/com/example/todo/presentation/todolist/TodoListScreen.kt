@@ -19,10 +19,10 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Sort
 import androidx.compose.material.icons.filled.SortByAlpha
 import androidx.compose.material.icons.filled.TaskAlt
 import androidx.compose.material3.AlertDialog
@@ -165,7 +165,7 @@ fun TodoListScreen(
                             }
                             IconButton(onClick = { viewModel.onSortTypeChange(TodoSortType.GOAL) }) {
                                 Icon(
-                                    imageVector = Icons.Filled.Sort,
+                                    imageVector = Icons.AutoMirrored.Filled.Sort,
                                     contentDescription = "Sort alphabetically",
                                     tint = Color.Black
                                 )
@@ -186,16 +186,7 @@ fun TodoListScreen(
                                 verticalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
                                 items(uiState.todos, key = { it.id }) { todo ->
-                                    val dismissBoxState = rememberSwipeToDismissBoxState(
-                                        confirmValueChange = { value ->
-                                            if (value == SwipeToDismissBoxValue.EndToStart) {
-                                                viewModel.deleteTodo(todo)
-                                                true
-                                            } else {
-                                                false
-                                            }
-                                        }
-                                    )
+                                    val dismissBoxState = rememberSwipeToDismissBoxState()
                                     val shape = MaterialTheme.shapes.medium
                                     Box(
                                         modifier = Modifier
@@ -207,6 +198,11 @@ fun TodoListScreen(
                                             state = dismissBoxState,
                                             enableDismissFromStartToEnd = false,
                                             enableDismissFromEndToStart = true,
+                                            onDismiss = { value ->
+                                                if (value == SwipeToDismissBoxValue.EndToStart) {
+                                                    viewModel.deleteTodo(todo)
+                                                }
+                                            },
                                             backgroundContent = {
                                                 val color = when (dismissBoxState.targetValue) {
                                                     SwipeToDismissBoxValue.EndToStart ->
