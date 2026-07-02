@@ -7,6 +7,7 @@ import com.deepworktracker.domain.model.FocusSession
 import com.deepworktracker.domain.model.TodoStatus
 import com.deepworktracker.domain.repository.SessionRepository
 import com.deepworktracker.domain.repository.TodoRepository
+import com.example.todo.notification.CountdownNotificationHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
@@ -30,6 +31,8 @@ private const val DEFAULT_MINUTES = 25
 class TodoCountdownViewModel @Inject constructor(
     private val todoRepository: TodoRepository,
     private val sessionRepository: SessionRepository,
+    private val stateStore: CountdownStateStore,
+    private val notificationHelper: CountdownNotificationHelper,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
@@ -53,6 +56,29 @@ class TodoCountdownViewModel @Inject constructor(
             todoRepository.observeAllTodo()
                 .map { list -> list.firstOrNull { it.id == todoId } }
                 .collectLatest { todo ->
+                    val saved = stateStore.load()
+                    if (saved != null && saved.todoId == todoId) {
+                        val nowMillis = Clock.System.now().toEpochMilliseconds()
+                        val remaining = ((saved.endEpochMillis - nowMillis) / 1000).toInt()
+                        if (remaining > 0) {
+                            activeSessionId = saved.sessionId
+                            _uiState.update {
+                                it.copy(
+                                    todo = todo,
+                                    totalSeconds = saved.totalSeconds,
+                                    remainingSeconds = remaining,
+                                    isRunning = true,
+                                    isPaused = false,
+                                    isLoading = false,
+                                )
+                            }
+                            startTimer()
+                            return@collectLatest
+                        } else {
+                            stateStore.clear()
+                            notificationHelper.cancel()
+                        }
+                    }
                     val minutes = todo?.estimatedMinutes ?: DEFAULT_MINUTES
                     val totalSec = minutes * 60
                     _uiState.update {
@@ -90,12 +116,19 @@ class TodoCountdownViewModel @Inject constructor(
             }
 
             if (todo.status == TodoStatus.TODO) {
-                val updated = todo.copy(
-                    status = TodoStatus.IN_PROGRESS,
-                    updatedAt = Clock.System.now(),
+                todoRepository.updateTodo(
+                    todo.copy(status = TodoStatus.IN_PROGRESS, updatedAt = Clock.System.now())
                 )
-                todoRepository.updateTodo(updated)
             }
+
+            val totalSec = _uiState.value.totalSeconds
+            val endEpoch = Clock.System.now().toEpochMilliseconds() + (totalSec * 1000L)
+            stateStore.save(
+                todoId = todoId,
+                sessionId = activeSessionId!!,
+                endEpochMillis = endEpoch,
+                totalSeconds = totalSec,
+            )
 
             _uiState.update { it.copy(isRunning = true, isPaused = false) }
             startTimer()
@@ -104,28 +137,39 @@ class TodoCountdownViewModel @Inject constructor(
 
     fun pause() {
         timerJob?.cancel()
+        notificationHelper.cancel()
+        viewModelScope.launch { stateStore.clear() }
         _uiState.update { it.copy(isPaused = true, isRunning = false) }
     }
 
     fun resume() {
+        val totalSec = _uiState.value.totalSeconds
+        val remaining = _uiState.value.remainingSeconds
+        val endEpoch = Clock.System.now().toEpochMilliseconds() + (remaining * 1000L)
+        viewModelScope.launch {
+            stateStore.save(
+                todoId = todoId,
+                sessionId = activeSessionId ?: "",
+                endEpochMillis = endEpoch,
+                totalSeconds = totalSec,
+            )
+        }
         _uiState.update { it.copy(isPaused = false, isRunning = true) }
         startTimer()
     }
 
     fun finish(markDone: Boolean) {
         timerJob?.cancel()
+        notificationHelper.cancel()
         viewModelScope.launch {
+            stateStore.clear()
             endActiveSession()
             if (markDone) {
                 val todo = _uiState.value.todo
                 if (todo != null && todo.status != TodoStatus.DONE) {
                     val now = Clock.System.now()
                     todoRepository.updateTodo(
-                        todo.copy(
-                            status = TodoStatus.DONE,
-                            completedAt = now,
-                            updatedAt = now,
-                        )
+                        todo.copy(status = TodoStatus.DONE, completedAt = now, updatedAt = now)
                     )
                 }
             }
@@ -139,7 +183,11 @@ class TodoCountdownViewModel @Inject constructor(
         timerJob = viewModelScope.launch {
             while (_uiState.value.isRunning && _uiState.value.remainingSeconds > 0) {
                 delay(1000)
-                _uiState.update { it.copy(remainingSeconds = it.remainingSeconds - 1) }
+                val newRemaining = _uiState.value.remainingSeconds - 1
+                _uiState.update { it.copy(remainingSeconds = newRemaining) }
+                if (newRemaining % 5 == 0) {
+                    notificationHelper.showOrUpdate(_uiState.value.todo?.title, newRemaining)
+                }
             }
             if (_uiState.value.remainingSeconds == 0 && _uiState.value.isRunning) {
                 onCountdownFinished()
@@ -148,6 +196,8 @@ class TodoCountdownViewModel @Inject constructor(
     }
 
     private suspend fun onCountdownFinished() {
+        stateStore.clear()
+        notificationHelper.cancel()
         endActiveSession()
         _uiState.update { it.copy(isRunning = false, isFinished = true) }
     }
@@ -158,11 +208,7 @@ class TodoCountdownViewModel @Inject constructor(
         val now = Clock.System.now()
         val total = (now - session.startTime).inWholeMilliseconds
         sessionRepository.updateSession(
-            session.copy(
-                endTime = now,
-                totalDuration = total,
-                focusedDuration = total,
-            )
+            session.copy(endTime = now, totalDuration = total, focusedDuration = total)
         )
         activeSessionId = null
     }

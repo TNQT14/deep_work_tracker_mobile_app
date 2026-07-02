@@ -17,4 +17,14 @@
     <string name="countdown_finish_dialog_message">Bạn đã hoàn thành phiên tập trung. Đánh dấu task này là DONE?</string>
     <string name="countdown_mark_done">Đánh dấu DONE</string>
     <string name="countdown_dismiss">Không</string>
+
+    <string name="countdown_back_confirm_title">Thoát phiên tập trung?</string>
+    <string name="countdown_back_confirm_message">Bạn đang trong phiên tập trung. Thoát sẽ dừng đồng hồ và kết thúc session.</string>
+    <string name="countdown_back_confirm_exit">Thoát</string>
+    <string name="countdown_back_confirm_continue">Tiếp tục tập trung</string>
+
+    <string name="countdown_notification_channel_name">Phiên tập trung</string>
+    <string name="countdown_notification_channel_description">Thông báo đếm ngược thời gian tập trung</string>
+    <string name="countdown_notification_remaining">Còn lại: %1$s</string>
+    <string name="countdown_notification_stop_action">Dừng</string>
 </resources>

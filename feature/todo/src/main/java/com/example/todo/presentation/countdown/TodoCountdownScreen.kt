@@ -2,6 +2,7 @@ package com.example.todo.presentation.countdown
 
 import android.media.RingtoneManager
 import android.view.WindowManager
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -56,7 +57,12 @@ fun TodoCountdownScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var showFinishDialog by remember { mutableStateOf(false) }
+    var showBackConfirmDialog by remember { mutableStateOf(false) }
     val context = LocalContext.current
+
+    BackHandler(enabled = uiState.isRunning || uiState.isPaused) {
+        showBackConfirmDialog = true
+    }
 
     val window = (context as? android.app.Activity)?.window
     DisposableEffect(uiState.isRunning) {
@@ -225,6 +231,29 @@ fun TodoCountdownScreen(
                 }
             }
         }
+    }
+
+    if (showBackConfirmDialog) {
+        AlertDialog(
+            onDismissRequest = { showBackConfirmDialog = false },
+            title = { Text(stringResource(R.string.countdown_back_confirm_title)) },
+            text = { Text(stringResource(R.string.countdown_back_confirm_message)) },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showBackConfirmDialog = false
+                        viewModel.finish(markDone = false)
+                    }
+                ) {
+                    Text(stringResource(R.string.countdown_back_confirm_exit))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showBackConfirmDialog = false }) {
+                    Text(stringResource(R.string.countdown_back_confirm_continue))
+                }
+            },
+        )
     }
 
     if (showFinishDialog) {

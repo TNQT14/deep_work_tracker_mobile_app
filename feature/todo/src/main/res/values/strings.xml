@@ -17,4 +17,14 @@
     <string name="countdown_finish_dialog_message">You\'ve completed the focus session. Mark this task as done?</string>
     <string name="countdown_mark_done">Mark as done</string>
     <string name="countdown_dismiss">No</string>
+
+    <string name="countdown_back_confirm_title">Leave focus session?</string>
+    <string name="countdown_back_confirm_message">You are in a focus session. Leaving will stop the timer and end the session.</string>
+    <string name="countdown_back_confirm_exit">Leave</string>
+    <string name="countdown_back_confirm_continue">Keep focusing</string>
+
+    <string name="countdown_notification_channel_name">Focus session</string>
+    <string name="countdown_notification_channel_description">Countdown timer for focus sessions</string>
+    <string name="countdown_notification_remaining">Remaining: %1$s</string>
+    <string name="countdown_notification_stop_action">Stop</string>
 </resources>
