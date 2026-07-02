@@ -13,16 +13,23 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import retrofit2.Response
+import javax.inject.Provider
 
 class RefreshTokenCoordinatorImplTest {
 
     private val tokenStore = FakeTokenStore()
     private val tokenRefreshApi = mockk<TokenRefreshApi>()
+    private val authSessionRepository = mockk<AuthSessionRepository>(relaxed = true)
+    private val authSessionRepositoryProvider = Provider { authSessionRepository }
     private lateinit var coordinator: RefreshTokenCoordinatorImpl
 
     @Before
     fun setUp() {
-        coordinator = RefreshTokenCoordinatorImpl(tokenStore, tokenRefreshApi)
+        coordinator = RefreshTokenCoordinatorImpl(
+            tokenStore,
+            tokenRefreshApi,
+            authSessionRepositoryProvider,
+        )
     }
 
     @Test
@@ -64,6 +71,21 @@ class RefreshTokenCoordinatorImplTest {
         val result = coordinator.refreshAccessToken(null)
 
         assertEquals(RefreshResult.InvalidRefreshToken, result)
+        coVerify(exactly = 1) { authSessionRepository.onRefreshTokenRevoked() }
+    }
+
+    @Test
+    fun refreshAccessToken_with403_returnsInvalidRefreshToken() = runTest {
+        tokenStore.refresh = "refresh-1"
+        val response = mockk<Response<AuthResponse>>()
+        every { response.isSuccessful } returns false
+        every { response.code() } returns 403
+        coEvery { tokenRefreshApi.refresh(any()) } returns response
+
+        val result = coordinator.refreshAccessToken(null)
+
+        assertEquals(RefreshResult.InvalidRefreshToken, result)
+        coVerify(exactly = 1) { authSessionRepository.onRefreshTokenRevoked() }
     }
 
     @Test
