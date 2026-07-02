@@ -60,6 +60,15 @@ import com.example.todo.presentation.components.TodoFormGoalField
 import com.example.todo.presentation.todolist.TodoListViewModel
 import com.example.todo.presentation.todolist.TodoSortType
 
+/**
+ * [UI — Screen] [DI] [UDF]
+ * Entry composable for todo list (wired in TodoNavigation LIST_ROUTE).
+ * Resolves hiltViewModel() internally; collects uiState and forwards events to ViewModel.
+ *
+ * Input: onNavigateToTodoDetail: (String) -> Unit — e.g. onNavigateToTodoDetail("todo-uuid")
+ * Process: collectAsState(uiState) → render list / form / sort / filter → call ViewModel on user action
+ * Output: Unit; navigates to detail via onNavigateToTodoDetail(todo.id)
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TodoListScreen(
@@ -68,9 +77,13 @@ fun TodoListScreen(
     val viewModel: TodoListViewModel = hiltViewModel()
     val uiState by viewModel.uiState.collectAsState()
 
+    /** Type: String | Sample: "Health" — add-form goal field */
     var goal by remember { mutableStateOf("") }
+    /** Type: String | Sample: "Run 5km" — add-form title field */
     var title by remember { mutableStateOf("") }
+    /** Type: String | Sample: "Morning jog" — add-form description field */
     var description by remember { mutableStateOf("") }
+    /** Type: Boolean | Sample: false — toggles AlertDialog add form */
     var showForm by remember { mutableStateOf(false) }
     Scaffold(topBar = {
             TopAppBar(
@@ -280,6 +293,14 @@ fun TodoListScreen(
     }
 }
 
+/**
+ * [UI — Screen]
+ * Single todo row: checkbox toggle, tap to detail, swipe-to-delete, delete icon.
+ *
+ * Input: todo: Todo, done: Boolean, onTap/onToggle/onDelete callbacks
+ * Process: Card + Checkbox + SwipeToDismissBox (parent) render todo fields
+ * Output: Unit; invokes callbacks on user interaction (no ViewModel access)
+ */
 @Composable
 private fun TodoRow(
     todo: Todo,
