@@ -24,7 +24,7 @@ class TodoListViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(TodoListUiState(isLoading = true))
     val uiState: StateFlow<TodoListUiState> = _uiState
-    var _rawTodos : List<Todo>  = emptyList()
+    var _rawTodos: List<Todo> = emptyList()
 
 
     init {
@@ -123,21 +123,28 @@ class TodoListViewModel @Inject constructor(
         }
     }
 
-    fun onSortTypeChange(type: TodoSortType){
+    fun onSortTypeChange(type: TodoSortType) {
         _uiState.update { it.copy(sortType = type) }
         applySort()
     }
 
-    private fun applySort(){
-        val sorted = when(_uiState.value.sortType){
-            TodoSortType.NAME -> _rawTodos.sortedBy { it.title }
-            TodoSortType.CREATED_AT -> _rawTodos.sortedByDescending { it.createdAt }
-            TodoSortType.GOAL -> _rawTodos.sortedBy { it.goal }
+    fun onStatusFilterChange(status: TodoStatus?) {
+        _uiState.update { it.copy(selectedStatus = status) }
+        applySort()
+    }
+
+    private fun applySort() {
+        val filtered = _uiState.value.selectedStatus
+            ?.let { status -> _rawTodos.filter { it.status == status } }
+            ?: _rawTodos
+
+        val sorted = when (_uiState.value.sortType) {
+            TodoSortType.NAME -> filtered.sortedBy { it.title }
+            TodoSortType.CREATED_AT -> filtered.sortedByDescending { it.createdAt }
+            TodoSortType.GOAL -> filtered.sortedBy { it.goal }
         }
 
-        _uiState.update {
-            it.copy(todos = sorted)
-        }
+        _uiState.update { it.copy(todos = sorted) }
     }
 
     fun TodoStatus.toggle(): TodoStatus {

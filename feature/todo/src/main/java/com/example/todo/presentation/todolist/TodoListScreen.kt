@@ -3,6 +3,7 @@ package com.deepworktracker.todo.presentation
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,8 +15,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CornerBasedShape
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material.icons.Icons
@@ -171,10 +174,42 @@ fun TodoListScreen(
                                 )
                             }
                         }
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .horizontalScroll(rememberScrollState()),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            FilterChip(
+                                selected = uiState.selectedStatus == null,
+                                onClick = { viewModel.onStatusFilterChange(null) },
+                                label = { Text("Tất cả") },
+                            )
+                            FilterChip(
+                                selected = uiState.selectedStatus == TodoStatus.TODO,
+                                onClick = { viewModel.onStatusFilterChange(TodoStatus.TODO) },
+                                label = { Text("Việc cần làm") },
+                            )
+                            FilterChip(
+                                selected = uiState.selectedStatus == TodoStatus.IN_PROGRESS,
+                                onClick = { viewModel.onStatusFilterChange(TodoStatus.IN_PROGRESS) },
+                                label = { Text("Đang làm") },
+                            )
+                            FilterChip(
+                                selected = uiState.selectedStatus == TodoStatus.PAUSED,
+                                onClick = { viewModel.onStatusFilterChange(TodoStatus.PAUSED) },
+                                label = { Text("Tạm dừng") },
+                            )
+                            FilterChip(
+                                selected = uiState.selectedStatus == TodoStatus.DONE,
+                                onClick = { viewModel.onStatusFilterChange(TodoStatus.DONE) },
+                                label = { Text("Hoàn thành") },
+                            )
+                        }
                         Spacer(Modifier.height(8.dp))
                         if (uiState.todos.isEmpty()) {
                             Text(
-                                text = "Chưa có todo.",
+                                text = if (uiState.selectedStatus != null) "Không có todo nào." else "Chưa có todo.",
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
