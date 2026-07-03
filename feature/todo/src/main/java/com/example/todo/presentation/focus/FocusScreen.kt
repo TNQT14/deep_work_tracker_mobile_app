@@ -278,9 +278,17 @@ private fun PhaseContent(
             }
         }
 
+        // Type: Animatable<Float> | Sample: value=0.72f mid-sweep; re-created on FOCUS ↔ BREAK switch
         val progressAnimatable = remember(phase) { Animatable(progress) }
 
-        // timerGeneration bumps on every timer (re)start — start, resume, continue, next cycle
+        /**
+         * [Effect]
+         * Input: timerGeneration (bumped by VM on every timer (re)start), isRunning
+         * Process: running → snap to current progress then one LinearEasing sweep to 0f
+         *          lasting the full remaining duration (no per-tick restart = no stutter);
+         *          paused/stopped → snap and freeze at exact position
+         * Output: continuous ring motion; MM:SS text still driven by 1s state ticks
+         */
         LaunchedEffect(uiState.timerGeneration, uiState.isRunning) {
             if (uiState.isRunning && remainingSeconds > 0) {
                 progressAnimatable.snapTo(progress)

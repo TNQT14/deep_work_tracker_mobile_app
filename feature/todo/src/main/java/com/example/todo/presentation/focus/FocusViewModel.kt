@@ -231,7 +231,8 @@ class FocusViewModel @Inject constructor(
     /**
      * [ViewModel]
      * Input: none (reads current uiState)
-     * Process: launch coroutine that ticks every 1s; update notification every 5s
+     * Process: bump timerGeneration (UI re-keys progress sweep) → launch coroutine
+     *          ticking every 1s; update notification every 5s
      * Output: focusRemainingSeconds decrements; actualFocusedSeconds increments;
      *         on zero → onFocusTimerFinished()
      */
@@ -262,10 +263,11 @@ class FocusViewModel @Inject constructor(
     }
 
     /**
-     * [ViewModel]
-     * Input: none
-     * Process: reset focusRemainingSeconds to full phase duration and restart timer
-     * Output: EndSessionDialog dismissed path — user chose "Keep focusing"
+     * [ViewModel] [UDF]
+     * Input: none — EndSessionDialog "Continue" path
+     * Process: force phase back to FOCUS (dialog can open during BREAK), clear break timer,
+     *          reset focusRemainingSeconds to config full duration → resumeTimer()
+     * Output: fresh FOCUS countdown; timerGeneration bump restarts UI progress sweep
      */
     fun continueSession() {
         val config = _uiState.value.config ?: return
@@ -282,11 +284,11 @@ class FocusViewModel @Inject constructor(
     }
 
     /**
-     * [ViewModel] [Effect]
-     * Input: none (called when timer hits 0)
-     * Process: increment cycles; if repeat → auto-restart phase (+ optional sound event);
-     *          else emit timerFinishedEvent for EndSessionDialog
-     * Output: cycles+1; either new timer or Channel event to UI
+     * [ViewModel] [UDF]
+     * Input: none — "Back to focus" button during BREAK phase
+     * Process: cancel break timer → roll unused breakRemainingSeconds into
+     *          accumulatedBreakSeconds (in-memory only) → startNextFocusCycle()
+     * Output: phase=FOCUS with full focus duration; accumulated break shown on next BREAK
      */
     fun skipBreak() {
         timerJob?.cancel()
@@ -302,6 +304,12 @@ class FocusViewModel @Inject constructor(
         startNextFocusCycle()
     }
 
+    /**
+     * [ViewModel]
+     * Input: none (requires config; no-op if user never configured)
+     * Process: switch phase to FOCUS, reset focusRemainingSeconds to config full duration
+     * Output: resumeTimer() starts a new focus countdown (cycles counter unchanged here)
+     */
     private fun startNextFocusCycle() {
         val config = _uiState.value.config ?: return
         val totalSec = config.focusMinutes * 60
@@ -314,6 +322,14 @@ class FocusViewModel @Inject constructor(
         resumeTimer()
     }
 
+    /**
+     * [ViewModel] [Effect]
+     * Input: none (called when focus timer hits 0)
+     * Process: increment cycles; NOTIFY → cycleCompletedEvent (sound);
+     *          repeat=true → phase=BREAK + startBreakTimer();
+     *          repeat=false → timerFinishedEvent for EndSessionDialog
+     * Output: cycles+1; either break countdown or Channel event to UI
+     */
     private suspend fun onFocusTimerFinished() {
         timerJob?.cancel()
         notificationHelper.cancel()
@@ -335,6 +351,13 @@ class FocusViewModel @Inject constructor(
         }
     }
 
+    /**
+     * [ViewModel]
+     * Input: none (breakRemainingSeconds already set by onFocusTimerFinished)
+     * Process: bump timerGeneration → 1s coroutine decrements breakRemainingSeconds;
+     *          showBreak notification every 5s
+     * Output: on zero → onBreakFinished(); interrupted early by skipBreak()
+     */
     private fun startBreakTimer() {
         _uiState.update {
             it.copy(isRunning = true, isPaused = false, timerGeneration = it.timerGeneration + 1)
@@ -355,6 +378,12 @@ class FocusViewModel @Inject constructor(
         }
     }
 
+    /**
+     * [ViewModel]
+     * Input: none (break timer reached 0 naturally)
+     * Process: cancel job + dismiss notification → auto-advance, no user action needed
+     * Output: startNextFocusCycle() — Pomodoro loops back to FOCUS
+     */
     private suspend fun onBreakFinished() {
         timerJob?.cancel()
         notificationHelper.cancel()
