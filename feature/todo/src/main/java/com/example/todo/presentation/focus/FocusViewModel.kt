@@ -279,22 +279,76 @@ class FocusViewModel @Inject constructor(
      *          else emit timerFinishedEvent for EndSessionDialog
      * Output: cycles+1; either new timer or Channel event to UI
      */
+    fun skipBreak() {
+        timerJob?.cancel()
+        notificationHelper.cancel()
+        val remaining = _uiState.value.breakRemainingSeconds
+        _uiState.update {
+            it.copy(
+                accumulatedBreakSeconds = it.accumulatedBreakSeconds + remaining,
+                breakRemainingSeconds = 0,
+                isRunning = false,
+            )
+        }
+        startNextFocusCycle()
+    }
+
+    private fun startNextFocusCycle() {
+        val config = _uiState.value.config ?: return
+        val totalSec = config.focusMinutes * 60
+        _uiState.update {
+            it.copy(
+                phase = FocusPhase.FOCUS,
+                focusRemainingSeconds = totalSec,
+            )
+        }
+        resumeTimer()
+    }
+
     private suspend fun onFocusTimerFinished() {
         timerJob?.cancel()
         notificationHelper.cancel()
         val config = _uiState.value.config
         _uiState.update { it.copy(isRunning = false, cycles = it.cycles + 1) }
 
+        if (config?.alertMode == AlertMode.NOTIFY) {
+            _cycleCompletedEvent.send(Unit)
+        }
+
         if (config?.repeat == true) {
-            if (config.alertMode == AlertMode.NOTIFY) {
-                _cycleCompletedEvent.send(Unit)
+            val breakSec = config.breakMinutes * 60
+            _uiState.update {
+                it.copy(phase = FocusPhase.BREAK, breakRemainingSeconds = breakSec)
             }
-            val totalSec = config.focusMinutes * 60
-            _uiState.update { it.copy(focusRemainingSeconds = totalSec) }
-            resumeTimer()
+            startBreakTimer()
         } else {
             _timerFinishedEvent.send(Unit)
         }
+    }
+
+    private fun startBreakTimer() {
+        _uiState.update { it.copy(isRunning = true, isPaused = false) }
+        timerJob?.cancel()
+        timerJob = viewModelScope.launch {
+            while (_uiState.value.isRunning && _uiState.value.breakRemainingSeconds > 0) {
+                delay(1000)
+                val newBreak = _uiState.value.breakRemainingSeconds - 1
+                _uiState.update { it.copy(breakRemainingSeconds = newBreak) }
+                if (newBreak % 5 == 0) {
+                    notificationHelper.showBreak(_uiState.value.todo?.title, newBreak)
+                }
+            }
+            if (_uiState.value.breakRemainingSeconds == 0 && _uiState.value.isRunning) {
+                onBreakFinished()
+            }
+        }
+    }
+
+    private suspend fun onBreakFinished() {
+        timerJob?.cancel()
+        notificationHelper.cancel()
+        _uiState.update { it.copy(isRunning = false) }
+        startNextFocusCycle()
     }
 
     override fun onCleared() {

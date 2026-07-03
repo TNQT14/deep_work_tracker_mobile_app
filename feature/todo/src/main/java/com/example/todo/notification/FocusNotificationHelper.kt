@@ -13,6 +13,11 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/**
+ * [Effect] [DI]
+ * Ongoing foreground notification for focus and break phases.
+ * Injected into FocusViewModel; updates every 5s while timer runs.
+ */
 @Singleton
 class FocusNotificationHelper @Inject constructor(
     @ApplicationContext private val context: Context,
@@ -53,6 +58,18 @@ class FocusNotificationHelper @Inject constructor(
             formatTime(remainingSeconds),
         ) + cycleText
 
+        notify(title, text)
+    }
+
+    /**
+     * [Effect]
+     * Input: todoTitle e.g. "Write report", remainingSeconds e.g. 240
+     * Process: build break-phase title/text → notify() (same NOTIFICATION_ID as focus)
+     * Output: ongoing silent notification while break timer runs
+     */
+    fun showBreak(todoTitle: String?, remainingSeconds: Int) {
+        val title = todoTitle?.takeIf { it.isNotBlank() } ?: "Nghỉ ngơi"
+        val text = "Thời gian nghỉ còn lại: ${formatTime(remainingSeconds)}"
         notify(title, text)
     }
 

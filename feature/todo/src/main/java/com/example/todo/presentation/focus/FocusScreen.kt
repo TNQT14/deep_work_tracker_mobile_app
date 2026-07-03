@@ -37,6 +37,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -144,13 +145,13 @@ fun FocusScreen(
             }
 
             else -> {
-                FocusContent(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(padding),
+                PhaseContent(
+                    modifier = Modifier.fillMaxSize().padding(padding),
+                    phase = uiState.phase,
                     uiState = uiState,
                     onPause = { viewModel.pause() },
                     onResume = { viewModel.resume() },
+                    onSkipBreak = { viewModel.skipBreak() },
                     onEndClick = { showEndDialog = true },
                 )
             }
@@ -198,22 +199,39 @@ fun FocusScreen(
 
 /**
  * [UI — Screen]
- * Stateless timer UI: circular progress, pause/resume FAB, end session button.
- * Receives uiState + callbacks only (no ViewModel).
+ * Stateless timer UI for focus or break phase: circular progress, primary action, end session.
+ * Receives phase + uiState + callbacks only (no ViewModel).
+ * FOCUS: pause/resume FAB; BREAK: skip-break button + accumulated-break label.
+ * phase: FocusPhase — e.g. FocusPhase.BREAK during Pomodoro rest
+ * onSkipBreak: [UDF] event ↑ → ViewModel.skipBreak() rolls unused time into accumulatedBreakSeconds
  */
 @Composable
-private fun FocusContent(
+private fun PhaseContent(
     modifier: Modifier = Modifier,
+    phase: FocusPhase,
     uiState: FocusUiState,
     onPause: () -> Unit,
     onResume: () -> Unit,
+    onSkipBreak: () -> Unit,
     onEndClick: () -> Unit,
 ) {
-    val animatedProgress by animateFloatAsState(
-        targetValue = uiState.focusProgress,
-        animationSpec = tween(durationMillis = 800),
-        label = "focus_progress",
-    )
+    // Type: Color | Sample: 0xFF4CAF50 green accent for break phase
+    val breakColor = androidx.compose.ui.graphics.Color(0xFF4CAF50)
+    // Type: Color | primary for FOCUS, breakColor for BREAK
+    val accentColor = when (phase) {
+        FocusPhase.FOCUS -> MaterialTheme.colorScheme.primary
+        FocusPhase.BREAK -> breakColor
+    }
+    // Type: Int (seconds) | Sample: 180 during a 5-minute break with 3 min left
+    val remainingSeconds = when (phase) {
+        FocusPhase.FOCUS -> uiState.focusRemainingSeconds
+        FocusPhase.BREAK -> uiState.breakRemainingSeconds
+    }
+    // Type: Float 0f..1f | phase-specific progress for CircularProgressIndicator
+    val progress = when (phase) {
+        FocusPhase.FOCUS -> uiState.focusProgress
+        FocusPhase.BREAK -> uiState.breakProgress
+    }
 
     Column(
         modifier = modifier.padding(24.dp),
@@ -222,43 +240,76 @@ private fun FocusContent(
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
-                text = stringResource(R.string.focus_phase_label),
+                text = when (phase) {
+                    FocusPhase.FOCUS -> stringResource(R.string.focus_phase_label)
+                    FocusPhase.BREAK -> "Nghỉ ngơi"
+                },
                 style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.primary,
+                color = accentColor,
             )
-            if (uiState.cycles > 0) {
-                Text(
-                    text = stringResource(R.string.focus_cycle, uiState.cycles + 1),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+            when (phase) {
+                FocusPhase.FOCUS -> {
+                    if (uiState.cycles > 0) {
+                        Text(
+                            text = stringResource(R.string.focus_cycle, uiState.cycles + 1),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+                FocusPhase.BREAK -> {
+                    Text(
+                        text = "Đã hoàn thành ${uiState.cycles} vòng tập trung",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    if (uiState.accumulatedBreakSeconds > 0) {
+                        Spacer(Modifier.height(4.dp))
+                        Text(
+                            text = "Nghỉ tích lũy: +${uiState.accumulatedBreakMinutes} phút",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = breakColor,
+                        )
+                    }
+                }
             }
         }
 
-        Box(contentAlignment = Alignment.Center) {
-            CircularProgressIndicator(
-                progress = { animatedProgress },
-                modifier = Modifier.size(220.dp),
-                strokeWidth = 10.dp,
-                color = MaterialTheme.colorScheme.primary,
-                trackColor = MaterialTheme.colorScheme.surfaceVariant,
+        // [Effect] Reset progress animation when phase or cycle changes (FOCUS ↔ BREAK transition)
+        key(uiState.cycles, phase) {
+            val animatedProgress by animateFloatAsState(
+                targetValue = progress,
+                animationSpec = tween(durationMillis = 800),
+                label = "${phase.name.lowercase()}_progress",
             )
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(
-                    text = formatTime(uiState.focusRemainingSeconds),
-                    fontSize = 52.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface,
+            Box(contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(
+                    progress = { animatedProgress },
+                    modifier = Modifier.size(220.dp),
+                    strokeWidth = 10.dp,
+                    color = accentColor,
+                    trackColor = MaterialTheme.colorScheme.surfaceVariant,
                 )
-                Text(
-                    text = if (uiState.isPaused) {
-                        stringResource(R.string.countdown_pause)
-                    } else {
-                        stringResource(R.string.focus_status_running)
-                    },
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        text = formatTime(remainingSeconds),
+                        fontSize = 52.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                    Text(
+                        text = when (phase) {
+                            FocusPhase.FOCUS -> if (uiState.isPaused) {
+                                stringResource(R.string.countdown_pause)
+                            } else {
+                                stringResource(R.string.focus_status_running)
+                            }
+                            FocusPhase.BREAK -> "thời gian nghỉ"
+                        },
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
             }
         }
 
@@ -267,20 +318,32 @@ private fun FocusContent(
             verticalArrangement = Arrangement.spacedBy(12.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            LargeFloatingActionButton(
-                onClick = { if (uiState.isRunning) onPause() else onResume() },
-            ) {
-                Icon(
-                    imageVector = if (uiState.isRunning) Icons.Filled.Pause else Icons.Filled.PlayArrow,
-                    contentDescription = if (uiState.isRunning) {
-                        stringResource(R.string.countdown_pause)
-                    } else {
-                        stringResource(R.string.countdown_resume)
-                    },
-                    modifier = Modifier.size(32.dp),
-                )
+            when (phase) {
+                FocusPhase.FOCUS -> {
+                    LargeFloatingActionButton(
+                        onClick = { if (uiState.isRunning) onPause() else onResume() },
+                    ) {
+                        Icon(
+                            imageVector = if (uiState.isRunning) Icons.Filled.Pause else Icons.Filled.PlayArrow,
+                            contentDescription = if (uiState.isRunning) {
+                                stringResource(R.string.countdown_pause)
+                            } else {
+                                stringResource(R.string.countdown_resume)
+                            },
+                            modifier = Modifier.size(32.dp),
+                        )
+                    }
+                }
+                FocusPhase.BREAK -> {
+                    Button(
+                        onClick = onSkipBreak,
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(containerColor = breakColor),
+                    ) {
+                        Text("Tập trung tiếp →")
+                    }
+                }
             }
-
             OutlinedButton(
                 onClick = onEndClick,
                 modifier = Modifier.fillMaxWidth(),
