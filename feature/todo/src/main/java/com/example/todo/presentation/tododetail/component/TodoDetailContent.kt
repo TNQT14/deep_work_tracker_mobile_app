@@ -95,13 +95,18 @@ internal fun TodoDetailContent(
         TodoDetailGoal(goal = todo.goal)
 
         if (todo.status == TodoStatus.TODO || todo.status == TodoStatus.IN_PROGRESS) {
-            val minutes = todo.estimatedMinutes ?: 25
+            val remaining = todo.remainingMinutes ?: todo.estimatedMinutes
+            val minuteLabel = if (remaining != null) {
+                stringResource(R.string.focus_minutes_remaining, remaining)
+            } else {
+                stringResource(R.string.focus_minutes_default)
+            }
             Button(
                 onClick = onStartCountdown,
                 modifier = Modifier.fillMaxWidth(),
                 enabled = actionsEnabled,
             ) {
-                Text("Bắt đầu tập trung  •  $minutes phút")
+                Text(stringResource(R.string.focus_start_button, minuteLabel))
             }
         }
     }

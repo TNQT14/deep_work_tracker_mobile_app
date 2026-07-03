@@ -27,4 +27,30 @@
     <string name="countdown_notification_channel_description">Countdown timer for focus sessions</string>
     <string name="countdown_notification_remaining">Remaining: %1$s</string>
     <string name="countdown_notification_stop_action">Stop</string>
+
+    <string name="focus_config_title">Focus session setup</string>
+    <string name="focus_estimated_remaining">Estimated remaining: %1$d min</string>
+    <string name="focus_duration_label">Focus duration (minutes)</string>
+    <string name="focus_break_duration_label">Break duration (minutes)</string>
+    <string name="focus_repeat_pomodoro">Repeat (Pomodoro)</string>
+    <string name="focus_when_timer_ends">When timer ends</string>
+    <string name="focus_alert_notify">Sound notification</string>
+    <string name="focus_alert_silent">Silent — auto-advance to next phase</string>
+    <string name="focus_start">Start focusing</string>
+    <string name="focus_start_button">Start focusing  •  %1$s</string>
+    <string name="focus_minutes_remaining">%1$d min remaining</string>
+    <string name="focus_minutes_default">25 min</string>
+    <string name="focus_phase_label">Focus</string>
+    <string name="focus_cycle">Cycle %1$d</string>
+    <string name="focus_status_running">running</string>
+    <string name="focus_end_session">End session</string>
+    <string name="focus_back_confirm_message">Leaving will end the current focus session.</string>
+    <string name="focus_back_confirm_end">End session</string>
+    <string name="focus_end_dialog_title">End focus session?</string>
+    <string name="focus_actual_minutes">Focused: %1$d min</string>
+    <string name="focus_cycles_count">Cycles: %1$d</string>
+    <string name="focus_mark_task_done">Mark task as done</string>
+    <string name="focus_notification_channel_description">Notification while in a deep focus session</string>
+    <string name="focus_notification_default_title">Focusing</string>
+    <string name="focus_notification_cycle_suffix"> · Cycle %1$d</string>
 </resources>

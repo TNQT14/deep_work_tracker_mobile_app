@@ -27,4 +27,30 @@
     <string name="countdown_notification_channel_description">Thông báo đếm ngược thời gian tập trung</string>
     <string name="countdown_notification_remaining">Còn lại: %1$s</string>
     <string name="countdown_notification_stop_action">Dừng</string>
+
+    <string name="focus_config_title">Cấu hình phiên tập trung</string>
+    <string name="focus_estimated_remaining">Ước tính còn lại: %1$d phút</string>
+    <string name="focus_duration_label">Thời gian tập trung (phút)</string>
+    <string name="focus_break_duration_label">Thời gian nghỉ (phút)</string>
+    <string name="focus_repeat_pomodoro">Lặp lại (Pomodoro)</string>
+    <string name="focus_when_timer_ends">Khi hết giờ</string>
+    <string name="focus_alert_notify">Thông báo âm thanh</string>
+    <string name="focus_alert_silent">Im lặng — tự chuyển giai đoạn tiếp</string>
+    <string name="focus_start">Bắt đầu tập trung</string>
+    <string name="focus_start_button">Bắt đầu tập trung  •  %1$s</string>
+    <string name="focus_minutes_remaining">%1$d phút còn lại</string>
+    <string name="focus_minutes_default">25 phút</string>
+    <string name="focus_phase_label">Tập trung</string>
+    <string name="focus_cycle">Vòng %1$d</string>
+    <string name="focus_status_running">đang chạy</string>
+    <string name="focus_end_session">Kết thúc phiên</string>
+    <string name="focus_back_confirm_message">Bước ra ngoài sẽ kết thúc phiên tập trung hiện tại.</string>
+    <string name="focus_back_confirm_end">Kết thúc phiên</string>
+    <string name="focus_end_dialog_title">Kết thúc phiên tập trung?</string>
+    <string name="focus_actual_minutes">Đã tập trung: %1$d phút</string>
+    <string name="focus_cycles_count">Số vòng: %1$d</string>
+    <string name="focus_mark_task_done">Đánh dấu task hoàn thành</string>
+    <string name="focus_notification_channel_description">Thông báo đang trong phiên tập trung sâu</string>
+    <string name="focus_notification_default_title">Đang tập trung</string>
+    <string name="focus_notification_cycle_suffix"> · Vòng %1$d</string>
 </resources>
