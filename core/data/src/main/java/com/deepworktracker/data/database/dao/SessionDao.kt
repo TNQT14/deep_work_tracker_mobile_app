@@ -32,6 +32,9 @@ interface SessionDao {
 
     @Query("SELECT * FROM focus_sessions ORDER BY start_time DESC")
     fun getAllSessions(): Flow<List<FocusSessionEntity>>
+
+    @Query("SELECT * FROM focus_sessions WHERE todo_id = :todoId ORDER BY start_time DESC")
+    fun getSessionsByTodoId(todoId: String): Flow<List<FocusSessionEntity>>
     
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertSession(session: FocusSessionEntity)

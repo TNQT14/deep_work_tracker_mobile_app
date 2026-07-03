@@ -118,4 +118,9 @@ class SessionRepositoryImpl @Inject constructor(
             emptyList()
         }
     }
+
+    override fun getSessionsByTodoId(todoId: String): Flow<List<FocusSession>> {
+        return sessionDao.getSessionsByTodoId(todoId)
+            .map { entities -> entities.map { mapper.toDomain(it) } }
+    }
 }

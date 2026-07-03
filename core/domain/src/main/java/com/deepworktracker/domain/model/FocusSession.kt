@@ -8,11 +8,18 @@ data class FocusSession(
     val category: String?,
     val startTime: Instant,
     val endTime: Instant?,
-    val totalDuration: Long, // milliseconds
-    val focusedDuration: Long, // milliseconds (total - interruptions)
+    val totalDuration: Long,
+    val focusedDuration: Long,
     val tag: String?,
     val note: String?,
-    val interruptions: List<Interruption> = emptyList()
+    val interruptions: List<Interruption> = emptyList(),
+    val todoId: String? = null,
+    val focusMinutes: Int = 25,
+    val breakMinutes: Int = 5,
+    val repeat: Boolean = false,
+    val alertMode: AlertMode = AlertMode.NOTIFY,
+    val actualFocusedMinutes: Int = 0,
+    val cycles: Int = 0,
 ) {
     val isActive: Boolean
         get() = endTime == null

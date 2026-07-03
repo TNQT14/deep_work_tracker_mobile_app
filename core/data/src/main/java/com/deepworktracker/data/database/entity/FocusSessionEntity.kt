@@ -4,6 +4,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import com.deepworktracker.domain.model.AlertMode
 
 @Entity(
     tableName = "focus_sessions",
@@ -41,7 +42,26 @@ data class FocusSessionEntity(
     
     @ColumnInfo(name = "created_at")
     val createdAt: Long = System.currentTimeMillis(),
-    
+
     @ColumnInfo(name = "updated_at")
-    val updatedAt: Long = System.currentTimeMillis()
+    val updatedAt: Long = System.currentTimeMillis(),
+
+    @ColumnInfo(name = "todo_id")
+    val todoId: String? = null,
+
+    @ColumnInfo(name = "focus_minutes")
+    val focusMinutes: Int = 25,
+
+    @ColumnInfo(name = "break_minutes")
+    val breakMinutes: Int = 5,
+
+    val repeat: Boolean = false,
+
+    @ColumnInfo(name = "alert_mode")
+    val alertMode: AlertMode = AlertMode.NOTIFY,
+
+    @ColumnInfo(name = "actual_focused_minutes")
+    val actualFocusedMinutes: Int = 0,
+
+    val cycles: Int = 0,
 )

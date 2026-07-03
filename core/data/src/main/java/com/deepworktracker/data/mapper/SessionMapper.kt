@@ -20,14 +20,21 @@ class SessionMapper {
             focusedDuration = entity.focusedDuration,
             tag = entity.tag,
             note = entity.note,
-            interruptions = emptyList() // Will be loaded separately
+            interruptions = emptyList(),
+            todoId = entity.todoId,
+            focusMinutes = entity.focusMinutes,
+            breakMinutes = entity.breakMinutes,
+            repeat = entity.repeat,
+            alertMode = entity.alertMode,
+            actualFocusedMinutes = entity.actualFocusedMinutes,
+            cycles = entity.cycles,
         )
     }
-    
+
     fun toEntity(domain: FocusSession): FocusSessionEntity {
         val date = domain.startTime.toLocalDateTime(TimeZone.currentSystemDefault())
             .date.toString()
-        
+
         return FocusSessionEntity(
             id = domain.id,
             goal = domain.goal,
@@ -38,7 +45,14 @@ class SessionMapper {
             focusedDuration = domain.focusedDuration,
             tag = domain.tag,
             note = domain.note,
-            date = date
+            date = date,
+            todoId = domain.todoId,
+            focusMinutes = domain.focusMinutes,
+            breakMinutes = domain.breakMinutes,
+            repeat = domain.repeat,
+            alertMode = domain.alertMode,
+            actualFocusedMinutes = domain.actualFocusedMinutes,
+            cycles = domain.cycles,
         )
     }
 }

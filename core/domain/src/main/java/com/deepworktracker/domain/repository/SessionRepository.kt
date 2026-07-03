@@ -17,4 +17,5 @@ interface SessionRepository {
     suspend fun getRecentCategories(limit: Int = 8): List<String>
     suspend fun getRecentTags(limit: Int = 8): List<String>
     suspend fun getAllSessions(): List<FocusSession>
+    fun getSessionsByTodoId(todoId: String): Flow<List<FocusSession>>
 }

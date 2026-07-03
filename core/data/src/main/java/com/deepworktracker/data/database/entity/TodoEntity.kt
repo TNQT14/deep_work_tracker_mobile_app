@@ -39,4 +39,7 @@ data class TodoEntity(
 
     @ColumnInfo(name = "estimated_minutes")
     val estimatedMinutes: Int? = null,
+
+    @ColumnInfo(name = "remaining_minutes")
+    val remainingMinutes: Int? = null,
 )

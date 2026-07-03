@@ -26,7 +26,7 @@ import com.deepworktracker.data.database.entity.TodoEntity
         CategoryRuleEntity::class,
         TodoEntity::class
     ],
-    version = 6,
+    version = 7,
     exportSchema = false
 )
 abstract class DeepWorkDatabase : RoomDatabase() {
@@ -153,6 +153,19 @@ abstract class DeepWorkDatabase : RoomDatabase() {
         val MIGRATION_5_6: Migration = object : Migration(5, 6) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL("ALTER TABLE todos ADD COLUMN estimated_minutes INTEGER")
+            }
+        }
+
+        val MIGRATION_6_7: Migration = object : Migration(6, 7) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE todos ADD COLUMN remaining_minutes INTEGER")
+                db.execSQL("ALTER TABLE focus_sessions ADD COLUMN todo_id TEXT")
+                db.execSQL("ALTER TABLE focus_sessions ADD COLUMN focus_minutes INTEGER NOT NULL DEFAULT 25")
+                db.execSQL("ALTER TABLE focus_sessions ADD COLUMN break_minutes INTEGER NOT NULL DEFAULT 5")
+                db.execSQL("ALTER TABLE focus_sessions ADD COLUMN repeat INTEGER NOT NULL DEFAULT 0")
+                db.execSQL("ALTER TABLE focus_sessions ADD COLUMN alert_mode TEXT NOT NULL DEFAULT 'NOTIFY'")
+                db.execSQL("ALTER TABLE focus_sessions ADD COLUMN actual_focused_minutes INTEGER NOT NULL DEFAULT 0")
+                db.execSQL("ALTER TABLE focus_sessions ADD COLUMN cycles INTEGER NOT NULL DEFAULT 0")
             }
         }
 

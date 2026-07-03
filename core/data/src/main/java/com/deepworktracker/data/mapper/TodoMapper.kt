@@ -19,6 +19,7 @@ class TodoMapper {
             createdAt = Instant.fromEpochMilliseconds(entity.createdAt),
             updatedAt = Instant.fromEpochMilliseconds(entity.updatedAt),
             estimatedMinutes = entity.estimatedMinutes,
+            remainingMinutes = entity.remainingMinutes,
         )
     }
 
@@ -35,6 +36,7 @@ class TodoMapper {
             createdAt = domain.createdAt.toEpochMilliseconds(),
             updatedAt = domain.updatedAt.toEpochMilliseconds(),
             estimatedMinutes = domain.estimatedMinutes,
+            remainingMinutes = domain.remainingMinutes,
         )
     }
 }
