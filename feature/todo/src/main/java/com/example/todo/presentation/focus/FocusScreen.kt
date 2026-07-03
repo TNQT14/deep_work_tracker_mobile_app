@@ -3,7 +3,8 @@ package com.example.todo.presentation.focus
 import android.media.RingtoneManager
 import android.view.WindowManager
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -37,7 +38,6 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -275,41 +275,50 @@ private fun PhaseContent(
             }
         }
 
-        // [Effect] Reset progress animation when phase or cycle changes (FOCUS ↔ BREAK transition)
-        key(uiState.cycles, phase) {
-            val animatedProgress by animateFloatAsState(
-                targetValue = progress,
-                animationSpec = tween(durationMillis = 800),
-                label = "${phase.name.lowercase()}_progress",
-            )
-            Box(contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(
-                    progress = { animatedProgress },
-                    modifier = Modifier.size(220.dp),
-                    strokeWidth = 10.dp,
-                    color = accentColor,
-                    trackColor = MaterialTheme.colorScheme.surfaceVariant,
+        val progressAnimatable = remember(phase) { Animatable(progress) }
+
+        LaunchedEffect(uiState.isRunning, uiState.cycles, phase) {
+            if (uiState.isRunning && remainingSeconds > 0) {
+                progressAnimatable.snapTo(progress)
+                progressAnimatable.animateTo(
+                    targetValue = 0f,
+                    animationSpec = tween(
+                        durationMillis = remainingSeconds * 1000,
+                        easing = LinearEasing,
+                    ),
                 )
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(
-                        text = formatTime(remainingSeconds),
-                        fontSize = 52.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface,
-                    )
-                    Text(
-                        text = when (phase) {
-                            FocusPhase.FOCUS -> if (uiState.isPaused) {
-                                stringResource(R.string.countdown_pause)
-                            } else {
-                                stringResource(R.string.focus_status_running)
-                            }
-                            FocusPhase.BREAK -> "thời gian nghỉ"
-                        },
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
+            } else {
+                progressAnimatable.snapTo(progress)
+            }
+        }
+
+        Box(contentAlignment = Alignment.Center) {
+            CircularProgressIndicator(
+                progress = { progressAnimatable.value },
+                modifier = Modifier.size(220.dp),
+                strokeWidth = 10.dp,
+                color = accentColor,
+                trackColor = MaterialTheme.colorScheme.surfaceVariant,
+            )
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    text = formatTime(remainingSeconds),
+                    fontSize = 52.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+                Text(
+                    text = when (phase) {
+                        FocusPhase.FOCUS -> if (uiState.isPaused) {
+                            stringResource(R.string.countdown_pause)
+                        } else {
+                            stringResource(R.string.focus_status_running)
+                        }
+                        FocusPhase.BREAK -> "thời gian nghỉ"
+                    },
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             }
         }
 
