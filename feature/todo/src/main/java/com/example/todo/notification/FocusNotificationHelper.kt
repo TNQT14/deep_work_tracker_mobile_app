@@ -68,8 +68,12 @@ class FocusNotificationHelper @Inject constructor(
      * Output: ongoing silent notification while break timer runs
      */
     fun showBreak(todoTitle: String?, remainingSeconds: Int) {
-        val title = todoTitle?.takeIf { it.isNotBlank() } ?: "Nghỉ ngơi"
-        val text = "Thời gian nghỉ còn lại: ${formatTime(remainingSeconds)}"
+        val title = todoTitle?.takeIf { it.isNotBlank() }
+            ?: context.getString(R.string.focus_break_phase_label)
+        val text = context.getString(
+            R.string.focus_notification_break_remaining,
+            formatTime(remainingSeconds),
+        )
         notify(title, text)
     }
 

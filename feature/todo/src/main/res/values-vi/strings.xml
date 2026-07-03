@@ -53,4 +53,10 @@
     <string name="focus_notification_channel_description">Thông báo đang trong phiên tập trung sâu</string>
     <string name="focus_notification_default_title">Đang tập trung</string>
     <string name="focus_notification_cycle_suffix"> · Vòng %1$d</string>
+    <string name="focus_break_phase_label">Nghỉ ngơi</string>
+    <string name="focus_break_cycles_done">Đã hoàn thành %1$d vòng tập trung</string>
+    <string name="focus_accumulated_break">Nghỉ tích lũy: +%1$d phút</string>
+    <string name="focus_skip_break">Tập trung tiếp →</string>
+    <string name="focus_break_time_label">thời gian nghỉ</string>
+    <string name="focus_notification_break_remaining">Thời gian nghỉ còn lại: %1$s</string>
 </resources>

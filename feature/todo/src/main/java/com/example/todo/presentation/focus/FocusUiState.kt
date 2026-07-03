@@ -73,6 +73,12 @@ data class FocusUiState(
     val cycles: Int = 0,
 
     /**
+     * Type: Int | Sample: 3 after start → pause/resume → continue
+     * Process: incremented every time a countdown (re)starts; UI keys progress animation on it
+     */
+    val timerGeneration: Int = 0,
+
+    /**
      * Type: Throwable? | Sample: null in happy path
      */
     val error: Throwable? = null,

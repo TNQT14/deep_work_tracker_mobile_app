@@ -236,7 +236,9 @@ class FocusViewModel @Inject constructor(
      *         on zero → onFocusTimerFinished()
      */
     private fun resumeTimer() {
-        _uiState.update { it.copy(isRunning = true, isPaused = false) }
+        _uiState.update {
+            it.copy(isRunning = true, isPaused = false, timerGeneration = it.timerGeneration + 1)
+        }
         timerJob?.cancel()
         timerJob = viewModelScope.launch {
             while (_uiState.value.isRunning && _uiState.value.focusRemainingSeconds > 0) {
@@ -268,7 +270,14 @@ class FocusViewModel @Inject constructor(
     fun continueSession() {
         val config = _uiState.value.config ?: return
         val totalSec = config.focusMinutes * 60
-        _uiState.update { it.copy(focusRemainingSeconds = totalSec) }
+        // phase reset covers "End session → Continue" chosen while on BREAK
+        _uiState.update {
+            it.copy(
+                phase = FocusPhase.FOCUS,
+                focusRemainingSeconds = totalSec,
+                breakRemainingSeconds = 0,
+            )
+        }
         resumeTimer()
     }
 
@@ -327,7 +336,9 @@ class FocusViewModel @Inject constructor(
     }
 
     private fun startBreakTimer() {
-        _uiState.update { it.copy(isRunning = true, isPaused = false) }
+        _uiState.update {
+            it.copy(isRunning = true, isPaused = false, timerGeneration = it.timerGeneration + 1)
+        }
         timerJob?.cancel()
         timerJob = viewModelScope.launch {
             while (_uiState.value.isRunning && _uiState.value.breakRemainingSeconds > 0) {

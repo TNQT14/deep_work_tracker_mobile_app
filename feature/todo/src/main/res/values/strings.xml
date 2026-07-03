@@ -53,4 +53,10 @@
     <string name="focus_notification_channel_description">Notification while in a deep focus session</string>
     <string name="focus_notification_default_title">Focusing</string>
     <string name="focus_notification_cycle_suffix"> · Cycle %1$d</string>
+    <string name="focus_break_phase_label">Break</string>
+    <string name="focus_break_cycles_done">Completed %1$d focus cycles</string>
+    <string name="focus_accumulated_break">Accumulated break: +%1$d min</string>
+    <string name="focus_skip_break">Back to focus →</string>
+    <string name="focus_break_time_label">break time</string>
+    <string name="focus_notification_break_remaining">Break remaining: %1$s</string>
 </resources>

@@ -242,7 +242,7 @@ private fun PhaseContent(
             Text(
                 text = when (phase) {
                     FocusPhase.FOCUS -> stringResource(R.string.focus_phase_label)
-                    FocusPhase.BREAK -> "Nghỉ ngơi"
+                    FocusPhase.BREAK -> stringResource(R.string.focus_break_phase_label)
                 },
                 style = MaterialTheme.typography.titleMedium,
                 color = accentColor,
@@ -259,14 +259,17 @@ private fun PhaseContent(
                 }
                 FocusPhase.BREAK -> {
                     Text(
-                        text = "Đã hoàn thành ${uiState.cycles} vòng tập trung",
+                        text = stringResource(R.string.focus_break_cycles_done, uiState.cycles),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                     if (uiState.accumulatedBreakSeconds > 0) {
                         Spacer(Modifier.height(4.dp))
                         Text(
-                            text = "Nghỉ tích lũy: +${uiState.accumulatedBreakMinutes} phút",
+                            text = stringResource(
+                                R.string.focus_accumulated_break,
+                                uiState.accumulatedBreakMinutes,
+                            ),
                             style = MaterialTheme.typography.bodySmall,
                             color = breakColor,
                         )
@@ -277,7 +280,8 @@ private fun PhaseContent(
 
         val progressAnimatable = remember(phase) { Animatable(progress) }
 
-        LaunchedEffect(uiState.isRunning, uiState.cycles, phase) {
+        // timerGeneration bumps on every timer (re)start — start, resume, continue, next cycle
+        LaunchedEffect(uiState.timerGeneration, uiState.isRunning) {
             if (uiState.isRunning && remainingSeconds > 0) {
                 progressAnimatable.snapTo(progress)
                 progressAnimatable.animateTo(
@@ -314,7 +318,7 @@ private fun PhaseContent(
                         } else {
                             stringResource(R.string.focus_status_running)
                         }
-                        FocusPhase.BREAK -> "thời gian nghỉ"
+                        FocusPhase.BREAK -> stringResource(R.string.focus_break_time_label)
                     },
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -349,7 +353,7 @@ private fun PhaseContent(
                         modifier = Modifier.fillMaxWidth(),
                         colors = ButtonDefaults.buttonColors(containerColor = breakColor),
                     ) {
-                        Text("Tập trung tiếp →")
+                        Text(stringResource(R.string.focus_skip_break))
                     }
                 }
             }
