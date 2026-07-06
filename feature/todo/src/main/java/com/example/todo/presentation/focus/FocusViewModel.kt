@@ -223,6 +223,8 @@ class FocusViewModel @Inject constructor(
                 }
             }
 
+            notificationHelper.showCompleted(todo?.title, actualMinutes, state.cycles)
+
             _uiState.update { it.copy(isRunning = false, isPaused = false) }
             _doneEvent.send(Unit)
         }

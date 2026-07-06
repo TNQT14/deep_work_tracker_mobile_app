@@ -36,4 +36,8 @@ object ComponentColors {
     fun todoInProgressBackground(): Color = todoInProgress.copy(alpha = 0.2f)
     fun todoPausedBackground(): Color = todoPaused.copy(alpha = 0.2f)
     fun todoDoneBackground(): Color = todoDone.copy(alpha = 0.2f)
+    val focusAccent = RawColors.Indigo500
+    val focusBreak = RawColors.Emerald500
+
+    fun focusBreakBackground(): Color = focusBreak.copy(alpha = 0.15f)
 }

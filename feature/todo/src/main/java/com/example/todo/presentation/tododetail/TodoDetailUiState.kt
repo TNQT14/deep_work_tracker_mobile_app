@@ -10,4 +10,5 @@ data class TodoDetailUiState(
     val isDeleting: Boolean = false,
     val error: Throwable? = null,
     val todo: Todo? = null,
+    val focusSessionCount: Int = 0,
 )

@@ -23,3 +23,8 @@ fun Instant.toDdMmYyyyCompact(zone: TimeZone = TimeZone.currentSystemDefault(),)
 fun Instant?.toDdMmYyyyCompactOrNull(
     zone: TimeZone = TimeZone.currentSystemDefault(),
 ): String? = this?.toDdMmYyyyCompact(zone)
+
+fun Instant.toHhMm(zone: TimeZone = TimeZone.currentSystemDefault()): String {
+    val t = this.toLocalDateTime(zone).time
+    return "%02d:%02d".format(t.hour, t.minute)
+}

@@ -69,6 +69,8 @@ internal fun TodoDetailContent(
     onEditClick: () -> Unit,
     onDeadlineEditClick: () -> Unit,
     onStartCountdown: () -> Unit = {},
+    focusSessionCount: Int = 0,
+    onFocusHistoryClick: () -> Unit = {},
 ) {
     val scroll = rememberScrollState()
     val actionsEnabled = !isSavingStatus && !isDeleting && !isSavingEdit
@@ -107,6 +109,16 @@ internal fun TodoDetailContent(
                 enabled = actionsEnabled,
             ) {
                 Text(stringResource(R.string.focus_start_button, minuteLabel))
+            }
+        }
+
+        if (focusSessionCount > 0) {
+            OutlinedButton(
+                onClick = onFocusHistoryClick,
+                modifier = Modifier.fillMaxWidth(),
+                enabled = actionsEnabled,
+            ) {
+                Text(stringResource(R.string.focus_history_entry, focusSessionCount))
             }
         }
     }

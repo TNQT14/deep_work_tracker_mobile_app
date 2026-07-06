@@ -59,4 +59,24 @@
     <string name="focus_skip_break">Back to focus →</string>
     <string name="focus_break_time_label">break time</string>
     <string name="focus_notification_break_remaining">Break remaining: %1$s</string>
+    <string name="focus_summary_focused_label">Focused</string>
+    <string name="focus_summary_cycles_label">Cycles</string>
+    <string name="focus_summary_break_label">Break banked</string>
+    <string name="focus_summary_new_remaining_label">New remaining</string>
+    <string name="focus_summary_minutes">%1$d min</string>
+    <string name="focus_summary_break_minutes">+%1$d min</string>
+    <string name="focus_history_title">Focus history</string>
+    <string name="focus_history_entry">Focus history • %1$d sessions</string>
+    <string name="focus_history_empty_title">No focus sessions yet</string>
+    <string name="focus_history_empty_body">Sessions you complete for this task will show up here.</string>
+    <string name="focus_history_total_label">Total</string>
+    <string name="focus_history_sessions_label">Sessions</string>
+    <string name="focus_history_cycles_label">Cycles</string>
+    <string name="focus_history_repeat_badge">Repeat</string>
+    <string name="focus_history_focused">%1$d min</string>
+    <string name="focus_history_cycles_value">%1$d cycles</string>
+    <string name="focus_history_break_value">%1$d min break</string>
+    <string name="focus_complete_channel_name">Focus session complete</string>
+    <string name="focus_notification_completed_title">Focus session complete</string>
+    <string name="focus_notification_completed_text">%1$d min · %2$d cycles</string>
 </resources>

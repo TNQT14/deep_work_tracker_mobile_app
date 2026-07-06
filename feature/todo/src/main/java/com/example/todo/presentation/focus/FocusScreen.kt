@@ -6,6 +6,7 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,12 +17,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -46,10 +49,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.deepworktracker.domain.model.AlertMode
+import com.deepworktracker.ui.theme.tokens.ComponentColors
 import com.example.todo.R
 
 /**
@@ -215,8 +220,8 @@ private fun PhaseContent(
     onSkipBreak: () -> Unit,
     onEndClick: () -> Unit,
 ) {
-    // Type: Color | Sample: 0xFF4CAF50 green accent for break phase
-    val breakColor = androidx.compose.ui.graphics.Color(0xFF4CAF50)
+    // Type: Color | green accent for break phase (design token, not hardcoded)
+    val breakColor = ComponentColors.focusBreak
     // Type: Color | primary for FOCUS, breakColor for BREAK
     val accentColor = when (phase) {
         FocusPhase.FOCUS -> MaterialTheme.colorScheme.primary
@@ -397,25 +402,60 @@ private fun EndSessionDialog(
 
     var markDone by remember { mutableStateOf(canMarkDone) }
 
+    // Precompute all stat strings unconditionally (composable calls must not be conditional)
+    val focusedLabel = stringResource(R.string.focus_summary_focused_label)
+    val focusedValue = stringResource(R.string.focus_summary_minutes, actualMinutes)
+    val cyclesLabel = stringResource(R.string.focus_summary_cycles_label)
+    val cyclesValue = uiState.cycles.toString()
+    val breakLabel = stringResource(R.string.focus_summary_break_label)
+    val breakValue = stringResource(R.string.focus_summary_break_minutes, uiState.accumulatedBreakMinutes)
+    val newRemainingLabel = stringResource(R.string.focus_summary_new_remaining_label)
+    val newRemainingValue = newRemaining?.let { stringResource(R.string.focus_summary_minutes, it) }
+    val breakColor = ComponentColors.focusBreak
+
+    val stats = buildList {
+        add(SummaryStat(focusedLabel, focusedValue, null))
+        add(SummaryStat(cyclesLabel, cyclesValue, null))
+        if (uiState.accumulatedBreakMinutes > 0) add(SummaryStat(breakLabel, breakValue, breakColor))
+        if (newRemainingValue != null) add(SummaryStat(newRemainingLabel, newRemainingValue, null))
+    }
+
     AlertDialog(
         onDismissRequest = onContinue,
         title = { Text(stringResource(R.string.focus_end_dialog_title)) },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(stringResource(R.string.focus_actual_minutes, actualMinutes))
-                if (uiState.cycles > 0) {
-                    Text(stringResource(R.string.focus_cycles_count, uiState.cycles))
-                }
-                if (newRemaining != null) {
-                    Text(stringResource(R.string.focus_estimated_remaining, newRemaining))
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                        .padding(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    stats.chunked(2).forEach { rowStats ->
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        ) {
+                            rowStats.forEach { stat ->
+                                SummaryStatCell(
+                                    modifier = Modifier.weight(1f),
+                                    label = stat.label,
+                                    value = stat.value,
+                                    valueColor = stat.valueColor ?: MaterialTheme.colorScheme.onSurface,
+                                )
+                            }
+                            if (rowStats.size == 1) Spacer(Modifier.weight(1f))
+                        }
+                    }
                 }
                 if (canMarkDone) {
-                    Spacer(Modifier.height(4.dp))
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
-                        androidx.compose.material3.Checkbox(
+                        Checkbox(
                             checked = markDone,
                             onCheckedChange = { markDone = it },
                         )
@@ -425,7 +465,12 @@ private fun EndSessionDialog(
             }
         },
         confirmButton = {
-            Button(onClick = { onEnd(markDone) }) { Text(stringResource(R.string.countdown_end)) }
+            Button(
+                onClick = { onEnd(markDone) },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.error,
+                ),
+            ) { Text(stringResource(R.string.countdown_end)) }
         },
         dismissButton = {
             TextButton(onClick = onContinue) {
@@ -433,6 +478,38 @@ private fun EndSessionDialog(
             }
         },
     )
+}
+
+/**
+ * [UiState]
+ * Type: plain data for one stat cell in the end-session summary grid.
+ */
+private data class SummaryStat(val label: String, val value: String, val valueColor: androidx.compose.ui.graphics.Color?)
+
+/**
+ * [UI — Screen]
+ * One labelled stat in the EndSessionDialog summary card (label above, value below).
+ */
+@Composable
+private fun SummaryStatCell(
+    label: String,
+    value: String,
+    valueColor: androidx.compose.ui.graphics.Color,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier = modifier) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Text(
+            text = value,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            color = valueColor,
+        )
+    }
 }
 
 private fun formatTime(totalSeconds: Int): String {

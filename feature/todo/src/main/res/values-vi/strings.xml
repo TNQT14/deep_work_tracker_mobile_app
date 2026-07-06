@@ -59,4 +59,24 @@
     <string name="focus_skip_break">Tập trung tiếp →</string>
     <string name="focus_break_time_label">thời gian nghỉ</string>
     <string name="focus_notification_break_remaining">Thời gian nghỉ còn lại: %1$s</string>
+    <string name="focus_summary_focused_label">Đã tập trung</string>
+    <string name="focus_summary_cycles_label">Số vòng</string>
+    <string name="focus_summary_break_label">Nghỉ tích lũy</string>
+    <string name="focus_summary_new_remaining_label">Còn lại mới</string>
+    <string name="focus_summary_minutes">%1$d phút</string>
+    <string name="focus_summary_break_minutes">+%1$d phút</string>
+    <string name="focus_history_title">Lịch sử tập trung</string>
+    <string name="focus_history_entry">Lịch sử tập trung • %1$d phiên</string>
+    <string name="focus_history_empty_title">Chưa có phiên tập trung nào</string>
+    <string name="focus_history_empty_body">Các phiên bạn hoàn thành cho việc này sẽ hiện ở đây.</string>
+    <string name="focus_history_total_label">Tổng</string>
+    <string name="focus_history_sessions_label">Phiên</string>
+    <string name="focus_history_cycles_label">Vòng</string>
+    <string name="focus_history_repeat_badge">Lặp lại</string>
+    <string name="focus_history_focused">%1$d phút</string>
+    <string name="focus_history_cycles_value">%1$d vòng</string>
+    <string name="focus_history_break_value">Nghỉ %1$d phút</string>
+    <string name="focus_complete_channel_name">Hoàn thành phiên tập trung</string>
+    <string name="focus_notification_completed_title">Hoàn thành phiên tập trung</string>
+    <string name="focus_notification_completed_text">%1$d phút · %2$d vòng</string>
 </resources>

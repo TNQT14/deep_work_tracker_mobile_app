@@ -47,6 +47,7 @@ fun TodoDetailScreen(
     todoId: String,
     onBack: () -> Unit = {},
     onNavigateToCountdown: (todoId: String) -> Unit = {},
+    onNavigateToFocusHistory: (todoId: String) -> Unit = {},
 ) {
     val viewModel: TodoDetailViewModel = hiltViewModel()
     val uiState by viewModel.uiState.collectAsState()
@@ -210,6 +211,8 @@ fun TodoDetailScreen(
                         onEditClick = openEditDialog,
                         onDeadlineEditClick = openDeadlineDialog,
                         onStartCountdown = { onNavigateToCountdown(todoId) },
+                        focusSessionCount = uiState.focusSessionCount,
+                        onFocusHistoryClick = { onNavigateToFocusHistory(todoId) },
                     )
 
                     if (showDeadlineDialog) {

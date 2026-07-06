@@ -42,7 +42,16 @@ class TodoDetailViewModel @Inject constructor(
             )
         } else {
             observeTodo()
+            observeFocusSessionCount()
             loadGoalOptions()
+        }
+    }
+
+    private fun observeFocusSessionCount() {
+        viewModelScope.launch {
+            sessionRepository.getSessionsByTodoId(todoId)
+                .map { sessions -> sessions.count { it.endTime != null } }
+                .collect { count -> _uiState.update { it.copy(focusSessionCount = count) } }
         }
     }
 
