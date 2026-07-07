@@ -12,6 +12,16 @@
     <string name="profile_logout">Đăng xuất</string>
     <string name="profile_dismiss">Đóng</string>
     <string name="profile_error_generic">Đã xảy ra lỗi</string>
+    <string name="profile_email_label">Email</string>
+    <string name="profile_edit_button">Sửa hồ sơ</string>
+    <string name="profile_edit_title">Sửa hồ sơ</string>
+    <string name="profile_full_name_label">Họ và tên</string>
+    <string name="profile_new_password_label">Mật khẩu mới (không bắt buộc)</string>
+    <string name="profile_confirm_password_label">Xác nhận mật khẩu mới</string>
+    <string name="profile_password_mismatch">Mật khẩu không khớp</string>
+    <string name="profile_edit_save">Lưu</string>
+    <string name="profile_edit_cancel">Huỷ</string>
+    <string name="profile_edit_success">Đã cập nhật hồ sơ</string>
     <string name="settings_appearance">Giao diện</string>
     <string name="settings_language">Ngôn ngữ</string>
     <string name="settings_language_system">Ngôn ngữ theo hệ thống</string>

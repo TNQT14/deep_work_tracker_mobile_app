@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.deepworktracker.data.remote.auth.AuthSessionRepository
 import com.deepworktracker.data.remote.network.NetworkResult
 import com.deepworktracker.data.repository.AuthRepository
+import com.deepworktracker.data.repository.UserRepository
 import com.deepworktracker.data.remote.token.TokenStore
 import com.deepworktracker.domain.repository.SessionRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -19,6 +20,7 @@ import javax.inject.Inject
 class ProfileViewModel @Inject constructor(
     private val sessionRepository: SessionRepository,
     private val authRepository: AuthRepository,
+    private val userRepository: UserRepository,
     private val tokenStore: TokenStore,
     private val authSessionRepository: AuthSessionRepository,
 ) : ViewModel() {
@@ -43,11 +45,17 @@ class ProfileViewModel @Inject constructor(
 
                 _uiState.update {
                     it.copy(
-                        userName = "User", // Default, sẽ update sau
                         totalSessions = totalSessions,
                         totalFocusTime = totalFocusTime,
                         isLoading = false
                     )
+                }
+
+                when (val result = userRepository.getMe()) {
+                    is NetworkResult.Success -> _uiState.update {
+                        it.copy(userName = result.data.fullName, email = result.data.email)
+                    }
+                    else -> Unit // Keep stats loaded even if profile fetch fails; stale name stays as-is.
                 }
             } catch (e: Exception) {
                 _uiState.update {
@@ -58,6 +66,48 @@ class ProfileViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    /**
+     * Input: fullName (required), password (blank = keep current)
+     * Process: PUT /users/me via UserRepository — mirrors backend "empty string = no change"
+     * Output: editProfileState transitions Loading -> Success (userName/email refreshed) | Error
+     */
+    fun updateProfile(fullName: String, password: String) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(editProfileState = EditProfileState.Loading) }
+            when (val result = userRepository.updateMe(fullName, password)) {
+                is NetworkResult.Success -> _uiState.update {
+                    it.copy(
+                        userName = result.data.fullName,
+                        email = result.data.email,
+                        editProfileState = EditProfileState.Success,
+                    )
+                }
+                else -> _uiState.update {
+                    it.copy(editProfileState = EditProfileState.Error(mapNetworkErrorMessage(result)))
+                }
+            }
+        }
+    }
+
+    fun consumeEditProfileSuccess() {
+        _uiState.update { it.copy(editProfileState = EditProfileState.Idle) }
+    }
+
+    fun clearEditProfileError() {
+        _uiState.update { it.copy(editProfileState = EditProfileState.Idle) }
+    }
+
+    private fun mapNetworkErrorMessage(result: NetworkResult<*>): String = when (result) {
+        is NetworkResult.HttpError -> result.message ?: "HTTP ${result.code}"
+        is NetworkResult.Unauthorized -> "Unauthorized"
+        is NetworkResult.NotFound -> "Not found"
+        is NetworkResult.ServerError -> "Server error"
+        is NetworkResult.NoInternet -> "No internet connection"
+        is NetworkResult.ParseError -> "Could not read server response"
+        is NetworkResult.NetworkError -> result.message ?: "Network error"
+        is NetworkResult.Success -> "Unexpected success"
     }
 
     fun refresh() {

@@ -8,6 +8,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -17,9 +20,11 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.deepworktracker.common.time.TimeFormatter
 import com.deepworktracker.profile.R
+import com.deepworktracker.profile.presentation.EditProfileState
 import com.deepworktracker.profile.presentation.LogoutState
 import com.deepworktracker.profile.presentation.ProfileUiState
 import com.deepworktracker.profile.presentation.ProfileViewModel
+import com.deepworktracker.profile.presentation.profile_screen.component.EditProfileDialog
 import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
@@ -29,11 +34,19 @@ fun ProfileRoute(
     viewModel: ProfileViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    var showEditDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(uiState.logoutState) {
         if (uiState.logoutState is LogoutState.Success) {
             onLogoutSuccess()
             viewModel.consumeLogoutSuccess()
+        }
+    }
+
+    LaunchedEffect(uiState.editProfileState) {
+        if (uiState.editProfileState is EditProfileState.Success) {
+            showEditDialog = false
+            viewModel.consumeEditProfileSuccess()
         }
     }
 
@@ -43,7 +56,21 @@ fun ProfileRoute(
         onClearError = viewModel::clearError,
         onLogout = viewModel::logout,
         onOpenSettings = onNavigateToSettings,
+        onEditProfileClick = { showEditDialog = true },
     )
+
+    if (showEditDialog) {
+        EditProfileDialog(
+            currentName = uiState.userName,
+            isSaving = uiState.editProfileState is EditProfileState.Loading,
+            errorMessage = (uiState.editProfileState as? EditProfileState.Error)?.message,
+            onDismiss = {
+                showEditDialog = false
+                viewModel.clearEditProfileError()
+            },
+            onSave = { fullName, password -> viewModel.updateProfile(fullName, password) },
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -54,6 +81,7 @@ fun ProfileScreen(
     onClearError: () -> Unit,
     onLogout: () -> Unit,
     onOpenSettings: () -> Unit,
+    onEditProfileClick: () -> Unit = {},
 ) {
     val isLoggingOut = uiState.logoutState is LogoutState.Loading
 
@@ -135,6 +163,20 @@ fun ProfileScreen(
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onPrimaryContainer
                             )
+
+                            if (uiState.email.isNotEmpty()) {
+                                Text(
+                                    text = uiState.email,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.height(12.dp))
+
+                            TextButton(onClick = onEditProfileClick) {
+                                Text(stringResource(R.string.profile_edit_button))
+                            }
                         }
                     }
 
