@@ -37,7 +37,7 @@ class RefreshTokenCoordinatorImpl @Inject constructor(
                 )
                 when {
                     response.isSuccessful -> {
-                        val body = response.body()
+                        val body = response.body()?.data
                         val newAccess = body?.accessToken
                         if (newAccess.isNullOrBlank()) {
                             RefreshResult.NetworkError

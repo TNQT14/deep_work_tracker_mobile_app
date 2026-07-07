@@ -1,6 +1,7 @@
 package com.deepworktracker.data.remote.auth
 
 import com.deepworktracker.data.remote.api.TokenRefreshApi
+import com.deepworktracker.data.remote.model.response.ApiEnvelope
 import com.deepworktracker.data.remote.model.response.AuthResponse
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -45,11 +46,11 @@ class RefreshTokenCoordinatorImplTest {
     @Test
     fun refreshAccessToken_withSuccessfulResponse_persistsTokens() = runTest {
         tokenStore.refresh = "refresh-1"
-        val response = mockk<Response<AuthResponse>>()
+        val response = mockk<Response<ApiEnvelope<AuthResponse>>>()
         every { response.isSuccessful } returns true
-        every { response.body() } returns AuthResponse(
-            accessToken = "new-access",
-            refreshToken = "new-refresh",
+        every { response.body() } returns ApiEnvelope(
+            success = true,
+            data = AuthResponse(accessToken = "new-access", refreshToken = "new-refresh"),
         )
         coEvery { tokenRefreshApi.refresh(any()) } returns response
 
@@ -63,7 +64,7 @@ class RefreshTokenCoordinatorImplTest {
     @Test
     fun refreshAccessToken_with401_returnsInvalidRefreshToken() = runTest {
         tokenStore.refresh = "refresh-1"
-        val response = mockk<Response<AuthResponse>>()
+        val response = mockk<Response<ApiEnvelope<AuthResponse>>>()
         every { response.isSuccessful } returns false
         every { response.code() } returns 401
         coEvery { tokenRefreshApi.refresh(any()) } returns response
@@ -77,7 +78,7 @@ class RefreshTokenCoordinatorImplTest {
     @Test
     fun refreshAccessToken_with403_returnsInvalidRefreshToken() = runTest {
         tokenStore.refresh = "refresh-1"
-        val response = mockk<Response<AuthResponse>>()
+        val response = mockk<Response<ApiEnvelope<AuthResponse>>>()
         every { response.isSuccessful } returns false
         every { response.code() } returns 403
         coEvery { tokenRefreshApi.refresh(any()) } returns response
@@ -103,9 +104,12 @@ class RefreshTokenCoordinatorImplTest {
     fun refreshAccessToken_concurrent401Handlers_singleApiCall() = runTest {
         tokenStore.access = "stale-access"
         tokenStore.refresh = "refresh-1"
-        val response = mockk<Response<AuthResponse>>()
+        val response = mockk<Response<ApiEnvelope<AuthResponse>>>()
         every { response.isSuccessful } returns true
-        every { response.body() } returns AuthResponse(accessToken = "new-access")
+        every { response.body() } returns ApiEnvelope(
+            success = true,
+            data = AuthResponse(accessToken = "new-access"),
+        )
         coEvery { tokenRefreshApi.refresh(any()) } coAnswers {
             kotlinx.coroutines.delay(50)
             response

@@ -11,6 +11,7 @@ import com.deepworktracker.data.remote.model.response.AuthResponse
 import com.deepworktracker.data.remote.model.response.MessageData
 import com.deepworktracker.data.remote.network.NetworkResult
 import com.deepworktracker.data.remote.network.safeApiCall
+import com.deepworktracker.data.remote.network.unwrapEnvelope
 import com.google.gson.Gson
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -25,13 +26,13 @@ class AuthRepository @Inject constructor(
         request: LoginRequest,
     ): NetworkResult<AuthResponse> = safeApiCall(gson) {
         api.login(request)
-    }
+    }.unwrapEnvelope()
 
     suspend fun register(
         request: RegisterRequest,
     ): NetworkResult<AuthResponse> = safeApiCall(gson) {
         api.register(request)
-    }
+    }.unwrapEnvelope()
 
     suspend fun verifyForgotPasswordEmail(
         email: String

@@ -14,15 +14,18 @@ import retrofit2.http.POST
 
 interface AuthApi {
 
+    // Backend wraps every response as {"success": bool, "data": {...}} — verified against the
+    // real login/register responses. AuthResponse alone (unwrapped) always deserializes to all
+    // nulls, so nothing was ever persisted after login.
     @POST("api/v1/auth/login")
     suspend fun login(
         @Body body: LoginRequest,
-    ): Response<AuthResponse>
+    ): Response<ApiEnvelope<AuthResponse>>
 
     @POST("api/v1/auth/register")
     suspend fun register(
         @Body body: RegisterRequest,
-    ): Response<AuthResponse>
+    ): Response<ApiEnvelope<AuthResponse>>
 
     @POST("api/v1/auth/forgot-password/verify-email")
     suspend fun forgotPasswordVerifyEmail(

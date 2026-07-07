@@ -21,10 +21,33 @@ class AuthLoginNetworkingTest {
 
     @Test
     fun login200_mapsToSuccess() = runTest {
-        harness.enqueue(MockResponse().setBody("""{"access_token":"tok"}"""))
+        // Real backend shape: {"success": true, "data": {"access_token": ..., "refresh_token": ...}}
+        harness.enqueue(
+            MockResponse().setBody(
+                """{"success":true,"data":{"access_token":"tok","refresh_token":"refresh-tok"}}""",
+            ),
+        )
         val result = harness.repository.login(LoginRequest("user@example.com", "secret"))
         assertTrue(result is NetworkResult.Success)
-        assertEquals("tok", (result as NetworkResult.Success).data.accessToken)
+        val data = (result as NetworkResult.Success).data
+        assertEquals("tok", data.accessToken)
+        assertEquals("refresh-tok", data.refreshToken)
+    }
+
+    @Test
+    fun login200WithFlatBody_mapsToParseError() = runTest {
+        // Regression guard: a flat (unwrapped) body must NOT silently parse into a Success
+        // with null tokens — this was the bug that skipped persisting the refresh token.
+        harness.enqueue(MockResponse().setBody("""{"access_token":"tok"}"""))
+        val result = harness.repository.login(LoginRequest("user@example.com", "secret"))
+        assertTrue(result is NetworkResult.ParseError)
+    }
+
+    @Test
+    fun login200WithSuccessFalse_mapsToParseError() = runTest {
+        harness.enqueue(MockResponse().setBody("""{"success":false,"data":null}"""))
+        val result = harness.repository.login(LoginRequest("user@example.com", "secret"))
+        assertTrue(result is NetworkResult.ParseError)
     }
 
     @Test

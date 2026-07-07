@@ -10,10 +10,12 @@ import com.deepworktracker.data.remote.auth.AuthSessionRepository
 import com.deepworktracker.data.repository.AuthRepository
 import com.deepworktracker.data.remote.token.TokenStore
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 sealed interface AuthUiState<out T> {
@@ -154,9 +156,12 @@ class AuthViewModel @Inject constructor(
         }
     }
 
-    private fun persistTokensIfPresent(data: AuthResponse) {
+    private suspend fun persistTokensIfPresent(data: AuthResponse) {
         val access = data.accessToken ?: return
-        tokenStore.setTokens(access = access, refresh = data.refreshToken)
+        // Encrypted-prefs write is synchronous (commit) → keep it off the main thread.
+        withContext(Dispatchers.IO) {
+            tokenStore.setTokens(access = access, refresh = data.refreshToken)
+        }
         authSessionRepository.onLoginSuccess()
     }
 }

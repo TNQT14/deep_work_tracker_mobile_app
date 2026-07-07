@@ -65,5 +65,5 @@ private fun parseErrorMessage(
     } catch (_: JsonSyntaxException) {
         null
     }
-    return apiError?.message ?: raw
+    return apiError?.error ?: apiError?.message ?: raw
 }
