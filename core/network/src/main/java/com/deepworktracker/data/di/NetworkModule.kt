@@ -3,6 +3,7 @@ package com.deepworktracker.data.di
 import android.content.Context
 import com.deepworktracker.data.remote.api.AuthApi
 import com.deepworktracker.data.remote.api.TokenRefreshApi
+import com.deepworktracker.data.remote.api.UserApi
 import com.deepworktracker.data.remote.auth.RefreshTokenCoordinator
 import com.deepworktracker.data.remote.interceptor.AuthInterceptor
 import com.deepworktracker.data.remote.interceptor.RetryInterceptor
@@ -110,6 +111,12 @@ object NetworkModule {
     fun provideAuthApi(
         retrofit: Retrofit,
     ): AuthApi = retrofit.create(AuthApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideUserApi(
+        retrofit: Retrofit,
+    ): UserApi = retrofit.create(UserApi::class.java)
 
     @Provides
     @Singleton

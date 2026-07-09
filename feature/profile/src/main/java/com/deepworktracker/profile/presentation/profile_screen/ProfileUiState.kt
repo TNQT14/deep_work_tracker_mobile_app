@@ -1,6 +1,8 @@
 package com.deepworktracker.profile.presentation
 
 data class ProfileUiState(
+    val email: String = "",
+    val editProfileState: EditProfileState = EditProfileState.Idle,
     val userName: String = "",
     val totalSessions: Int = 0,
     val totalFocusTime: Long = 0L, // milliseconds
@@ -13,4 +15,11 @@ sealed interface LogoutState {
     data object Idle : LogoutState
     data object Loading : LogoutState
     data object Success : LogoutState
+}
+
+sealed interface EditProfileState {
+    data object Idle : EditProfileState
+    data object Loading : EditProfileState
+    data object Success : EditProfileState
+    data class Error(val message: String) : EditProfileState
 }

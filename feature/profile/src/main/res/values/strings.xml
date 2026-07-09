@@ -20,4 +20,14 @@
     <string name="settings_theme_system">System default</string>
     <string name="settings_theme_light">Light</string>
     <string name="settings_theme_dark">Dark</string>
+    <string name="profile_email_label">Email</string>
+    <string name="profile_edit_button">Edit profile</string>
+    <string name="profile_edit_title">Edit profile</string>
+    <string name="profile_full_name_label">Full name</string>
+    <string name="profile_new_password_label">New password (optional)</string>
+    <string name="profile_confirm_password_label">Confirm new password</string>
+    <string name="profile_password_mismatch">Passwords do not match</string>
+    <string name="profile_edit_save">Save</string>
+    <string name="profile_edit_cancel">Cancel</string>
+    <string name="profile_edit_success">Profile updated</string>
 </resources>

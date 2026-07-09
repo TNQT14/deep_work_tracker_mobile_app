@@ -20,4 +20,14 @@
     <string name="settings_theme_system">Mặc định hệ thống</string>
     <string name="settings_theme_light">Sáng</string>
     <string name="settings_theme_dark">Tối</string>
+    <string name="profile_email_label">Email</string>
+    <string name="profile_edit_button">Sửa hồ sơ</string>
+    <string name="profile_edit_title">Sửa hồ sơ</string>
+    <string name="profile_full_name_label">Họ và tên</string>
+    <string name="profile_new_password_label">Mật khẩu mới (không bắt buộc)</string>
+    <string name="profile_confirm_password_label">Xác nhận mật khẩu mới</string>
+    <string name="profile_password_mismatch">Mật khẩu không khớp</string>
+    <string name="profile_edit_save">Lưu</string>
+    <string name="profile_edit_cancel">Huỷ</string>
+    <string name="profile_edit_success">Đã cập nhật hồ sơ</string>
 </resources>
