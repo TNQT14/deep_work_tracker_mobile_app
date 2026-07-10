@@ -4,5 +4,6 @@
     <string name="session_notification_channel_description">Ongoing timer for the running focus session</string>
     <string name="session_notification_default_title">Focus session</string>
     <string name="session_notification_elapsed">%1$s elapsed</string>
+    <string name="session_notification_elapsed_interruptions">%1$s elapsed · %2$d interruptions</string>
     <string name="session_notification_end_action">End</string>
 </resources>

@@ -42,10 +42,14 @@ dependencies {
     // Foreground service (LifecycleService)
     implementation(libs.androidx.lifecycle.service)
 
+    // App-wide lifecycle for interruption detection (ProcessLifecycleOwner)
+    implementation(libs.androidx.lifecycle.process)
+
     // Hilt
     implementation(libs.hilt.android)
     implementation(libs.hilt.navigation.compose)
     implementation(libs.lifecycle.service)
+    implementation(libs.lifecycle.process)
     kapt(libs.hilt.compiler)
     
     // Domain

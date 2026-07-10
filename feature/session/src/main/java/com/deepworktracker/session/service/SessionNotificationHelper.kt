@@ -55,17 +55,25 @@ class SessionNotificationHelper @Inject constructor(
 
     /**
      * [Effect]
-     * Input: goal e.g. "Write thesis" (nullable), elapsed e.g. 3m 12s
-     * Process: build ongoing silent notification with timer text + End action + tap-to-open
+     * Input: goal e.g. "Write thesis" (nullable), elapsed e.g. 3m 12s,
+     *        interruptionCount e.g. 2 (0 = none detected yet)
+     * Process: build ongoing silent notification with timer text (+ interruption count when
+     *          any), End action + tap-to-open
      * Output: a [Notification] ready for startForeground / NotificationManager.notify
      */
-    fun build(goal: String?, elapsed: Duration): Notification {
+    fun build(goal: String?, elapsed: Duration, interruptionCount: Int = 0): Notification {
         val title = goal?.takeIf { it.isNotBlank() }
             ?: context.getString(R.string.session_notification_default_title)
-        val text = context.getString(
-            R.string.session_notification_elapsed,
-            TimeFormatter.formatDuration(elapsed),
-        )
+        val elapsedText = TimeFormatter.formatDuration(elapsed)
+        val text = if (interruptionCount > 0) {
+            context.getString(
+                R.string.session_notification_elapsed_interruptions,
+                elapsedText,
+                interruptionCount,
+            )
+        } else {
+            context.getString(R.string.session_notification_elapsed, elapsedText)
+        }
 
         return NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(android.R.drawable.ic_media_play)

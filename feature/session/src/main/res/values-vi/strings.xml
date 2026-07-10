@@ -4,5 +4,6 @@
     <string name="session_notification_channel_description">Bộ đếm giờ đang chạy cho phiên tập trung</string>
     <string name="session_notification_default_title">Phiên tập trung</string>
     <string name="session_notification_elapsed">Đã tập trung %1$s</string>
+    <string name="session_notification_elapsed_interruptions">Đã tập trung %1$s · %2$d gián đoạn</string>
     <string name="session_notification_end_action">Kết thúc</string>
 </resources>

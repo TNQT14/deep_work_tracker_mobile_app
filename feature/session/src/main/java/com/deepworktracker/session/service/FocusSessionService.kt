@@ -12,6 +12,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlin.time.Duration
@@ -24,8 +25,10 @@ import javax.inject.Inject
  * active session from Room (end_time IS NULL) and resumes the notification, computing
  * elapsed time from the persisted startTime — no extra state needed.
  *
- * M1.1 scope: FGS + timer notification + survives kill + restart recovery.
- * Interruption detection (M1.2) and focusedDuration (M1.3) come later.
+ * M1.1: FGS + timer notification + survives kill + restart recovery.
+ * M1.2: drives [InterruptionDetector] for the active session and shows the live
+ *       interruption count in the notification.
+ * focusedDuration + end-session summary (M1.3) come later.
  */
 @AndroidEntryPoint
 class FocusSessionService : LifecycleService() {
@@ -34,6 +37,7 @@ class FocusSessionService : LifecycleService() {
     @Inject lateinit var endSessionUseCase: EndSessionUseCase
     @Inject lateinit var notificationHelper: SessionNotificationHelper
     @Inject lateinit var ticker: SessionTicker
+    @Inject lateinit var interruptionDetector: InterruptionDetector
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private var observing = false
@@ -63,11 +67,19 @@ class FocusSessionService : LifecycleService() {
                 if (session == null) {
                     stopService()
                 } else {
+                    // Detect + record interruptions (M1.2) for the active session.
+                    interruptionDetector.start(session.id)
                     tickerJob?.cancel()
                     tickerJob = launch {
-                        ticker.elapsed(session.startTime).collect { elapsed ->
-                            notificationHelper.notify(notificationHelper.build(session.goal, elapsed))
-                        }
+                        combine(
+                            ticker.elapsed(session.startTime),
+                            interruptionDetector.interruptionCount,
+                        ) { elapsed, count -> elapsed to count }
+                            .collect { (elapsed, count) ->
+                                notificationHelper.notify(
+                                    notificationHelper.build(session.goal, elapsed, count),
+                                )
+                            }
                     }
                 }
             }
@@ -93,6 +105,7 @@ class FocusSessionService : LifecycleService() {
 
     private fun stopService() {
         tickerJob?.cancel()
+        interruptionDetector.stop()
         ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
         stopSelf()
     }
