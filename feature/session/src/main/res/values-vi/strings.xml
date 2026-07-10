@@ -6,4 +6,13 @@
     <string name="session_notification_elapsed">Đã tập trung %1$s</string>
     <string name="session_notification_elapsed_interruptions">Đã tập trung %1$s · %2$d gián đoạn</string>
     <string name="session_notification_end_action">Kết thúc</string>
+    <string name="session_summary_title">Tổng kết phiên</string>
+    <string name="session_summary_total_label">Tổng thời gian</string>
+    <string name="session_summary_focused_label">Thời gian tập trung</string>
+    <string name="session_summary_interruptions_title">Gián đoạn</string>
+    <string name="session_summary_no_interruptions">Không có gián đoạn nào — tập trung tốt lắm!</string>
+    <string name="session_summary_interruption_type_screen_lock">Khoá màn hình</string>
+    <string name="session_summary_interruption_type_app_switch">Chuyển ứng dụng</string>
+    <string name="session_summary_interruption_type_background">Chạy nền</string>
+    <string name="session_summary_done_action">Xong</string>
 </resources>

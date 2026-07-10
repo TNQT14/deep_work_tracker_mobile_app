@@ -57,8 +57,6 @@ workRuntimeKtx = "2.11.1"
 retrofit = "2.9.0"
 okhttp = "4.12.0"
 runtimeVersion = "1.11.2"
-lifecycleService = "2.11.0"
-lifecycleProcess = "2.11.0"
 
 [libraries]
 # Core Android
@@ -140,8 +138,6 @@ okhttp-logging = { group = "com.squareup.okhttp3", name = "logging-interceptor",
 mockwebserver = { group = "com.squareup.okhttp3", name = "mockwebserver", version.ref = "okhttp" }
 androidx-runtime = { group = "androidx.compose.runtime", name = "runtime", version.ref = "runtimeVersion" }
 androidx-security-crypto = { group = "androidx.security", name = "security-crypto", version.ref = "securityCrypto" }
-lifecycle-service = { group = "androidx.lifecycle", name = "lifecycle-service", version.ref = "lifecycleService" }
-lifecycle-process = { group = "androidx.lifecycle", name = "lifecycle-process", version.ref = "lifecycleProcess" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

@@ -134,11 +134,12 @@ class SessionViewModel @Inject constructor(
             
             when (val result = endSessionUseCase()) {
                 is Result.Success -> {
-                    _uiState.update { 
+                    _uiState.update {
                         it.copy(
                             session = result.data,
                             isTracking = false,
-                            isLoading = false
+                            isLoading = false,
+                            navigateToSummarySessionId = result.data.id,
                         )
                     }
                     sessionServiceController.stop()
@@ -156,6 +157,10 @@ class SessionViewModel @Inject constructor(
         }
     }
     
+    fun onSummaryNavigated() {
+        _uiState.update { it.copy(navigateToSummarySessionId = null) }
+    }
+
     private fun observeActiveSession() {
         viewModelScope.launch {
             getActiveSessionUseCase().collect { session ->

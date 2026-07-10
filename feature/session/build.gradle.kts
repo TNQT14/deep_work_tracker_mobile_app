@@ -48,8 +48,6 @@ dependencies {
     // Hilt
     implementation(libs.hilt.android)
     implementation(libs.hilt.navigation.compose)
-    implementation(libs.lifecycle.service)
-    implementation(libs.lifecycle.process)
     kapt(libs.hilt.compiler)
     
     // Domain

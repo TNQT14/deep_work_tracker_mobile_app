@@ -50,6 +50,7 @@ import com.deepworktracker.profile.navigation.SETTINGS_ROUTE
 import com.deepworktracker.profile.presentation.profile_screen.ProfileRoute
 import com.deepworktracker.profile.presentation.setting_screen.SettingRoute
 import com.deepworktracker.session.presentation.SessionScreen
+import com.deepworktracker.session.presentation.summary.SessionSummaryScreen
 import com.deepworktracker.startup.AppSessionViewModel
 import com.deepworktracker.startup.BootstrapErrorScreen
 import com.deepworktracker.startup.SplashScreen
@@ -178,6 +179,15 @@ private fun MainAppScaffold(
                         onNavigateToDashboard = {
                             navController.navigate("dashboard")
                         },
+                        onNavigateToSummary = { sessionId ->
+                            navController.navigate("session/summary/${Uri.encode(sessionId)}")
+                        },
+                    )
+                }
+
+                composable("session/summary/{sessionId}") {
+                    SessionSummaryScreen(
+                        onBack = { navController.popBackStack() },
                     )
                 }
 

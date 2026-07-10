@@ -20,9 +20,17 @@ import com.deepworktracker.common.time.TimeFormatter
 @Composable
 fun SessionScreen(
     viewModel: SessionViewModel = hiltViewModel(),
-    onNavigateToDashboard: () -> Unit = {}
+    onNavigateToDashboard: () -> Unit = {},
+    onNavigateToSummary: (String) -> Unit = {},
 ) {
     val uiState by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(uiState.navigateToSummarySessionId) {
+        uiState.navigateToSummarySessionId?.let { sessionId ->
+            onNavigateToSummary(sessionId)
+            viewModel.onSummaryNavigated()
+        }
+    }
 
     Surface(
         modifier = Modifier.fillMaxSize(),

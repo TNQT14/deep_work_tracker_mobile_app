@@ -14,4 +14,6 @@ data class SessionUiState(
     val recentTags: List<String> = emptyList(),
     val suggestedCategory: String? = null,
     val suggestedTag: String? = null,
+    /** One-shot: id of the just-ended session to navigate to the summary screen for. */
+    val navigateToSummarySessionId: String? = null,
 )

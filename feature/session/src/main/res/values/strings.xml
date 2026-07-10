@@ -6,4 +6,13 @@
     <string name="session_notification_elapsed">%1$s elapsed</string>
     <string name="session_notification_elapsed_interruptions">%1$s elapsed · %2$d interruptions</string>
     <string name="session_notification_end_action">End</string>
+    <string name="session_summary_title">Session summary</string>
+    <string name="session_summary_total_label">Total time</string>
+    <string name="session_summary_focused_label">Focused time</string>
+    <string name="session_summary_interruptions_title">Interruptions</string>
+    <string name="session_summary_no_interruptions">No interruptions — great focus!</string>
+    <string name="session_summary_interruption_type_screen_lock">Screen lock</string>
+    <string name="session_summary_interruption_type_app_switch">App switch</string>
+    <string name="session_summary_interruption_type_background">Backgrounded</string>
+    <string name="session_summary_done_action">Done</string>
 </resources>
