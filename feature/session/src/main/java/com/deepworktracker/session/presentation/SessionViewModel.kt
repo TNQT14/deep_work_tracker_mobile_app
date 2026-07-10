@@ -9,6 +9,7 @@ import com.deepworktracker.session.domain.usecase.GetRecentCategoriesUseCase
 import com.deepworktracker.session.domain.usecase.GetRecentGoalsUseCase
 import com.deepworktracker.session.domain.usecase.GetRecentTagsUseCase
 import com.deepworktracker.session.domain.usecase.StartSessionUseCase
+import com.deepworktracker.session.service.SessionServiceController
 import com.deepworktracker.domain.model.CategoryRule
 import com.deepworktracker.domain.repository.CategoryRuleRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -34,6 +35,7 @@ class SessionViewModel @Inject constructor(
     private val getRecentCategoriesUseCase: GetRecentCategoriesUseCase,
     private val getRecentTagsUseCase: GetRecentTagsUseCase,
     private val categoryRuleRepository: CategoryRuleRepository,
+    private val sessionServiceController: SessionServiceController,
 ) : ViewModel() {
     
     private val _uiState = MutableStateFlow(SessionUiState())
@@ -69,6 +71,7 @@ class SessionViewModel @Inject constructor(
                             isLoading = false
                         )
                     }
+                    sessionServiceController.start()
                     startTimer()
                 }
                 is Result.Error -> {
@@ -138,6 +141,7 @@ class SessionViewModel @Inject constructor(
                             isLoading = false
                         )
                     }
+                    sessionServiceController.stop()
                     stopTimer()
                 }
                 is Result.Error -> {
@@ -158,6 +162,9 @@ class SessionViewModel @Inject constructor(
                 _uiState.update { it.copy(session = session) }
                 if (session != null && !_uiState.value.isTracking) {
                     _uiState.update { it.copy(isTracking = true) }
+                    // Re-attach to an already-active session (e.g. app reopened) and
+                    // ensure the foreground service is running so it survives kill.
+                    sessionServiceController.start()
                     startTimer()
                 } else if (session == null) {
                     _uiState.update { it.copy(isTracking = false) }

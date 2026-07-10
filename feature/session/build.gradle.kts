@@ -38,10 +38,14 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
-    
+
+    // Foreground service (LifecycleService)
+    implementation(libs.androidx.lifecycle.service)
+
     // Hilt
     implementation(libs.hilt.android)
     implementation(libs.hilt.navigation.compose)
+    implementation(libs.lifecycle.service)
     kapt(libs.hilt.compiler)
     
     // Domain

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="session_notification_channel_name">Phiên tập trung</string>
+    <string name="session_notification_channel_description">Bộ đếm giờ đang chạy cho phiên tập trung</string>
+    <string name="session_notification_default_title">Phiên tập trung</string>
+    <string name="session_notification_elapsed">Đã tập trung %1$s</string>
+    <string name="session_notification_end_action">Kết thúc</string>
+</resources>
