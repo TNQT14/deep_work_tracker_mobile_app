@@ -27,7 +27,7 @@ import com.deepworktracker.data.database.entity.TodoEntity
         TodoEntity::class
     ],
     version = 7,
-    exportSchema = false
+    exportSchema = true
 )
 abstract class DeepWorkDatabase : RoomDatabase() {
     abstract fun sessionDao(): SessionDao
