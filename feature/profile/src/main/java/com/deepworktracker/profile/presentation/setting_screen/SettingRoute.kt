@@ -16,6 +16,7 @@ fun SettingRoute(
         onBack = onBack,
         onThemeSelected = viewModel::onThemeSelected,
         onLanguageTagSelected  = viewModel::onLanguageTagSelected,
+        onDndToggle = viewModel::onDndToggle,
         onClearError = viewModel::clearError,
     )
 }

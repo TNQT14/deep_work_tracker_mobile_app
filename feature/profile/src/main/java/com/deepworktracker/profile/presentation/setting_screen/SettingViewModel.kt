@@ -6,6 +6,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.deepworktracker.domain.model.LanguagePreference
 import com.deepworktracker.domain.model.SupportedLocales
 import com.deepworktracker.domain.model.ThemePreference
+import com.deepworktracker.domain.repository.FocusShieldRepository
 import com.deepworktracker.domain.repository.UserPreferencesRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,7 +20,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SettingViewModel @Inject constructor(
-    private val userPreferencesRepository: UserPreferencesRepository
+    private val userPreferencesRepository: UserPreferencesRepository,
+    private val focusShieldRepository: FocusShieldRepository
 ) : ViewModel() {
     companion object {
         const val LANGUAGE_TAG_SYSTEM = "system"
@@ -38,6 +40,11 @@ class SettingViewModel @Inject constructor(
                         isSaving = false
                     )
                 }
+            }
+        }
+        viewModelScope.launch {
+            focusShieldRepository.observeConfig().collect { config ->
+                _uiState.update { it.copy(shieldDndEnabled = config.dndEnabled) }
             }
         }
     }
@@ -88,6 +95,19 @@ class SettingViewModel @Inject constructor(
                         )
                     }
                 }
+        }
+    }
+
+    fun onDndToggle(enabled: Boolean){
+        if(_uiState.value.shieldDndEnabled == enabled) return
+        viewModelScope.launch {
+            focusShieldRepository.setDndEnabled(enabled).onFailure {
+                _uiState.update {
+                    it.copy(
+                        errorMsg = it.errorMsg ?: "Failed to save DND setting"
+                    )
+                }
+            }
         }
     }
 }

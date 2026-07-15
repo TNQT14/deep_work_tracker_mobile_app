@@ -1,5 +1,7 @@
 package com.deepworktracker.profile.presentation.setting_screen
 
+import android.content.Context
+import android.content.Intent
 import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -25,16 +27,28 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.deepworktracker.domain.model.LanguagePreference
 import com.deepworktracker.domain.model.SupportedLocales
 import com.deepworktracker.domain.model.ThemePreference
 import com.deepworktracker.profile.R
+import android.app.NotificationManager
+import android.provider.Settings
+import androidx.compose.material3.Switch
+import androidx.compose.material3.TextButton
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -43,6 +57,7 @@ fun SettingScreen(
     onBack: () -> Unit,
     onThemeSelected: (ThemePreference) -> Unit,
     onLanguageTagSelected: (String) -> Unit,
+    onDndToggle: (Boolean) -> Unit,
     onClearError: () -> Unit,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
@@ -108,12 +123,64 @@ fun SettingScreen(
             if (uiState.isSaving) {
                 LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
             }
+
+            HorizontalDivider()
+
+            Text(
+                text = stringResource(R.string.settings_focus_shield),
+                style = MaterialTheme.typography.titleMedium,
+            )
+
+            val context = LocalContext.current
+            val lifecycleOwner = LocalLifecycleOwner.current
+            var hasPolicyAccess by remember { mutableStateOf(hasDndAccess(context)) }
+            DisposableEffect(lifecycleOwner) {
+                val observer = LifecycleEventObserver { _, event ->
+                    if (event == Lifecycle.Event.ON_RESUME) hasPolicyAccess = hasDndAccess(context)
+                }
+                lifecycleOwner.lifecycle.addObserver(observer)
+                onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(Modifier.weight(1f)) {
+                    Text(stringResource(R.string.settings_shield_dnd_label),
+                        style = MaterialTheme.typography.bodyLarge)
+                    Text(stringResource(R.string.settings_shield_dnd_desc),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+                Switch(
+                    checked = uiState.shieldDndEnabled,
+                    enabled = !uiState.isSaving,
+                    onCheckedChange = onDndToggle,
+                )
+            }
+            if (uiState.shieldDndEnabled && !hasPolicyAccess) {
+                Text(stringResource(R.string.settings_shield_permission_needed),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error)
+                TextButton(onClick = { context.startActivity(dndAccessIntent()) }) {
+                    Text(stringResource(R.string.settings_shield_grant_permission))
+                }
+            }
+
         }
 
     }
 
 
 }
+
+private fun hasDndAccess(context: Context): Boolean =
+    context.getSystemService(NotificationManager::class.java).isNotificationPolicyAccessGranted
+
+private fun dndAccessIntent(): Intent =
+    Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS)
+        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 
 @Composable
 private fun PreferenceRadioRow(
