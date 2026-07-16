@@ -26,7 +26,7 @@ import com.deepworktracker.data.database.entity.TodoEntity
         CategoryRuleEntity::class,
         TodoEntity::class
     ],
-    version = 7,
+    version = 8,
     exportSchema = true
 )
 abstract class DeepWorkDatabase : RoomDatabase() {
@@ -207,6 +207,12 @@ abstract class DeepWorkDatabase : RoomDatabase() {
                 db.execSQL("CREATE INDEX IF NOT EXISTS index_todos_status ON todos(status)")
                 db.execSQL("CREATE INDEX IF NOT EXISTS index_todos_created_at ON todos(created_at)")
                 db.execSQL("CREATE INDEX IF NOT EXISTS index_todos_due_at ON todos(due_at)")
+            }
+        }
+
+        val MIGRATION_7_8: Migration = object : Migration(7,8){
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE interruptions ADD COLUMN distraction_package TEXT")
             }
         }
     }

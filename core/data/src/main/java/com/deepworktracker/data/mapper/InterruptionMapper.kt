@@ -15,7 +15,8 @@ class InterruptionMapper {
             startTime = Instant.fromEpochMilliseconds(entity.startTime),
             endTime = entity.endTime?.let { Instant.fromEpochMilliseconds(it) },
             type = InterruptionType.valueOf(entity.type),
-            duration = entity.duration
+            duration = entity.duration,
+            distractionPackage = entity.distractionPackage
         )
     }
     
@@ -26,7 +27,8 @@ class InterruptionMapper {
             startTime = domain.startTime.toEpochMilliseconds(),
             endTime = domain.endTime?.toEpochMilliseconds(),
             type = domain.type.name,
-            duration = domain.duration
+            duration = domain.duration,
+            distractionPackage = domain.distractionPackage
         )
     }
 }
