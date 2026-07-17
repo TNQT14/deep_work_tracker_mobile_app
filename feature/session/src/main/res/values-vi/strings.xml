@@ -15,4 +15,8 @@
     <string name="session_summary_interruption_type_app_switch">Chuyển ứng dụng</string>
     <string name="session_summary_interruption_type_background">Chạy nền</string>
     <string name="session_summary_done_action">Xong</string>
+    <string name="shield_notification_channel_name">Lá chắn tập trung</string>
+    <string name="shield_notification_channel_description">Nhắc khi bạn chuyển sang app gây xao nhãng.</string>
+    <string name="shield_nudge_title">Quay lại tập trung 🔒</string>
+    <string name="shield_nudge_text">%1$s đợi được — quay lại phiên của bạn nào.</string>
 </resources>

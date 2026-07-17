@@ -39,6 +39,7 @@ class FocusSessionService : LifecycleService() {
     @Inject lateinit var ticker: SessionTicker
     @Inject lateinit var interruptionDetector: InterruptionDetector
     @Inject lateinit var dndController: DndController
+    @Inject lateinit var foregroundAppMonitor: ForegroundAppMonitor
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private var observing = false
@@ -72,6 +73,7 @@ class FocusSessionService : LifecycleService() {
                 } else {
                     interruptionDetector.start(session.id)
                     dndController.onSessionStarted()
+                    foregroundAppMonitor.start()
                     tickerJob?.cancel()
                     tickerJob = launch {
                         combine(
@@ -110,6 +112,7 @@ class FocusSessionService : LifecycleService() {
     private fun stopService() {
         tickerJob?.cancel()
         interruptionDetector.stop()
+        foregroundAppMonitor.stop()
         ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
         stopSelf()
     }

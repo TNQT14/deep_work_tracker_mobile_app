@@ -1,6 +1,7 @@
 package com.deepworktracker.session.domain.interruption
 
 import com.deepworktracker.domain.model.InterruptionType
+import com.deepworktracker.session.domain.interruption.InterruptionStateMachine.Command.*
 import kotlinx.datetime.Instant
 import kotlin.time.Duration.Companion.seconds
 
@@ -48,6 +49,9 @@ class InterruptionStateMachine {
 
         /** The focus session ended while an interruption may still be open. */
         data class SessionEnded(override val at: Instant) : Event
+
+        /** Foreground app sampled during an interruption (from UsageStats). */
+        data class DistractionDetected(override val at: Instant, val packageName: String) : Event
     }
 
     /** Instructions for the caller to persist; the machine never touches storage. */
@@ -63,11 +67,18 @@ class InterruptionStateMachine {
 
         /** Nothing to persist. */
         data object None : Command
+
+        /** Tag the currently-open interruption with the distracting app package. */
+        data class SetDistraction(val packageName: String) : Command
     }
 
     private sealed interface Phase {
         data object Focused : Phase
-        data class Interrupted(val type: InterruptionType, val startedAt: Instant) : Phase
+        data class Interrupted(
+            val type: InterruptionType,
+            val startedAt: Instant,
+            val distractionPackage: String? = null,
+        ) : Phase
     }
 
     private var phase: Phase = Phase.Focused
@@ -92,38 +103,50 @@ class InterruptionStateMachine {
             lastScreenOffAt = event.at
             open(InterruptionType.SCREEN_LOCK, event.at)
         }
+
         is Event.AppBackgrounded -> {
             val screenJustOff = lastScreenOffAt
                 ?.let { event.at - it <= RECLASSIFY_WINDOW && event.at >= it }
                 ?: false
-            val type = if (screenJustOff) InterruptionType.SCREEN_LOCK else InterruptionType.APP_SWITCH
+            val type =
+                if (screenJustOff) InterruptionType.SCREEN_LOCK else InterruptionType.APP_SWITCH
             open(type, event.at)
         }
+
         is Event.StartedInBackground -> open(InterruptionType.BACKGROUND, event.at)
         is Event.AppForegrounded -> Command.None
         is Event.SessionEnded -> Command.None
+        is Event.DistractionDetected -> Command.None
     }
 
-    private fun onEventWhileInterrupted(event: Event, current: Phase.Interrupted): Command = when (event) {
-        // A late SCREEN_OFF right after an APP_SWITCH means it was really a screen lock.
-        is Event.ScreenOff -> {
-            lastScreenOffAt = event.at
-            if (current.type == InterruptionType.APP_SWITCH &&
-                event.at - current.startedAt <= RECLASSIFY_WINDOW
-            ) {
-                phase = current.copy(type = InterruptionType.SCREEN_LOCK)
-                Command.UpdateType(InterruptionType.SCREEN_LOCK)
-            } else {
+    private fun onEventWhileInterrupted(event: Event, current: Phase.Interrupted): Command =
+        when (event) {
+            // A late SCREEN_OFF right after an APP_SWITCH means it was really a screen lock.
+            is Event.ScreenOff -> {
+                lastScreenOffAt = event.at
+                if (current.type == InterruptionType.APP_SWITCH &&
+                    event.at - current.startedAt <= RECLASSIFY_WINDOW
+                ) {
+                    phase = current.copy(type = InterruptionType.SCREEN_LOCK)
+                    UpdateType(InterruptionType.SCREEN_LOCK)
+                } else {
+                    Command.None
+                }
+            }
+            is Event.AppBackgrounded -> Command.None
+            is Event.StartedInBackground -> Command.None
+            is Event.AppForegrounded -> close(event.at)
+            is Event.SessionEnded -> close(event.at)
+            is Event.DistractionDetected -> if(current.type == InterruptionType.APP_SWITCH  && current.distractionPackage == null){
+                phase = current.copy(
+                    distractionPackage = event.packageName
+                )
+                Command.SetDistraction(event.packageName)
+            }
+            else{
                 Command.None
             }
         }
-        // Already interrupted — ignore duplicate open triggers (single-active invariant).
-        is Event.AppBackgrounded -> Command.None
-        is Event.StartedInBackground -> Command.None
-        // Returning to foreground (or the session ending) closes the interruption.
-        is Event.AppForegrounded -> close(event.at)
-        is Event.SessionEnded -> close(event.at)
-    }
 
     private fun open(type: InterruptionType, at: Instant): Command {
         phase = Phase.Interrupted(type, at)

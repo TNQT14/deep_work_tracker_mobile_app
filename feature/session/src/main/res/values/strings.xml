@@ -15,4 +15,8 @@
     <string name="session_summary_interruption_type_app_switch">App switch</string>
     <string name="session_summary_interruption_type_background">Backgrounded</string>
     <string name="session_summary_done_action">Done</string>
+    <string name="shield_notification_channel_name">Focus Shield</string>
+    <string name="shield_notification_channel_description">Alerts when you switch to a distracting app.</string>
+    <string name="shield_nudge_title">Back to focus 🔒</string>
+    <string name="shield_nudge_text">%1$s can wait — return to your session.</string>
 </resources>

@@ -52,6 +52,7 @@ import javax.inject.Singleton
 class InterruptionDetector @Inject constructor(
     @ApplicationContext private val context: Context,
     private val interruptionRepository: InterruptionRepository,
+    private val notificationHelper: SessionNotificationHelper,
 ) {
     /** DB writes + serialized event processing live here for the detector's lifetime. */
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
@@ -60,6 +61,7 @@ class InterruptionDetector @Inject constructor(
     private val mainHandler = Handler(Looper.getMainLooper())
 
     private val _interruptionCount = MutableStateFlow(0)
+
     /** Number of interruptions opened in the current session — drives the notification. */
     val interruptionCount: StateFlow<Int> = _interruptionCount.asStateFlow()
 
@@ -78,9 +80,17 @@ class InterruptionDetector @Inject constructor(
         }
     }
 
+    /** Called by ForegroundAppMonitor with a sampled foreground package (already blocklist-filtered). */
+    fun reportForegroundPackage(packageName: String) {
+        emit(
+            Event.DistractionDetected(Clock.System.now(), packageName)
+        )
+    }
+
     private val lifecycleObserver = object : DefaultLifecycleObserver {
         override fun onStop(owner: LifecycleOwner) = emit(Event.AppBackgrounded(Clock.System.now()))
-        override fun onStart(owner: LifecycleOwner) = emit(Event.AppForegrounded(Clock.System.now()))
+        override fun onStart(owner: LifecycleOwner) =
+            emit(Event.AppForegrounded(Clock.System.now()))
     }
 
     /**
@@ -148,7 +158,11 @@ class InterruptionDetector @Inject constructor(
         events?.trySend(event)
     }
 
-    private suspend fun handle(event: Event, currentSession: String, machine: InterruptionStateMachine) {
+    private suspend fun handle(
+        event: Event,
+        currentSession: String,
+        machine: InterruptionStateMachine
+    ) {
         when (val command = machine.onEvent(event)) {
             is Command.Open -> {
                 val interruption = Interruption(
@@ -163,6 +177,7 @@ class InterruptionDetector @Inject constructor(
                 active = interruption
                 _interruptionCount.value += 1
             }
+
             is Command.UpdateType -> {
                 active?.let { current ->
                     val updated = current.copy(type = command.type)
@@ -170,15 +185,26 @@ class InterruptionDetector @Inject constructor(
                     active = updated
                 }
             }
+
             is Command.Close -> {
                 active?.let { current ->
-                    val duration = (command.at - current.startTime).inWholeMilliseconds.coerceAtLeast(0)
+                    val duration =
+                        (command.at - current.startTime).inWholeMilliseconds.coerceAtLeast(0)
                     val closed = current.copy(endTime = command.at, duration = duration)
                     interruptionRepository.updateInterruption(closed)
                     active = null
                 }
             }
+
             Command.None -> Unit
+            is Command.SetDistraction -> {
+                active?.let { current ->
+                    val updated = current.copy(distractionPackage = command.packageName)
+                    interruptionRepository.updateInterruption(updated)
+                    active = updated
+                    notificationHelper.notifyDistraction(command.packageName)
+                }
+            }
         }
     }
 }
