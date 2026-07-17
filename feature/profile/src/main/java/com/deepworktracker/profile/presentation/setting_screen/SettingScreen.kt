@@ -47,6 +47,8 @@ import com.deepworktracker.domain.model.ThemePreference
 import com.deepworktracker.profile.R
 import android.app.NotificationManager
 import android.provider.Settings
+import androidx.compose.foundation.clickable
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.Switch
 import androidx.compose.material3.TextButton
 
@@ -59,6 +61,7 @@ fun SettingScreen(
     onLanguageTagSelected: (String) -> Unit,
     onDndToggle: (Boolean) -> Unit,
     onClearError: () -> Unit,
+    onNavigateToBlocklist: () -> Unit
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -143,15 +146,21 @@ fun SettingScreen(
             }
 
             Row(
-                modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 12.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Column(Modifier.weight(1f)) {
-                    Text(stringResource(R.string.settings_shield_dnd_label),
-                        style = MaterialTheme.typography.bodyLarge)
-                    Text(stringResource(R.string.settings_shield_dnd_desc),
+                    Text(
+                        stringResource(R.string.settings_shield_dnd_label),
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                    Text(
+                        stringResource(R.string.settings_shield_dnd_desc),
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
                 Switch(
                     checked = uiState.shieldDndEnabled,
@@ -160,12 +169,35 @@ fun SettingScreen(
                 )
             }
             if (uiState.shieldDndEnabled && !hasPolicyAccess) {
-                Text(stringResource(R.string.settings_shield_permission_needed),
+                Text(
+                    stringResource(R.string.settings_shield_permission_needed),
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.error)
+                    color = MaterialTheme.colorScheme.error
+                )
                 TextButton(onClick = { context.startActivity(dndAccessIntent()) }) {
                     Text(stringResource(R.string.settings_shield_grant_permission))
                 }
+            }
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onNavigateToBlocklist() }
+                    .padding(vertical = 12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(Modifier.weight(1f)) {
+                    Text(
+                        stringResource(R.string.settings_shield_blocklist_label),
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                    Text(
+                        stringResource(R.string.settings_shield_blocklist_desc),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null)
             }
 
         }

@@ -46,7 +46,9 @@ import com.deepworktracker.dashboard.presentation.goal_detail.GoalDetailScreen
 import com.deepworktracker.data.remote.auth.AuthSessionState
 import com.deepworktracker.preferences.LanguageManager
 import com.deepworktracker.preferences.ThemeManager
+import com.deepworktracker.profile.navigation.BLOCKLIST_ROUTE
 import com.deepworktracker.profile.navigation.SETTINGS_ROUTE
+import com.deepworktracker.profile.presentation.blocklist_screen.BlocklistRoute
 import com.deepworktracker.profile.presentation.profile_screen.ProfileRoute
 import com.deepworktracker.profile.presentation.setting_screen.SettingRoute
 import com.deepworktracker.session.presentation.SessionScreen
@@ -135,8 +137,10 @@ private fun MainAppScaffold(
         bottomBar = {
             val hideBottomBar =
                 currentRoute?.startsWith("auth") == true ||
-                    currentRoute == "goal" ||
-                    currentRoute == SETTINGS_ROUTE
+                        currentRoute == "goal" ||
+                        currentRoute == SETTINGS_ROUTE ||
+                        currentRoute == BLOCKLIST_ROUTE
+
             if (!hideBottomBar) {
                 BottomBar(
                     currentRoute = currentRoute,
@@ -240,7 +244,14 @@ private fun MainAppScaffold(
                 }
 
                 composable(SETTINGS_ROUTE) {
-                    SettingRoute(onBack = { navController.popBackStack() })
+                    SettingRoute(
+                        onBack = { navController.popBackStack() },
+                        onNavigateToBlocklist = { navController.navigate(BLOCKLIST_ROUTE) },
+                    )
+                }
+
+                composable(BLOCKLIST_ROUTE) {
+                    BlocklistRoute(onBack = { navController.popBackStack() })
                 }
             }
         }

@@ -7,15 +7,17 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 @Composable
 fun SettingRoute(
-    onBack:()-> Unit,
+    onBack: () -> Unit,
+    onNavigateToBlocklist: () -> Unit,
     viewModel: SettingViewModel = hiltViewModel()
-    ){
+) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     SettingScreen(
         uiState = uiState,
         onBack = onBack,
+        onNavigateToBlocklist = onNavigateToBlocklist,
         onThemeSelected = viewModel::onThemeSelected,
-        onLanguageTagSelected  = viewModel::onLanguageTagSelected,
+        onLanguageTagSelected = viewModel::onLanguageTagSelected,
         onDndToggle = viewModel::onDndToggle,
         onClearError = viewModel::clearError,
     )

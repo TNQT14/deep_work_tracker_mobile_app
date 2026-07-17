@@ -35,4 +35,10 @@
     <string name="settings_shield_dnd_desc">Silence notifications automatically while a focus session is running.</string>
     <string name="settings_shield_permission_needed">Grant Do Not Disturb access so this can work.</string>
     <string name="settings_shield_grant_permission">Grant access</string>
+    <string name="settings_shield_blocklist_label">Distracting apps</string>
+    <string name="settings_shield_blocklist_desc">Get nudged when you open these during a session.</string>
+    <string name="blocklist_title">Distracting apps</string>
+    <string name="blocklist_search">Search apps</string>
+    <string name="blocklist_usage_access_needed">Grant usage access so distractions can be detected.</string>
+    <string name="blocklist_grant_usage_access">Grant usage access</string>
 </resources>
