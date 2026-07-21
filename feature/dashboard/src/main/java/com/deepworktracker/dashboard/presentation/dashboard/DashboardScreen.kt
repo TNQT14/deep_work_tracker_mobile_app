@@ -22,8 +22,12 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.deepworktracker.common.time.TimeFormatter
 import com.deepworktracker.dashboard.domain.usecase.TodayStats
 import com.deepworktracker.dashboard.presentation.dashboard.DashboardViewModel
+import com.deepworktracker.dashboard.presentation.chart.AggregateBarChart
 import com.deepworktracker.dashboard.presentation.chart.FocusTimeBarChart
 import com.deepworktracker.dashboard.presentation.charts.GoalDistributionChart
+import com.deepworktracker.dashboard.presentation.analytics.FocusHeatmap
+import com.deepworktracker.dashboard.presentation.analytics.FocusScoreRing
+import com.deepworktracker.dashboard.presentation.analytics.PeriodSelector
 import com.deepworktracker.domain.model.FocusSession
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.datetime.Instant
@@ -86,6 +90,44 @@ fun DashboardScreen(
                     ) {
                         item {
                             TodayStatsCard(stats = uiState.todayStats)
+                        }
+
+                        item {
+                            PeriodSelector(
+                                selected = uiState.selectedPeriod,
+                                onSelect = viewModel::onPeriodSelected
+                            )
+                        }
+
+                        uiState.focusAnalytics?.let { analytics ->
+                            item {
+                                Card(modifier = Modifier.fillMaxWidth()) {
+                                    Column(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(20.dp),
+                                        horizontalAlignment = Alignment.CenterHorizontally
+                                    ) {
+                                        Text(
+                                            text = "Focus score",
+                                            style = MaterialTheme.typography.titleMedium,
+                                            fontWeight = FontWeight.Bold,
+                                            modifier = Modifier.padding(bottom = 12.dp)
+                                        )
+                                        FocusScoreRing(score = analytics.focusScore)
+                                    }
+                                }
+                            }
+                            item {
+                                FocusHeatmap(heatmap = analytics.heatmap)
+                            }
+                            item {
+                                AggregateBarChart(
+                                    title = "Focus trend",
+                                    subtitle = "Minutes focused per day",
+                                    valuesMinutes = analytics.dailyTrendMinutes
+                                )
+                            }
                         }
 
                         item {
