@@ -32,14 +32,19 @@ class GetFocusAnalyticsUseCase @Inject constructor(
             val sessions = sessionRepository.getSessionsByDateRange(from, to).first()
             val completed = sessions.filter { it.endTime != null }
 
+            val totalFocusedMinutes = completed.sumOf { it.focusedDuration } / MILLIS_PER_MINUTE
+            val bestHours = FocusHeatmapAggregator.bestFocusHours(sessions, zone)
+
             val analytics = FocusAnalytics(
                 period = period,
                 focusScore = FocusScoreCalculator.score(sessions),
-                totalFocusedMinutes = completed.sumOf { it.focusedDuration } / MILLIS_PER_MINUTE,
+                totalFocusedMinutes = totalFocusedMinutes,
                 sessionCount = completed.size,
+                avgSessionMinutes = if (completed.isNotEmpty()) totalFocusedMinutes / completed.size else 0L,
+                bestFocusHour = bestHours.firstOrNull(),
                 dailyTrendMinutes = dailyTrend(completed, from, to, zone),
                 heatmap = FocusHeatmapAggregator.aggregate(sessions, zone),
-                bestFocusHours = FocusHeatmapAggregator.bestFocusHours(sessions, zone),
+                bestFocusHours = bestHours,
             )
             Result.Success(analytics)
         } catch (e: Exception) {

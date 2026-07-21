@@ -1,0 +1,48 @@
+<resources>
+    <string name="dashboard_title">Bảng điều khiển</string>
+    <string name="dashboard_refresh_content_description">Làm mới</string>
+    <string name="dashboard_session_content_description">Bắt đầu phiên</string>
+    <string name="dashboard_error_generic">Đã xảy ra lỗi</string>
+    <string name="dashboard_dismiss">Đóng</string>
+
+    <string name="dashboard_period_day">Ngày</string>
+    <string name="dashboard_period_week">Tuần</string>
+    <string name="dashboard_period_month">Tháng</string>
+
+    <string name="dashboard_stat_focused">Tập trung</string>
+    <string name="dashboard_stat_sessions">Phiên</string>
+    <string name="dashboard_stat_avg">TB</string>
+    <string name="dashboard_stat_best_hour">Giờ vàng</string>
+    <string name="dashboard_best_hour_none">—</string>
+
+    <string name="dashboard_heatmap_title">Bản đồ nhiệt tập trung</string>
+    <string name="dashboard_focus_trend_title">Xu hướng tập trung</string>
+    <string name="dashboard_focus_trend_subtitle">Số phút tập trung mỗi ngày</string>
+
+    <string name="dashboard_goal_distribution_title">Phân bố theo mục tiêu</string>
+    <string name="dashboard_goal_distribution_subtitle">Hoạt động hàng đầu theo thời gian</string>
+
+    <string name="dashboard_recent_sessions">Phiên gần đây</string>
+    <string name="dashboard_no_sessions">Chưa có phiên nào.\nBắt đầu phiên deep work đầu tiên!</string>
+    <string name="dashboard_session_active">Đang chạy</string>
+    <string name="dashboard_chart_no_data">Không có dữ liệu</string>
+
+    <string name="dashboard_hour_midnight">12 SA</string>
+    <string name="dashboard_hour_noon">12 CH</string>
+    <string name="dashboard_hour_am">%1$d SA</string>
+    <string name="dashboard_hour_pm">%1$d CH</string>
+
+    <plurals name="dashboard_session_interruptions">
+        <item quantity="other">%1$s · %2$d lần gián đoạn</item>
+    </plurals>
+
+    <string-array name="dashboard_heatmap_day_labels">
+        <item>T2</item>
+        <item>T3</item>
+        <item>T4</item>
+        <item>T5</item>
+        <item>T6</item>
+        <item>T7</item>
+        <item>CN</item>
+    </string-array>
+</resources>

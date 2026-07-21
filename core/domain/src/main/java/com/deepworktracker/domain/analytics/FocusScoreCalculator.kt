@@ -13,7 +13,7 @@ object FocusScoreCalculator {
             totalDuration += session.totalDuration
         }
 
-        if(totalDuration <= 0L) return 0f
-        return (totalDuration.toFloat()/totalDuration.toFloat()).coerceIn(0f,1f)
+        if (totalDuration <= 0L) return 0f
+        return (totalFocused.toFloat() / totalDuration.toFloat()).coerceIn(0f, 1f)
     }
 }

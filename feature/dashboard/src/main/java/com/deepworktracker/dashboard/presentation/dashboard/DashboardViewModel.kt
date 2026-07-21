@@ -6,7 +6,6 @@ import com.deepworktracker.common.result.Result
 import com.deepworktracker.dashboard.domain.usecase.GetAllSessionUseCase
 import com.deepworktracker.dashboard.domain.usecase.GetFocusAnalyticsUseCase
 import com.deepworktracker.dashboard.domain.usecase.GetRecentSessionsUseCase
-import com.deepworktracker.dashboard.domain.usecase.GetTodayStatsUseCase
 import com.deepworktracker.domain.analytics.AnalyticsPeriod
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,7 +17,6 @@ import javax.inject.Inject
 
 @HiltViewModel
 class DashboardViewModel @Inject constructor(
-    private val getTodayStatsUseCase: GetTodayStatsUseCase,
     private val getRecentSessionsUseCase: GetRecentSessionsUseCase,
     private val getAllSessionUseCase: GetAllSessionUseCase,
     private val getFocusAnalyticsUseCase: GetFocusAnalyticsUseCase
@@ -34,23 +32,6 @@ class DashboardViewModel @Inject constructor(
     fun loadDashboardData() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
-
-            // Load today's stats
-            when (val statsResult = getTodayStatsUseCase()) {
-                is Result.Success -> {
-                    _uiState.update { it.copy(todayStats = statsResult.data) }
-                }
-
-                is Result.Error -> {
-                    _uiState.update {
-                        it.copy(
-                            error = statsResult.exception,
-                            isLoading = false
-                        )
-                    }
-                    return@launch
-                }
-            }
 
             // Load recent sessions
             when (val sessionsResult = getRecentSessionsUseCase()) {
