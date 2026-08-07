@@ -3,10 +3,12 @@ package com.deepworktracker.dashboard.presentation.dashboard
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.deepworktracker.common.result.Result
+import com.deepworktracker.dashboard.domain.usecase.GenerateInsightsUseCase
 import com.deepworktracker.dashboard.domain.usecase.GetAllSessionUseCase
 import com.deepworktracker.dashboard.domain.usecase.GetFocusAnalyticsUseCase
 import com.deepworktracker.dashboard.domain.usecase.GetRecentSessionsUseCase
 import com.deepworktracker.domain.analytics.AnalyticsPeriod
+import com.deepworktracker.domain.repository.InsightRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -19,14 +21,28 @@ import javax.inject.Inject
 class DashboardViewModel @Inject constructor(
     private val getRecentSessionsUseCase: GetRecentSessionsUseCase,
     private val getAllSessionUseCase: GetAllSessionUseCase,
-    private val getFocusAnalyticsUseCase: GetFocusAnalyticsUseCase
+    private val getFocusAnalyticsUseCase: GetFocusAnalyticsUseCase,
+    private val insightRepository: InsightRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(DashboardUiState())
     val uiState: StateFlow<DashboardUiState> = _uiState.asStateFlow()
 
+
+
     init {
         loadDashboardData()
+        observeInsights()
+    }
+
+    fun observeInsights(){
+        viewModelScope.launch {
+            insightRepository.getRecentInsights(limit = 5).collect {
+                insights -> _uiState.update {
+                    it.copy(insights = insights)
+                }
+            }
+        }
     }
 
     fun loadDashboardData() {
@@ -85,6 +101,12 @@ class DashboardViewModel @Inject constructor(
         if (_uiState.value.selectedPeriod == period) return
         _uiState.update { it.copy(selectedPeriod = period) }
         loadAnalytics(period)
+    }
+
+    fun onDissmissInsight(id: String){
+        viewModelScope.launch {
+            insightRepository.dismissInsight(id)
+        }
     }
 
     private fun loadAnalytics(period: AnalyticsPeriod) {

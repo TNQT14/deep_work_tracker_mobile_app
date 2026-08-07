@@ -6,6 +6,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import com.deepworktracker.data.database.entity.InterruptionEntity
+import com.deepworktracker.domain.model.Interruption
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -25,4 +26,7 @@ interface InterruptionDao {
     
     @Query("DELETE FROM interruptions WHERE session_id = :sessionId")
     suspend fun deleteInterruptionsBySession(sessionId: String)
+
+    @Query("SELECT * FROM interruptions WHERE start_time >= :fromMillis AND start_time <:toMillis")
+    suspend fun getInterruptionsBetween(fromMillis: Long, toMillis:Long): List<InterruptionEntity>
 }

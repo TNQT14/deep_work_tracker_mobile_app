@@ -2,6 +2,7 @@
 
 package com.deepworktracker.dashboard.presentation.dashboard
 
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -28,6 +29,7 @@ import com.deepworktracker.dashboard.presentation.charts.GoalDistributionChart
 import com.deepworktracker.dashboard.presentation.analytics.FocusHeatmap
 import com.deepworktracker.dashboard.presentation.analytics.FocusSummaryCard
 import com.deepworktracker.dashboard.presentation.analytics.PeriodSelector
+import com.deepworktracker.dashboard.presentation.insights.InsightCarousel
 import com.deepworktracker.domain.model.FocusSession
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -119,6 +121,15 @@ fun DashboardScreen(
                                         }
                                     }
                                 }
+                            }
+                        }
+                        Log.d("DashboardScreen", "insights: ${uiState.insights.size}")
+                        if(uiState.insights.isNotEmpty()){
+                            item(key = "insight"){
+                                InsightCarousel(
+                                    insights = uiState.insights,
+                                    onDismiss = viewModel::onDissmissInsight
+                                )
                             }
                         }
 
