@@ -46,4 +46,20 @@
         <item>S</item>
         <item>S</item>
     </string-array>
+
+    <string name="insight_best_time_title">Best focus window</string>
+    <string name="insight_best_time_msg">You focus best around %1$s h</string>
+    <string name="insight_distraction_title">Distraction pattern</string>
+    <string name="insight_distraction_msg">%1$s is your most interrupted day (%2$s×)</string>
+    <string name="insight_optimal_title">Optimal session</string>
+    <string name="insight_optimal_msg">%1$s-minute sessions give your best focus</string>
+    <string name="insight_trend_title">Trend</string>
+    <string name="insight_trend_msg">Your focus dropped %1$s vs last period</string>
+    <string name="insight_day_mon">Mon</string>
+    <string name="insight_day_tue">Tue</string>
+    <string name="insight_day_wed">Wed</string>
+    <string name="insight_day_thu">Thu</string>
+    <string name="insight_day_fri">Fri</string>
+    <string name="insight_day_sat">Sat</string>
+    <string name="insight_day_sun">Sun</string>
 </resources>
