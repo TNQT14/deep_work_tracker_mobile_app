@@ -52,6 +52,15 @@ class InterruptionRepositoryImpl @Inject constructor(
         }
     }
 
+    /**
+     * [Repository]
+     * Input: from/to — kotlinx.datetime.Instant (timezone-agnostic UTC instants)
+     * Process: converts to epoch millis, delegates to InterruptionDao, maps each
+     *          InterruptionEntity back to the domain Interruption model.
+     * Output: List<Interruption> — flat list across sessions; callers that need it
+     *         grouped by day (e.g. DistractionPatternRule) do that grouping themselves
+     *         using kotlinx.datetime, not SQL, to stay timezone-correct.
+     */
     override suspend fun getInterruptionsBetween(from: Instant, to: Instant): List<Interruption> {
         return interruptionDao.getInterruptionsBetween(
             from.toEpochMilliseconds(),

@@ -26,6 +26,22 @@ import com.deepworktracker.domain.model.InsightType
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
+/**
+ * [UI — Screen] (stateless composable, no ViewModel reference)
+ * Horizontally-paged carousel of insight cards, shown at the top of the Dashboard.
+ * Swiping a card in any direction dismisses it via [onDismiss].
+ *
+ * Input: insights (List<Insight>, e.g. [Insight(type=BEST_TIME_WINDOW, ...)]),
+ *        onDismiss (String -> Unit, called with the swiped insight's id)
+ * Process: early-returns (renders nothing) when insights is empty — the caller
+ *          (DashboardScreen) also guards with `if (uiState.insights.isNotEmpty())`,
+ *          this is a defensive second check. Each page wraps one InsightCard in a
+ *          SwipeToDismissBox; any swipe direction (Settled excluded) fires onDismiss
+ *          then reports back `true` to let Material3 animate the dismissal.
+ * Output: renders 0 or N horizontally swipeable cards. Does not mutate its own state —
+ *         the actual removal happens up in DashboardViewModel (Room delete -> Flow
+ *         re-emits a shorter list -> this composable recomposes with fewer pages).
+ */
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun InsightCarousel(
@@ -77,6 +93,10 @@ private fun InsightCard(insight: Insight) {
     }
 }
 
+/**
+ * [UI] i18n label per InsightType. Static per-type strings, no `data` needed —
+ * see insightMessage() below for the parameterized body text.
+ */
 @Composable
 private fun insightTitle(type: InsightType): String = when (type) {
     InsightType.BEST_TIME_WINDOW -> stringResource(R.string.insight_best_time_title)
@@ -85,6 +105,17 @@ private fun insightTitle(type: InsightType): String = when (type) {
     InsightType.PRODUCTIVITY_TREND -> stringResource(R.string.insight_trend_title)
 }
 
+/**
+ * [UI]
+ * Input: insight — reads insight.type + insight.data (Map<String, Any>?)
+ * Process: builds the localized body text by pulling parameters straight out of
+ *          `data` (e.g. data["hours"], data["dayOfWeek"]) into a stringResource
+ *          placeholder (%1$s, %2$s in values/strings.xml + values-vi/strings.xml).
+ *          Falls back to insight.message (English-only, non-localized) if `data`
+ *          is null — should not normally happen since every rule always populates it.
+ * Output: localized String, e.g. "Bạn tập trung tốt nhất khoảng 9,10 giờ" (vi) or
+ *         "You focus best around 9,10 h" (en).
+ */
 @Composable
 private fun insightMessage(insight: Insight): String {
     val data = insight.data ?: return insight.message

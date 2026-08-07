@@ -12,11 +12,22 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
+/**
+ * [Domain — Insight Engine tests]
+ * Pure unit tests: no Room, no Hilt, no Android dependencies — each rule is a plain
+ * function of StatsWindow -> Insight?, so a fake window is enough to drive it.
+ */
 class InsightRulesTest {
 
+    // Test fixture: builds a FocusAnalytics with only the fields these rules read
+    // (focusScore, sessionCount) set; everything else keeps FocusAnalytics.empty()'s
+    // defaults. Sample: analytics(0.5f, 10) -> FocusAnalytics(focusScore=0.5, sessionCount=10, ...)
     private fun analytics(score: Float, sessions: Int = 10) =
         FocusAnalytics.empty(AnalyticsPeriod.WEEK).copy(focusScore = score, sessionCount = sessions)
 
+    // Test fixture: builds a minimal StatsWindow for a single rule under test.
+    // sessions is always empty here because none of the currently-tested rules
+    // (Declining, Distraction) read window.sessions.
     private fun window(
         current: FocusAnalytics,
         previous: FocusAnalytics? = null,

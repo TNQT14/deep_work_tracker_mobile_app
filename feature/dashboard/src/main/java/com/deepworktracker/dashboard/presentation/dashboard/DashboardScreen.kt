@@ -123,6 +123,9 @@ fun DashboardScreen(
                                 }
                             }
                         }
+                        // [UI — Screen] [UDF: state down] insights carousel — only added
+                        // to the LazyColumn when non-empty; onDismiss forwards straight
+                        // to the ViewModel event, no local state kept in this composable.
                         Log.d("DashboardScreen", "insights: ${uiState.insights.size}")
                         if(uiState.insights.isNotEmpty()){
                             item(key = "insight"){

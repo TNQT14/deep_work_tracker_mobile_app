@@ -25,9 +25,15 @@ import kotlinx.datetime.toLocalDateTime
 import javax.inject.Inject
 
 /**
- * Gom [StatsWindow] (current + previous + interruptionsByDay) -> chạy tất cả rule
- * -> lưu insight vào Room. Chạy nền bởi WorkManager (Step 7), không đụng UI.
- * @return số insight mới đã lưu.
+ * [Domain — Feature orchestration] [DI]
+ * Assembles a [StatsWindow] (current period + previous period + per-day interruption
+ * counts), runs every injected [InsightRule] against it, and persists whatever fires
+ * via [InsightRepository]. Invoked from background (GenerateInsightsWorker, periodic
+ * 24h) — never touches UI/ViewModel state directly; the UI picks up new rows reactively
+ * through InsightRepository.getRecentInsights()'s Flow.
+ *
+ * `rules` is injected as a List<InsightRule> — see InsightModule (Hilt @Provides) for
+ * how the 4 concrete rule classes are assembled into that list.
  */
 class GenerateInsightsUseCase @Inject constructor(
     private val sessionRepository: SessionRepository,
@@ -36,6 +42,25 @@ class GenerateInsightsUseCase @Inject constructor(
     private val getFocusAnalytics: GetFocusAnalyticsUseCase,
     private val rules: List<@JvmSuppressWildcards InsightRule>,
 ) {
+    /**
+     * Input: period (AnalyticsPeriod, default WEEK), zone (TimeZone, default device zone)
+     * Process:
+     *   1. Reuse GetFocusAnalyticsUseCase (feature #6) to get `current` period aggregates.
+     *   2. Fetch this period's sessions (for OptimalSessionLengthRule).
+     *   3. Compute the immediately preceding period of the same length and its
+     *      focusScore/sessionCount only (all DecliningTrendRule needs) -> `previous`.
+     *   4. Fetch interruptions in range and group by isoDayNumber in Kotlin (not SQL
+     *      GROUP BY) — start_time is stored as UTC epoch millis, so bucketing by
+     *      calendar day must go through kotlinx.datetime + the caller's TimeZone.
+     *   5. Build the StatsWindow; bail early with Result.Success(0) if
+     *      !window.hasEnoughData (see StatsWindow.MIN_SESSIONS guardrail).
+     *   6. Run every rule, collect non-null Insights.
+     *   7. For each produced Insight, skip it if the same InsightType was already
+     *      saved earlier the same day (de-dupe against notification spam), otherwise
+     *      persist via insightRepository.saveInsight.
+     * Output: Result<Int> — Success(count of newly saved insights, 0 if guardrail
+     *         short-circuited) or Error(DeepWorkError) on any exception.
+     */
     suspend operator fun invoke(
         period: AnalyticsPeriod = AnalyticsPeriod.WEEK,
         zone: TimeZone = TimeZone.currentSystemDefault(),
@@ -84,7 +109,7 @@ class GenerateInsightsUseCase @Inject constructor(
             for (insight in produced) {
                 val latest = insightRepository.getLatestInsightByType(insight.type.name)
                 if (latest != null && sameDay(latest.generatedAt, insight.generatedAt, zone)) continue
-                if (insightRepository.saveInsight(insight) is Result.Success<*>) saved++
+                if (insightRepository.saveInsight(insight).isSuccess) saved++
             }
             Result.Success(saved)
         } catch (e: Exception) {
