@@ -2,10 +2,14 @@ package com.deepworktracker.domain.insights
 
 import com.deepworktracker.domain.analytics.AnalyticsPeriod
 import com.deepworktracker.domain.analytics.FocusAnalytics
+import com.deepworktracker.domain.insights.rules.BestFocusHoursRule
 import com.deepworktracker.domain.insights.rules.DecliningTrendRule
 import com.deepworktracker.domain.insights.rules.DistractionPatternRule
+import com.deepworktracker.domain.insights.rules.OptimalSessionLengthRule
+import com.deepworktracker.domain.model.FocusSession
 import com.deepworktracker.domain.model.InsightType
 import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
@@ -22,23 +26,38 @@ class InsightRulesTest {
     // Test fixture: builds a FocusAnalytics with only the fields these rules read
     // (focusScore, sessionCount) set; everything else keeps FocusAnalytics.empty()'s
     // defaults. Sample: analytics(0.5f, 10) -> FocusAnalytics(focusScore=0.5, sessionCount=10, ...)
-    private fun analytics(score: Float, sessions: Int = 10) =
-        FocusAnalytics.empty(AnalyticsPeriod.WEEK).copy(focusScore = score, sessionCount = sessions)
+    private fun analytics(score: Float, sessions: Int = 10, bestFocusHours: List<Int> = emptyList()) =
+        FocusAnalytics.empty(AnalyticsPeriod.WEEK)
+            .copy(focusScore = score, sessionCount = sessions, bestFocusHours = bestFocusHours)
 
     // Test fixture: builds a minimal StatsWindow for a single rule under test.
-    // sessions is always empty here because none of the currently-tested rules
-    // (Declining, Distraction) read window.sessions.
     private fun window(
         current: FocusAnalytics,
         previous: FocusAnalytics? = null,
         byDay: Map<Int, Int> = emptyMap(),
+        sessions: List<FocusSession> = emptyList(),
     ) = StatsWindow(
         period = AnalyticsPeriod.WEEK,
         current = current,
         previous = previous,
-        sessions = emptyList(),
+        sessions = sessions,
         interruptionsByDay = byDay,
         now = Clock.System.now(),
+    )
+
+    // Test fixture: a completed FocusSession with a given planned length (focusMinutes)
+    // and focus ratio (focused/total) — matches OptimalSessionLengthRule's bucketing key.
+    private fun session(focusMinutes: Int, totalMs: Long, focusedMs: Long) = FocusSession(
+        id = "s-$focusMinutes-${totalMs}",
+        goal = "g",
+        category = null,
+        startTime = Instant.fromEpochMilliseconds(0),
+        endTime = Instant.fromEpochMilliseconds(totalMs),
+        totalDuration = totalMs,
+        focusedDuration = focusedMs,
+        tag = null,
+        note = null,
+        focusMinutes = focusMinutes,
     )
 
     @Test
@@ -91,6 +110,62 @@ class InsightRulesTest {
             DistractionPatternRule().evaluate(
                 window(current = analytics(0.6f), byDay = mapOf(3 to 10)),
             ),
+        )
+    }
+
+    // ---- BestFocusHoursRule ----
+
+    @Test
+    fun `bestFocusHours phat khi current co gio vang`() {
+        val insight = BestFocusHoursRule().evaluate(
+            window(current = analytics(0.6f, bestFocusHours = listOf(9, 10))),
+        )
+        assertNotNull(insight)
+        assertEquals(InsightType.BEST_TIME_WINDOW, insight!!.type)
+        assertNull(insight.confidence)
+        assertEquals("9,10", insight.data!!["hours"])
+    }
+
+    @Test
+    fun `bestFocusHours khong phat khi rong`() {
+        assertNull(
+            BestFocusHoursRule().evaluate(
+                window(current = analytics(0.6f, bestFocusHours = emptyList())),
+            ),
+        )
+    }
+
+    // ---- OptimalSessionLengthRule ----
+
+    @Test
+    fun `optimal phat va chon bucket diem cao hon`() {
+        val sessions = List(3) { session(focusMinutes = 25, totalMs = 1_500_000, focusedMs = 450_000) } + // score 0.3
+            List(3) { session(focusMinutes = 50, totalMs = 3_000_000, focusedMs = 1_800_000) } // score 0.6
+
+        val insight = OptimalSessionLengthRule().evaluate(
+            window(current = analytics(0.5f), sessions = sessions),
+        )
+        assertNotNull(insight)
+        assertEquals(InsightType.OPTIMAL_SESSION_LENGTH, insight!!.type)
+        assertEquals(50, insight.data!!["bucketMinutes"])
+        assertEquals(0.6, insight.data!!["score"] as Double, 0.01)
+    }
+
+    @Test
+    fun `optimal khong phat khi chi co 1 bucket`() {
+        val sessions = List(5) { session(focusMinutes = 25, totalMs = 1_500_000, focusedMs = 750_000) }
+        assertNull(
+            OptimalSessionLengthRule().evaluate(window(current = analytics(0.5f), sessions = sessions)),
+        )
+    }
+
+    @Test
+    fun `optimal khong phat khi bucket chua du mau`() {
+        // Mỗi bucket chỉ 2 phiên < MIN_SAMPLE_PER_BUCKET=3 -> cả 2 bucket bị lọc, sessions = null.
+        val sessions = List(2) { session(focusMinutes = 25, totalMs = 1_500_000, focusedMs = 450_000) } +
+            List(2) { session(focusMinutes = 50, totalMs = 3_000_000, focusedMs = 1_800_000) }
+        assertNull(
+            OptimalSessionLengthRule().evaluate(window(current = analytics(0.5f), sessions = sessions)),
         )
     }
 }
