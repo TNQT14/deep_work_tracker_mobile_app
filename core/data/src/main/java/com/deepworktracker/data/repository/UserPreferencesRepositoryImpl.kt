@@ -13,29 +13,42 @@ import javax.inject.Singleton
 @Singleton
 class UserPreferencesRepositoryImpl @Inject constructor(
     private val localDataSource: PreferencesLocalDataSource,
-): UserPreferencesRepository
-{
+) : UserPreferencesRepository {
     override fun observePreferences(): Flow<UserPreferences> = localDataSource.observePreferences()
 
     override suspend fun getPreferences(): UserPreferences = localDataSource.getPreferences()
 
-    override suspend fun setTheme(theme: ThemePreference): Result<Unit> = localDataSource.updatePreferences {
-        current -> current.copy(
-            theme = theme,
-            hasExplicitThemeChoice = true,
-            updatedAt = Clock.System.now()
-        )
-    }
+    override suspend fun setTheme(theme: ThemePreference): Result<Unit> =
+        localDataSource.updatePreferences { current ->
+            current.copy(
+                theme = theme,
+                hasExplicitThemeChoice = true,
+                updatedAt = Clock.System.now()
+            )
+        }
 
-    override suspend fun setLanguage(language: LanguagePreference): Result<Unit> = localDataSource.updatePreferences {
-        current -> current.copy(
-            language = language,
-            hasExplicitLanguageChoice = true,
-            updatedAt = Clock.System.now()
-        )
-    }
+    override suspend fun setLanguage(language: LanguagePreference): Result<Unit> =
+        localDataSource.updatePreferences { current ->
+            current.copy(
+                language = language,
+                hasExplicitLanguageChoice = true,
+                updatedAt = Clock.System.now()
+            )
+        }
 
     override suspend fun resetToDefaults(): Result<Unit> =
         localDataSource.savePreferences(UserPreferences.DEFAULT)
+
+    override suspend fun setDailyGoalMinutes(minutes: Int): Result<Unit> =
+        localDataSource.updatePreferences { current ->
+            current.copy(
+                dailyGoalMinutes = minutes.coerceIn(0, MAX_DAILY_GOAL_MINUTES),
+                updatedAt = Clock.System.now(),
+            )
+        }
+
+    private companion object {
+        const val MAX_DAILY_GOAL_MINUTES = 24 * 60
+    }
 
 }

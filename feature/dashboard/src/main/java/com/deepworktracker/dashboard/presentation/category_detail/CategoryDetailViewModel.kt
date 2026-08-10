@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.deepworktracker.dashboard.presentation.goal_detail.GoalMetrics
 import com.deepworktracker.domain.model.FocusSession
 import com.deepworktracker.domain.repository.SessionRepository
+import com.deepworktracker.domain.streak.StreakCalculator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -175,7 +176,14 @@ private fun computeMetrics(
         }
     }
 
-    val (currentStreakDays, longestStreakDays) = computeStreaks(dailyMinutes)
+    // Streak dùng chung StreakCalculator (core/domain).
+    // goalMinutes = 1 giữ nguyên ngưỡng cũ "ngày có hoạt động" (> 0 phút).
+    // byDateMs là mili-giây → đổi sang phút cho khớp đơn vị của domain.
+    val streak = StreakCalculator.calculate(
+        dailyMinutes = byDateMs.mapValues { (_, ms) -> ms / 60_000 },
+        goalMinutes = 1,
+        today = endDate,
+    )
     val avgMinutesPerActiveDay = if (activeDays > 0) totalMinutes.toFloat() / activeDays else 0f
     val avgMinutesPerCalendarDay = if (rangeDays > 0) totalMinutes.toFloat() / rangeDays else 0f
     val dailyCv = coefficientOfVariation(dailyMinutes.map { it.toFloat() })
@@ -205,8 +213,11 @@ private fun computeMetrics(
         rangeDays = rangeDays,
         activeDays = activeDays,
         coverageRatio = coverageRatio,
-        currentStreakDays = currentStreakDays,
-        longestStreakDays = longestStreakDays,
+        // Màn hình này vốn dùng suffix streak nghiêm ngặt: ngày cuối range không có
+        // hoạt động thì chuỗi = 0. StreakCalculator cố ý khoan dung với "hôm nay",
+        // nên quy đổi lại để con số hiển thị không đổi so với trước refactor.
+        currentStreakDays = if (streak.isTodayDone) streak.current else 0,
+        longestStreakDays = streak.longest,
         totalMinutes = totalMinutes,
         focusedMinutes = focusedMinutes,
         focusEfficiency = focusEfficiency,
@@ -230,24 +241,6 @@ private fun daysBetweenInclusive(start: LocalDate, end: LocalDate): Int {
         if (count > 5000) break
     }
     return count
-}
-
-private fun computeStreaks(dailyMinutes: List<Long>): Pair<Int, Int> {
-    var current = 0
-    var best = 0
-    for (m in dailyMinutes) {
-        if (m > 0) {
-            current++
-            if (current > best) best = current
-        } else {
-            current = 0
-        }
-    }
-    var suffix = 0
-    for (i in dailyMinutes.indices.reversed()) {
-        if (dailyMinutes[i] > 0) suffix++ else break
-    }
-    return suffix to best
 }
 
 private fun coefficientOfVariation(xs: List<Float>): Float {

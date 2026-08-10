@@ -20,4 +20,5 @@ object PreferencesKeys {
     val SHIELD_DND_ENABLED = booleanPreferencesKey("shield_dnd_enabled")
     val SHIELD_BLOCKLIST = stringSetPreferencesKey("shield_blocklist")
     val SHIELD_PREV_FILTER = intPreferencesKey("shield_prev_dnd_filter")
+    val DAILY_GOAL_MINUTES = intPreferencesKey("daily_goal_minutes")
 }
