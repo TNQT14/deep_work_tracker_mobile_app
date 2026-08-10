@@ -133,14 +133,10 @@ fun DashboardScreen(
                             }
                         }
                         // [UI — Screen] [UDF: state down] insights carousel — only added
-                        // to the LazyColumn when non-empty; onDismiss forwards straight
-                        // to the ViewModel event, no local state kept in this composable.
+                        // to the LazyColumn when non-empty; read-only, no dismiss action.
                         if(uiState.insights.isNotEmpty()){
                             item(key = "insight"){
-                                InsightCarousel(
-                                    insights = uiState.insights,
-                                    onDismiss = viewModel::onDissmissInsight
-                                )
+                                InsightCarousel(insights = uiState.insights)
                             }
                         }
 

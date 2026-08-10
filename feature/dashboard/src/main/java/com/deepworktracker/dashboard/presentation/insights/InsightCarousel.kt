@@ -1,25 +1,18 @@
 package com.deepworktracker.dashboard.presentation.insights
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Card
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -32,34 +25,20 @@ import kotlin.math.roundToInt
 /**
  * [UI — Screen] (stateless composable, no ViewModel reference)
  * Horizontally-paged carousel of insight cards, shown at the top of the Dashboard.
+ * No manual dismiss affordance — a card only disappears from the list when the
+ * underlying insight's is_dismissed flips some other way, or the next
+ * GenerateInsightsUseCase run replaces it (de-dup keeps at most one per type/day).
  *
- * Dismiss is a discrete tap on a close IconButton, NOT a swipe gesture. Two swipe-based
- * approaches were tried and rejected after device testing: (1) Material3's
- * SwipeToDismissBox is horizontal-only, which conflicted with HorizontalPager's own
- * horizontal page-swipe on the same axis — a single fast swipe could both turn the
- * page AND dismiss the newly revealed card. (2) A custom vertical drag was then tried
- * to use a different axis, but the card lives inside the Dashboard's outer LazyColumn,
- * which claimed the vertical drag for its own scroll before the card's gesture
- * detector saw it — the whole screen scrolled instead of the card dismissing. Since
- * the card is nested in BOTH a horizontal pager and a vertical scroll container,
- * every swipe axis is already claimed by an ancestor; a plain tap sidesteps the
- * conflict entirely.
- *
- * Input: insights (List<Insight>, e.g. [Insight(type=BEST_TIME_WINDOW, ...)]),
- *        onDismiss (String -> Unit, called with the tapped insight's id)
+ * Input: insights (List<Insight>, e.g. [Insight(type=BEST_TIME_WINDOW, ...)])
  * Process: early-returns (renders nothing) when insights is empty — the caller
  *          (DashboardScreen) also guards with `if (uiState.insights.isNotEmpty())`,
- *          this is a defensive second check. Each page renders one InsightCard with a
- *          close IconButton in its top-end corner.
- * Output: renders 0 or N horizontally paged cards. Does not mutate its own state — the
- *         actual removal happens up in DashboardViewModel (Room update -> Flow
- *         re-emits a shorter list -> this composable recomposes with fewer pages).
+ *          this is a defensive second check.
+ * Output: renders 0 or N horizontally paged, read-only cards.
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun InsightCarousel(
     insights: List<Insight>,
-    onDismiss: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     if (insights.isEmpty()) return
@@ -67,47 +46,31 @@ fun InsightCarousel(
 
     HorizontalPager(
         state = pagerState,
-        // Key each page by the insight's own id (not its position) — otherwise, once
-        // a dismiss shrinks `insights`, Compose reuses the page-index composition slot
-        // for whatever insight now falls there. Keying by id forces a fresh
-        // composition whenever the item occupying a slot actually changes.
+        // Key each page by the insight's own id (not its position) — keeps page
+        // identity stable if the underlying list ever reorders or shrinks.
         key = { insights[it].id },
         contentPadding = PaddingValues(horizontal = 8.dp),
         pageSpacing = 12.dp,
         modifier = modifier.fillMaxWidth(),
     ) { page ->
-        InsightCard(insight = insights[page], onDismiss = onDismiss)
+        InsightCard(insight = insights[page])
     }
 }
 
 @Composable
-private fun InsightCard(insight: Insight, onDismiss: (String) -> Unit) {
+private fun InsightCard(insight: Insight) {
     Card(modifier = Modifier.fillMaxWidth()) {
-        Box {
-            Column(Modifier.padding(16.dp)) {
-                Text(
-                    text = insightTitle(insight.type),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.padding(end = 32.dp), // leave room for close button
-                )
-                Spacer(Modifier.height(4.dp))
-                Text(
-                    text = insightMessage(insight),
-                    style = MaterialTheme.typography.bodyLarge,
-                )
-            }
-            IconButton(
-                onClick = { onDismiss(insight.id) },
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .size(32.dp),
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.Close,
-                    contentDescription = stringResource(R.string.insight_dismiss_content_description),
-                )
-            }
+        Column(Modifier.padding(16.dp)) {
+            Text(
+                text = insightTitle(insight.type),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.primary,
+            )
+            Spacer(Modifier.height(4.dp))
+            Text(
+                text = insightMessage(insight),
+                style = MaterialTheme.typography.bodyLarge,
+            )
         }
     }
 }
