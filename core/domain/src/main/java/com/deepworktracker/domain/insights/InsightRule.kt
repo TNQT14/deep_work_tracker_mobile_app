@@ -1,6 +1,5 @@
 package com.deepworktracker.domain.insights
 
-import android.view.Window
 import com.deepworktracker.domain.analytics.AnalyticsPeriod
 import com.deepworktracker.domain.analytics.FocusAnalytics
 import com.deepworktracker.domain.model.FocusSession
