@@ -67,7 +67,15 @@ dependencies {
     implementation(libs.androidx.compose.foundation.layout)
     implementation(libs.androidx.appcompat)
     kapt(libs.hilt.compiler)
-    
+
+    // WorkManager (+ Hilt integration)
+    implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.androidx.hilt.work)
+    kapt(libs.androidx.hilt.compiler)
+
+    // DateTime (dùng bởi GenerateInsightsUseCase khi Worker gọi)
+    implementation(libs.kotlinx.datetime)
+
     // Features
     implementation(project(":feature:session"))
     implementation(project(":feature:dashboard"))

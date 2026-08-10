@@ -33,6 +33,8 @@ class SessionNotificationHelper @Inject constructor(
     companion object {
         const val CHANNEL_ID = "session_channel"
         const val NOTIFICATION_ID = 1004
+        const val SHIELD_CHANNEL_ID = "focus_shield_channel"
+        const val SHIELD_NOTIFICATION_ID = 1005
     }
 
     init {
@@ -51,6 +53,14 @@ class SessionNotificationHelper @Inject constructor(
             enableVibration(false)
         }
         manager.createNotificationChannel(channel)
+        val shieldChannel = NotificationChannel(
+            SHIELD_CHANNEL_ID,
+            context.getString(R.string.shield_notification_channel_name),
+            NotificationManager.IMPORTANCE_HIGH
+        ).apply {
+            description = context.getString(R.string.shield_notification_channel_description)
+        }
+        manager.createNotificationChannel(shieldChannel)
     }
 
     /**
@@ -102,8 +112,33 @@ class SessionNotificationHelper @Inject constructor(
             context, Manifest.permission.POST_NOTIFICATIONS,
         ) == PackageManager.PERMISSION_GRANTED
         if (!granted) return
-        runCatching { NotificationManagerCompat.from(context).notify(NOTIFICATION_ID, notification) }
+        runCatching {
+            NotificationManagerCompat.from(context).notify(NOTIFICATION_ID, notification)
+        }
     }
+
+    fun notifyDistraction(packageName: String) {
+        val granted = ContextCompat.checkSelfPermission(
+            context, Manifest.permission.POST_NOTIFICATIONS,
+        ) == PackageManager.PERMISSION_GRANTED
+        if (!granted) return
+        val appLabel = runCatching {
+            val pm = context.packageManager
+            pm.getApplicationLabel(pm.getApplicationInfo(packageName, 0)).toString()
+        }.getOrDefault(packageName)
+        val notif = NotificationCompat.Builder(context, SHIELD_CHANNEL_ID)
+            .setSmallIcon(android.R.drawable.ic_lock_lock)
+            .setContentTitle(context.getString(R.string.shield_nudge_title))
+            .setContentText(context.getString(R.string.shield_nudge_text, appLabel))
+            .setColor(ComponentColors.focusAccent.toArgb())
+            .setAutoCancel(true)
+            .setContentIntent(contentIntent())
+            .build()
+        runCatching {
+            NotificationManagerCompat.from(context).notify(SHIELD_NOTIFICATION_ID, notif)
+        }
+    }
+
 
     /** PendingIntent that re-launches the app's launcher activity (module can't see MainActivity). */
     private fun contentIntent(): PendingIntent? {

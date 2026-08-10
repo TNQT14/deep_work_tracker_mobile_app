@@ -14,21 +14,22 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.deepworktracker.common.time.TimeFormatter
-import com.deepworktracker.dashboard.domain.usecase.TodayStats
-import com.deepworktracker.dashboard.presentation.dashboard.DashboardViewModel
-import com.deepworktracker.dashboard.presentation.chart.FocusTimeBarChart
+import com.deepworktracker.dashboard.R
+import com.deepworktracker.dashboard.presentation.utils.durationWithInterruptionsLabel
+import com.deepworktracker.dashboard.presentation.utils.formatSessionTime
+import com.deepworktracker.dashboard.presentation.chart.AggregateBarChart
 import com.deepworktracker.dashboard.presentation.charts.GoalDistributionChart
+import com.deepworktracker.dashboard.presentation.analytics.FocusHeatmap
+import com.deepworktracker.dashboard.presentation.analytics.FocusSummaryCard
+import com.deepworktracker.dashboard.presentation.analytics.PeriodSelector
+import com.deepworktracker.dashboard.presentation.insights.InsightCarousel
 import com.deepworktracker.domain.model.FocusSession
-import kotlin.time.Duration.Companion.milliseconds
-import kotlinx.datetime.Instant
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -47,7 +48,7 @@ fun DashboardScreen(
                 modifier = Modifier.fillMaxSize()
             ) {
                 TopAppBar(
-                    title = { Text("Dashboard") },
+                    title = { Text(stringResource(R.string.dashboard_title)) },
                     actions = {
                         IconButton(
                             onClick = { viewModel.refresh() },
@@ -58,38 +59,112 @@ fun DashboardScreen(
                             } else {
                                 Icon(
                                     imageVector = Icons.Default.Refresh,
-                                    contentDescription = "Refresh"
+                                    contentDescription = stringResource(
+                                        R.string.dashboard_refresh_content_description,
+                                    ),
                                 )
                             }
                         }
                         IconButton(onClick = onNavigateToSession) {
                             Icon(
                                 imageVector = Icons.Default.PlayArrow,
-                                contentDescription = "Session"
+                                contentDescription = stringResource(
+                                    R.string.dashboard_session_content_description,
+                                ),
                             )
                         }
                     }
                 )
 
-                if (uiState.isLoading && uiState.todayStats == null) {
+                // TEMPORARY DEBUG (M3.3b) — seeds session/interruption data only; go to
+                // Background Task Inspector -> generate_insights_periodic -> Run Now to
+                // exercise the REAL worker. Delete this button once verified.
+                Button(
+                    onClick = { viewModel.debugSeedTestData() },
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+                ) {
+                    Text("DEBUG: Seed test data")
+                }
+
+                if (uiState.isLoading && uiState.focusAnalytics == null) {
                     Box(
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxWidth(),
                         contentAlignment = Alignment.Center
                     ) {
                         CircularProgressIndicator()
                     }
                 } else {
                     LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxWidth(),
                         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        item {
-                            TodayStatsCard(stats = uiState.todayStats)
+                        uiState.error?.let { error ->
+                            item(key = "error") {
+                                Card(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    colors = CardDefaults.cardColors(
+                                        containerColor = MaterialTheme.colorScheme.errorContainer
+                                    )
+                                ) {
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(16.dp),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(
+                                            text = error.message
+                                                ?: stringResource(R.string.dashboard_error_generic),
+                                            color = MaterialTheme.colorScheme.onErrorContainer,
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            modifier = Modifier.weight(1f)
+                                        )
+                                        TextButton(onClick = { viewModel.clearError() }) {
+                                            Text(stringResource(R.string.dashboard_dismiss))
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        // [UI — Screen] [UDF: state down] insights carousel — only added
+                        // to the LazyColumn when non-empty; onDismiss forwards straight
+                        // to the ViewModel event, no local state kept in this composable.
+                        if(uiState.insights.isNotEmpty()){
+                            item(key = "insight"){
+                                InsightCarousel(
+                                    insights = uiState.insights,
+                                    onDismiss = viewModel::onDissmissInsight
+                                )
+                            }
                         }
 
                         item {
-                            FocusTimeBarChart(sessions = uiState.recentSessions)
+                            PeriodSelector(
+                                selected = uiState.selectedPeriod,
+                                onSelect = viewModel::onPeriodSelected
+                            )
+                        }
+
+                        uiState.focusAnalytics?.let { analytics ->
+                            item {
+                                FocusSummaryCard(analytics = analytics)
+                            }
+                            item {
+                                FocusHeatmap(heatmap = analytics.heatmap)
+                            }
+                            item {
+                                AggregateBarChart(
+                                    title = stringResource(R.string.dashboard_focus_trend_title),
+                                    subtitle = stringResource(R.string.dashboard_focus_trend_subtitle),
+                                    valuesMinutes = analytics.dailyTrendMinutes
+                                )
+                            }
                         }
 
                         item {
@@ -101,7 +176,7 @@ fun DashboardScreen(
 
                         item {
                             Text(
-                                text = "Recent Sessions",
+                                text = stringResource(R.string.dashboard_recent_sessions),
                                 style = MaterialTheme.typography.titleLarge,
                                 fontWeight = FontWeight.Bold,
                                 modifier = Modifier.padding(vertical = 8.dp)
@@ -120,7 +195,7 @@ fun DashboardScreen(
                                         contentAlignment = Alignment.Center
                                     ) {
                                         Text(
-                                            text = "No sessions yet.\nStart your first deep work session!",
+                                            text = stringResource(R.string.dashboard_no_sessions),
                                             style = MaterialTheme.typography.bodyLarge,
                                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                                             textAlign = TextAlign.Center
@@ -135,120 +210,7 @@ fun DashboardScreen(
                         }
                     }
                 }
-                
-                // Error message
-                uiState.error?.let { error ->
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.errorContainer
-                        )
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = error.message ?: "An error occurred",
-                                color = MaterialTheme.colorScheme.onErrorContainer,
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-                            TextButton(onClick = { viewModel.clearError() }) {
-                                Text("Dismiss")
-                            }
-                    }
-                }
             }
-        }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun TodayStatsCard(stats: TodayStats?) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer
-        )
-    ) {
-        Column(
-            modifier = Modifier.padding(20.dp)
-        ) {
-            Text(
-                text = "Today",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onPrimaryContainer,
-                modifier = Modifier.padding(bottom = 16.dp)
-            )
-            
-            // Focus Time
-            StatRow(
-                label = "Focus Time",
-                value = TimeFormatter.formatDurationShort(
-                    (stats?.totalFocusTime ?: 0L).milliseconds
-                ),
-                modifier = Modifier.padding(bottom = 12.dp)
-            )
-            
-            // Session Count
-            StatRow(
-                label = "Sessions",
-                value = "${stats?.sessionCount ?: 0}",
-                modifier = Modifier.padding(bottom = 12.dp)
-            )
-            
-            // Average Duration
-            if (stats != null && stats.sessionCount > 0) {
-                StatRow(
-                    label = "Avg Duration",
-                    value = TimeFormatter.formatDurationShort(
-                        stats.averageSessionDuration.milliseconds
-                    )
-                )
-            }
-            
-            // Best Focus Hour
-            stats?.bestFocusHour?.let { hour ->
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "Best Focus Hour: ${formatHour(hour)}",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun StatRow(
-    label: String,
-    value: String,
-    modifier: Modifier = Modifier
-) {
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
-        )
-        Text(
-            text = value,
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onPrimaryContainer
-        )
     }
 }
 
@@ -275,13 +237,13 @@ fun SessionCard(session: FocusSession) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = TimeFormatter.formatDurationShort(session.totalDuration.milliseconds),
-                    style = MaterialTheme.typography.bodyLarge,
+                    text = session.durationWithInterruptionsLabel(),
+                    style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.primary
                 )
-                
+
                 Text(
-                    text = formatSessionDate(session.startTime),
+                    text = formatSessionTime(session.startTime),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                 )
@@ -295,7 +257,7 @@ fun SessionCard(session: FocusSession) {
                     shape = MaterialTheme.shapes.small
                 ) {
                     Text(
-                        text = "Active",
+                        text = stringResource(R.string.dashboard_session_active),
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onPrimaryContainer
@@ -304,20 +266,4 @@ fun SessionCard(session: FocusSession) {
             }
         }
     }
-}
-
-fun formatHour(hour: Int): String {
-    return when {
-        hour == 0 -> "12 AM"
-        hour < 12 -> "$hour AM"
-        hour == 12 -> "12 PM"
-        else -> "${hour - 12} PM"
-    }
-}
-
-fun formatSessionDate(instant: Instant): String {
-    val localDateTime = instant.toLocalDateTime(TimeZone.currentSystemDefault())
-    val hour = localDateTime.hour
-    val minute = localDateTime.minute
-    return "${formatHour(hour)}:${String.format("%02d", minute)}"
 }

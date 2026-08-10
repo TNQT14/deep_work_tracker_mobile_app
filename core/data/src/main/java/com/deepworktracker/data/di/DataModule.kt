@@ -1,6 +1,10 @@
 package com.deepworktracker.data.di
 
 import android.content.Context
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.PreferenceDataStoreFactory
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.preferencesDataStoreFile
 import androidx.room.Room
 import com.deepworktracker.data.database.DeepWorkDatabase
 import com.deepworktracker.data.database.dao.InterruptionDao
@@ -13,13 +17,16 @@ import com.deepworktracker.data.mapper.SessionMapper
 import com.deepworktracker.data.mapper.StatsMapper
 import com.deepworktracker.data.mapper.InsightMapper
 import com.deepworktracker.data.mapper.TodoMapper
+import com.deepworktracker.data.preferences.FocusShieldLocalDataSource
 import com.deepworktracker.data.preferences.PreferencesLocalDataSource
+import com.deepworktracker.data.repository.FocusShieldRepositoryImpl
 import com.deepworktracker.data.repository.InterruptionRepositoryImpl
 import com.deepworktracker.data.repository.SessionRepositoryImpl
 import com.deepworktracker.data.repository.StatsRepositoryImpl
 import com.deepworktracker.data.repository.InsightRepositoryImpl
 import com.deepworktracker.data.repository.TodoRepositoryImpl
 import com.deepworktracker.data.repository.UserPreferencesRepositoryImpl
+import com.deepworktracker.domain.repository.FocusShieldRepository
 import com.deepworktracker.domain.repository.InterruptionRepository
 import com.deepworktracker.domain.repository.SessionRepository
 import com.deepworktracker.domain.repository.StatsRepository
@@ -52,6 +59,7 @@ object DataModule {
                 DeepWorkDatabase.MIGRATION_4_5,
                 DeepWorkDatabase.MIGRATION_5_6,
                 DeepWorkDatabase.MIGRATION_6_7,
+                DeepWorkDatabase.MIGRATION_7_8
             )
             .build()
     }
@@ -169,6 +177,22 @@ object DataModule {
         localDataSource: PreferencesLocalDataSource,
     ): UserPreferencesRepository {
         return UserPreferencesRepositoryImpl(localDataSource)
+    }
+    @Provides
+    @Singleton
+    @FocusShieldDataStore
+    fun provideFocusShieldDataStore(
+        @ApplicationContext context: Context,
+    ): DataStore<Preferences> = PreferenceDataStoreFactory.create(
+        produceFile = { context.preferencesDataStoreFile("focus_shield_preferences") },
+    )
+
+    @Provides
+    @Singleton
+    fun provideFocusShieldRepository(
+        localDataSource: FocusShieldLocalDataSource,
+    ): FocusShieldRepository {
+        return FocusShieldRepositoryImpl(localDataSource)
     }
 
 }

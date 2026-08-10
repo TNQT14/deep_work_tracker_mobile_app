@@ -136,5 +136,5 @@ KNOWLEDGE_MAP.md
 LEVEL_ASSESSMENT.md
 *.md
 /.tokensave
+interview/topics/sessions/2026-07-15-room-database-migration.json
 /.cursor
-*.json

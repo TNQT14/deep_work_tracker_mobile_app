@@ -1,0 +1,66 @@
+<resources>
+    <string name="dashboard_title">Dashboard</string>
+    <string name="dashboard_refresh_content_description">Refresh</string>
+    <string name="dashboard_session_content_description">Start session</string>
+    <string name="dashboard_error_generic">An error occurred</string>
+    <string name="dashboard_dismiss">Dismiss</string>
+
+    <string name="dashboard_period_day">Day</string>
+    <string name="dashboard_period_week">Week</string>
+    <string name="dashboard_period_month">Month</string>
+
+    <string name="dashboard_stat_focused">Focused</string>
+    <string name="dashboard_stat_sessions">Sessions</string>
+    <string name="dashboard_stat_avg">Avg</string>
+    <string name="dashboard_stat_best_hour">Best hour</string>
+    <string name="dashboard_best_hour_none">—</string>
+
+    <string name="dashboard_heatmap_title">Focus heatmap</string>
+    <string name="dashboard_focus_trend_title">Focus trend</string>
+    <string name="dashboard_focus_trend_subtitle">Minutes focused per day</string>
+
+    <string name="dashboard_goal_distribution_title">Focus distribution by goal</string>
+    <string name="dashboard_goal_distribution_subtitle">Top activities by time spent</string>
+
+    <string name="dashboard_recent_sessions">Recent sessions</string>
+    <string name="dashboard_no_sessions">No sessions yet.\nStart your first deep work session!</string>
+    <string name="dashboard_session_active">Active</string>
+    <string name="dashboard_chart_no_data">No data to display</string>
+
+    <string name="dashboard_hour_midnight">12 AM</string>
+    <string name="dashboard_hour_noon">12 PM</string>
+    <string name="dashboard_hour_am">%1$d AM</string>
+    <string name="dashboard_hour_pm">%1$d PM</string>
+
+    <plurals name="dashboard_session_interruptions">
+        <item quantity="one">%1$s · %2$d interruption</item>
+        <item quantity="other">%1$s · %2$d interruptions</item>
+    </plurals>
+
+    <string-array name="dashboard_heatmap_day_labels">
+        <item>M</item>
+        <item>T</item>
+        <item>W</item>
+        <item>T</item>
+        <item>F</item>
+        <item>S</item>
+        <item>S</item>
+    </string-array>
+
+    <string name="insight_best_time_title">Best focus window</string>
+    <string name="insight_best_time_msg">You focus best around %1$s h</string>
+    <string name="insight_distraction_title">Distraction pattern</string>
+    <string name="insight_distraction_msg">%1$s is your most interrupted day (%2$s×)</string>
+    <string name="insight_optimal_title">Optimal session</string>
+    <string name="insight_optimal_msg">%1$s-minute sessions give your best focus</string>
+    <string name="insight_trend_title">Trend</string>
+    <string name="insight_trend_msg">Your focus dropped %1$s vs last period</string>
+    <string name="insight_day_mon">Mon</string>
+    <string name="insight_day_tue">Tue</string>
+    <string name="insight_day_wed">Wed</string>
+    <string name="insight_day_thu">Thu</string>
+    <string name="insight_day_fri">Fri</string>
+    <string name="insight_day_sat">Sat</string>
+    <string name="insight_day_sun">Sun</string>
+    <string name="insight_dismiss_content_description">Dismiss insight</string>
+</resources>

@@ -8,7 +8,8 @@ data class Interruption(
     val startTime: Instant,
     val endTime: Instant?,
     val type: InterruptionType,
-    val duration: Long
+    val duration: Long,
+    val distractionPackage: String? = null
 ) {
     val isActive: Boolean
         get() = endTime == null

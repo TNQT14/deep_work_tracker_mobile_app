@@ -30,4 +30,15 @@
     <string name="profile_edit_save">Lưu</string>
     <string name="profile_edit_cancel">Huỷ</string>
     <string name="profile_edit_success">Đã cập nhật hồ sơ</string>
+    <string name="settings_focus_shield">Lá chắn tập trung</string>
+    <string name="settings_shield_dnd_label">Bật Không làm phiền khi tập trung</string>
+    <string name="settings_shield_dnd_desc">Tự động tắt thông báo trong lúc phiên tập trung đang chạy.</string>
+    <string name="settings_shield_permission_needed">Cần cấp quyền Không làm phiền để tính năng hoạt động.</string>
+    <string name="settings_shield_grant_permission">Cấp quyền</string>
+    <string name="settings_shield_blocklist_label">Ứng dụng gây xao nhãng</string>
+    <string name="settings_shield_blocklist_desc">Được nhắc khi bạn mở các app này giữa phiên.</string>
+    <string name="blocklist_title">Ứng dụng gây xao nhãng</string>
+    <string name="blocklist_search">Tìm ứng dụng</string>
+    <string name="blocklist_usage_access_needed">Cần cấp quyền Usage access để phát hiện xao nhãng.</string>
+    <string name="blocklist_grant_usage_access">Cấp quyền</string>
 </resources>

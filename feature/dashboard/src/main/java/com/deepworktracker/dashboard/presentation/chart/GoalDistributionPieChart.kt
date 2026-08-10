@@ -9,9 +9,11 @@ import androidx.compose.foundation.clickable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.deepworktracker.common.time.TimeFormatter
+import com.deepworktracker.dashboard.R
 import com.deepworktracker.domain.model.FocusSession
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -55,14 +57,14 @@ fun GoalDistributionChart(
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
-                text = "Focus Distribution by Goal",
+                text = stringResource(R.string.dashboard_goal_distribution_title),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(bottom = 8.dp)
             )
 
             Text(
-                text = "Top activities by time spent",
+                text = stringResource(R.string.dashboard_goal_distribution_subtitle),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                 modifier = Modifier.padding(bottom = 16.dp)
@@ -76,7 +78,7 @@ fun GoalDistributionChart(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "No data to display",
+                        text = stringResource(R.string.dashboard_chart_no_data),
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                     )
                 }

@@ -24,7 +24,10 @@ android {
 dependencies {
     // Coroutines Flow
     implementation(libs.kotlinx.coroutines.core)
-    
+
     // Date/Time
     implementation(libs.kotlinx.datetime)
+
+    // Testing
+    testImplementation(libs.junit)
 }

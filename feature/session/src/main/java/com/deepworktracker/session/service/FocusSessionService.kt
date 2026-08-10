@@ -38,6 +38,8 @@ class FocusSessionService : LifecycleService() {
     @Inject lateinit var notificationHelper: SessionNotificationHelper
     @Inject lateinit var ticker: SessionTicker
     @Inject lateinit var interruptionDetector: InterruptionDetector
+    @Inject lateinit var dndController: DndController
+    @Inject lateinit var foregroundAppMonitor: ForegroundAppMonitor
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private var observing = false
@@ -46,14 +48,15 @@ class FocusSessionService : LifecycleService() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
 
-        // Promote to foreground within the 5s ANR window with a placeholder notification;
-        // the observer below refreshes it with the real goal/elapsed shortly after.
         startForegroundInternal(notificationHelper.build(goal = null, elapsed = Duration.ZERO))
 
         when (intent?.action) {
             ACTION_END -> endActiveSession()
-            ACTION_STOP -> stopService()
-            else -> ensureObserving() // ACTION_START or null (START_STICKY restart)
+            ACTION_STOP -> scope.launch {
+                dndController.onSessionEnded()
+                stopService()
+            }
+            else -> ensureObserving()
         }
         return START_STICKY
     }
@@ -65,10 +68,12 @@ class FocusSessionService : LifecycleService() {
         scope.launch {
             getActiveSessionUseCase().collect { session ->
                 if (session == null) {
+                    dndController.onSessionEnded()
                     stopService()
                 } else {
-                    // Detect + record interruptions (M1.2) for the active session.
                     interruptionDetector.start(session.id)
+                    dndController.onSessionStarted()
+                    foregroundAppMonitor.start()
                     tickerJob?.cancel()
                     tickerJob = launch {
                         combine(
@@ -90,6 +95,7 @@ class FocusSessionService : LifecycleService() {
     private fun endActiveSession() {
         scope.launch {
             endSessionUseCase()
+            dndController.onSessionEnded()
             stopService()
         }
     }
@@ -106,6 +112,7 @@ class FocusSessionService : LifecycleService() {
     private fun stopService() {
         tickerJob?.cancel()
         interruptionDetector.stop()
+        foregroundAppMonitor.stop()
         ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
         stopSelf()
     }

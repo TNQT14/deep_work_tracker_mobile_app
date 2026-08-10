@@ -121,4 +121,57 @@ class InterruptionStateMachineTest {
         // A brand new interruption after returning to focus.
         assertEquals(Command.Open(InterruptionType.SCREEN_LOCK, at(10)), sm.onEvent(Event.ScreenOff(at(10))))
     }
+
+    @Test
+    fun `distraction during APP_SWITCH tags the package once`() {
+        val sm = InterruptionStateMachine()
+
+        sm.onEvent(Event.AppBackgrounded(at(0))) // opens APP_SWITCH
+        assertEquals(
+            Command.SetDistraction("com.facebook.katana"),
+            sm.onEvent(Event.DistractionDetected(at(6), "com.facebook.katana")),
+        )
+        // Second sample of the same interruption is throttled.
+        assertEquals(
+            Command.None,
+            sm.onEvent(Event.DistractionDetected(at(11), "com.facebook.katana")),
+        )
+    }
+
+    @Test
+    fun `distraction ignored when not APP_SWITCH`() {
+        val sm = InterruptionStateMachine()
+
+        sm.onEvent(Event.ScreenOff(at(0))) // opens SCREEN_LOCK
+        assertEquals(
+            Command.None,
+            sm.onEvent(Event.DistractionDetected(at(6), "com.facebook.katana")),
+        )
+    }
+
+    @Test
+    fun `distraction while focused is ignored`() {
+        val sm = InterruptionStateMachine()
+
+        assertEquals(
+            Command.None,
+            sm.onEvent(Event.DistractionDetected(at(0), "com.facebook.katana")),
+        )
+    }
+
+    @Test
+    fun `distraction tag does not survive reopen`() {
+        val sm = InterruptionStateMachine()
+
+        sm.onEvent(Event.AppBackgrounded(at(0)))
+        sm.onEvent(Event.DistractionDetected(at(6), "com.facebook.katana"))
+        sm.onEvent(Event.AppForegrounded(at(10))) // closes interruption
+
+        // New APP_SWITCH interruption can be tagged again.
+        sm.onEvent(Event.AppBackgrounded(at(20)))
+        assertEquals(
+            Command.SetDistraction("com.instagram.android"),
+            sm.onEvent(Event.DistractionDetected(at(26), "com.instagram.android")),
+        )
+    }
 }
