@@ -136,3 +136,5 @@ KNOWLEDGE_MAP.md
 LEVEL_ASSESSMENT.md
 *.md
 /.tokensave
+/.cursor
+*.json
