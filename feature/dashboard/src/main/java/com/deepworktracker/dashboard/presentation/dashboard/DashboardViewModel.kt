@@ -55,9 +55,9 @@ class DashboardViewModel @Inject constructor(
      * Input: none (reads insightRepository)
      * Process: subscribes to InsightRepository.getRecentInsights(limit=5), a Room Flow
      *          that automatically re-emits whenever the `insights` table changes
-     *          (a new row inserted by GenerateInsightsWorker, or is_dismissed flipped
-     *          by onDissmissInsight below). `collect` never completes — this coroutine
-     *          lives for as long as the ViewModel does (viewModelScope).
+     *          (a new row inserted by GenerateInsightsWorker). `collect` never
+     *          completes — this coroutine lives for as long as the ViewModel does
+     *          (viewModelScope).
      * Output: uiState.insights replaced with the latest emission on every change.
      */
     fun observeInsights(){
@@ -126,21 +126,6 @@ class DashboardViewModel @Inject constructor(
         if (_uiState.value.selectedPeriod == period) return
         _uiState.update { it.copy(selectedPeriod = period) }
         loadAnalytics(period)
-    }
-
-    /**
-     * [ViewModel] [UDF: event (swipe) -> repository, state updates itself via Flow]
-     * Input: id — Insight.id, e.g. "a1b2c3..."
-     * Process: marks the row is_dismissed=1 in Room. Deliberately does NOT call
-     *          _uiState.update here — observeInsights()'s Flow collection is the
-     *          single source of truth for uiState.insights, so mutating it directly
-     *          here would risk it getting overwritten by a stale emission.
-     * Output: uiState.insights shrinks by one item once the Flow re-emits.
-     */
-    fun onDissmissInsight(id: String){
-        viewModelScope.launch {
-            insightRepository.dismissInsight(id)
-        }
     }
 
     private fun loadAnalytics(period: AnalyticsPeriod) {
