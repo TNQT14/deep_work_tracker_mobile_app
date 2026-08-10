@@ -76,6 +76,16 @@ fun DashboardScreen(
                     }
                 )
 
+                // TEMPORARY DEBUG (M3.3b) — seeds session/interruption data only; go to
+                // Background Task Inspector -> generate_insights_periodic -> Run Now to
+                // exercise the REAL worker. Delete this button once verified.
+                Button(
+                    onClick = { viewModel.debugSeedTestData() },
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+                ) {
+                    Text("DEBUG: Seed test data")
+                }
+
                 if (uiState.isLoading && uiState.focusAnalytics == null) {
                     Box(
                         modifier = Modifier
