@@ -4,14 +4,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.deepworktracker.common.result.Result
 import com.deepworktracker.session.domain.usecase.EndSessionUseCase
-import com.deepworktracker.session.domain.usecase.GetActiveSessionUseCase
-import com.deepworktracker.session.domain.usecase.GetRecentCategoriesUseCase
-import com.deepworktracker.session.domain.usecase.GetRecentGoalsUseCase
-import com.deepworktracker.session.domain.usecase.GetRecentTagsUseCase
 import com.deepworktracker.session.domain.usecase.StartSessionUseCase
 import com.deepworktracker.session.service.SessionServiceController
 import com.deepworktracker.domain.model.CategoryRule
 import com.deepworktracker.domain.repository.CategoryRuleRepository
+import com.deepworktracker.domain.repository.SessionRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -30,10 +27,7 @@ import javax.inject.Inject
 class SessionViewModel @Inject constructor(
     private val startSessionUseCase: StartSessionUseCase,
     private val endSessionUseCase: EndSessionUseCase,
-    private val getActiveSessionUseCase: GetActiveSessionUseCase,
-    private val getRecentGoalsUseCase: GetRecentGoalsUseCase,
-    private val getRecentCategoriesUseCase: GetRecentCategoriesUseCase,
-    private val getRecentTagsUseCase: GetRecentTagsUseCase,
+    private val sessionRepository: SessionRepository,
     private val categoryRuleRepository: CategoryRuleRepository,
     private val sessionServiceController: SessionServiceController,
 ) : ViewModel() {
@@ -88,9 +82,9 @@ class SessionViewModel @Inject constructor(
 
     fun loadRecents(){
         viewModelScope.launch {
-            val recentGoals = getRecentGoalsUseCase()
-            val recentCategories = getRecentCategoriesUseCase()
-            val recentTags = getRecentTagsUseCase()
+            val recentGoals = sessionRepository.getRecentGoal()
+            val recentCategories = sessionRepository.getRecentCategories()
+            val recentTags = sessionRepository.getRecentTags()
             _uiState.update {
                 it.copy(
                     recentSession = recentGoals,
@@ -163,7 +157,7 @@ class SessionViewModel @Inject constructor(
 
     private fun observeActiveSession() {
         viewModelScope.launch {
-            getActiveSessionUseCase().collect { session ->
+            sessionRepository.observeActiveSession().collect { session ->
                 _uiState.update { it.copy(session = session) }
                 if (session != null && !_uiState.value.isTracking) {
                     _uiState.update { it.copy(isTracking = true) }

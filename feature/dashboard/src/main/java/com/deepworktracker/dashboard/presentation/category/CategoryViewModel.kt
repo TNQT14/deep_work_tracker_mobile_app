@@ -2,11 +2,10 @@ package com.deepworktracker.dashboard.presentation.category
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.deepworktracker.common.result.Result
-import com.deepworktracker.dashboard.domain.usecase.GetAllSessionUseCase
 import com.deepworktracker.domain.model.CategoryRule
 import com.deepworktracker.domain.model.FocusSession
 import com.deepworktracker.domain.repository.CategoryRuleRepository
+import com.deepworktracker.domain.repository.SessionRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -23,7 +22,7 @@ import java.util.UUID
 
 @HiltViewModel
 class CategoryViewModel @Inject constructor(
-    private val getAllSessionUseCase: GetAllSessionUseCase,
+    private val sessionRepository: SessionRepository,
     private val categoryRuleRepository: CategoryRuleRepository,
 ) : ViewModel() {
 

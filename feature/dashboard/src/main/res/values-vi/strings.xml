@@ -66,4 +66,11 @@
     <string name="dashboard_goal_progress">%1$d / %2$d phút tập trung</string>
     <string name="dashboard_goal_best">Kỷ lục: %1$d ngày</string>
     <string name="dashboard_goal_empty">Đặt mục tiêu mỗi ngày trong Cài đặt để bắt đầu chuỗi ngày.</string>
+    <string name="day_history_title">Các phiên</string>
+    <string name="day_history_back">Quay lại</string>
+    <string name="day_history_count">%1$d phiên đã hoàn thành</string>
+    <string name="day_history_focused_minutes">%1$d phút tập trung</string>
+    <string name="day_history_running">đang chạy</string>
+    <string name="day_history_running_note">Đang chạy — chưa tính vào mục tiêu</string>
+    <string name="day_history_empty">Không có phiên nào trong ngày này.</string>
 </resources>

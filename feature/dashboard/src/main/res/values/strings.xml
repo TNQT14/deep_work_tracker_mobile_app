@@ -67,4 +67,11 @@
     <string name="dashboard_goal_progress">%1$d / %2$d min focused</string>
     <string name="dashboard_goal_best">Best streak: %1$d days</string>
     <string name="dashboard_goal_empty">Set a daily goal in Settings to start building a streak.</string>
+    <string name="day_history_title">Sessions</string>
+    <string name="day_history_back">Back</string>
+    <string name="day_history_count">%1$d completed sessions</string>
+    <string name="day_history_focused_minutes">%1$d min focused</string>
+    <string name="day_history_running">running</string>
+    <string name="day_history_running_note">In progress — not counted toward your goal yet</string>
+    <string name="day_history_empty">No sessions on this day.</string>
 </resources>

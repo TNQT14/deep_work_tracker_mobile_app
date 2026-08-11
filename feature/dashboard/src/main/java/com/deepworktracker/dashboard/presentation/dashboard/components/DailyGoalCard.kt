@@ -1,5 +1,6 @@
-package com.deepworktracker.dashboard.presentation.dashboard.streak
+package com.deepworktracker.dashboard.presentation.dashboard.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,61 +16,24 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.deepworktracker.dashboard.R
 import com.deepworktracker.domain.streak.StreakResult
 
-/**
- * [UI] Huy hiệu 🔥 + số ngày, đặt trong TopAppBar actions.
- * Ẩn hoàn toàn khi chưa có chuỗi — tránh hiển thị "0 ngày" cho user mới,
- * vốn là trải nghiệm khởi đầu tiêu cực.
- * Mờ đi khi hôm nay CHƯA đạt goal (nhưng con số KHÔNG đổi — chuỗi chưa gãy).
- */
-@Composable
-fun StreakBadge(
-    streak: StreakResult,
-    modifier: Modifier = Modifier,
-) {
-    if (streak.current <= 0) return
-
-    val label = stringResource(R.string.dashboard_streak_days, streak.current)
-    Row(
-        modifier = modifier
-            .padding(horizontal = 8.dp)
-            .semantics { contentDescription = label },
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-    ) {
-        Text(
-            text = "🔥",
-            modifier = Modifier.alpha(if (streak.isTodayDone) 1f else 0.4f),
-        )
-        Text(
-            text = streak.current.toString(),
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-        )
-    }
-}
-
-/**
- * [UI] Thẻ mục tiêu hôm nay: vòng tiến độ + phút hiện tại/mục tiêu + kỷ lục.
- * Tái dùng pattern FocusScoreRing trong AnalyticsComponents.kt (M3
- * CircularProgressIndicator, không phải Canvas).
- */
 @Composable
 fun DailyGoalCard(
     streak: StreakResult?,
     goalMinutes: Int,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Card(modifier = modifier.fillMaxWidth()) {
-        // Chưa đặt goal → CTA thay vì hiển thị vòng rỗng vô nghĩa.
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .then(if (goalMinutes > 0) Modifier.clickable(onClick = onClick) else Modifier)
+    ) {
         if (goalMinutes <= 0) {
             Text(
                 text = stringResource(R.string.dashboard_goal_empty),
