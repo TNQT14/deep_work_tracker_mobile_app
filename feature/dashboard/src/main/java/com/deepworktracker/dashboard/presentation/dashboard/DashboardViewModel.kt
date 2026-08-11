@@ -6,6 +6,7 @@ import com.deepworktracker.common.result.Result
 import com.deepworktracker.dashboard.domain.usecase.GetAllSessionUseCase
 import com.deepworktracker.dashboard.domain.usecase.GetFocusAnalyticsUseCase
 import com.deepworktracker.dashboard.domain.usecase.GetRecentSessionsUseCase
+import com.deepworktracker.dashboard.domain.usecase.GetStreakUseCase
 import com.deepworktracker.domain.analytics.AnalyticsPeriod
 import com.deepworktracker.domain.model.AlertMode
 import com.deepworktracker.domain.model.FocusSession
@@ -14,10 +15,13 @@ import com.deepworktracker.domain.model.InterruptionType
 import com.deepworktracker.domain.repository.InsightRepository
 import com.deepworktracker.domain.repository.InterruptionRepository
 import com.deepworktracker.domain.repository.SessionRepository
+import com.deepworktracker.domain.repository.UserPreferencesRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
@@ -33,21 +37,22 @@ class DashboardViewModel @Inject constructor(
     private val getRecentSessionsUseCase: GetRecentSessionsUseCase,
     private val getAllSessionUseCase: GetAllSessionUseCase,
     private val getFocusAnalyticsUseCase: GetFocusAnalyticsUseCase,
+    private val getStreakUseCase: GetStreakUseCase,
+
     private val insightRepository: InsightRepository,
-    // TEMPORARY DEBUG (M3.3b device verification) — remove together with
-    // debugSeedTestData()/seedSession() and the button in DashboardScreen once verified.
     private val sessionRepository: SessionRepository,
     private val interruptionRepository: InterruptionRepository,
+    private val userPreferencesRepository: UserPreferencesRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(DashboardUiState())
     val uiState: StateFlow<DashboardUiState> = _uiState.asStateFlow()
 
 
-
     init {
         loadDashboardData()
         observeInsights()
+        observeStreak()
     }
 
     /**
@@ -60,12 +65,33 @@ class DashboardViewModel @Inject constructor(
      *          (viewModelScope).
      * Output: uiState.insights replaced with the latest emission on every change.
      */
-    fun observeInsights(){
+    fun observeInsights() {
         viewModelScope.launch {
-            insightRepository.getRecentInsights(limit = 5).collect {
-                insights -> _uiState.update {
+            insightRepository.getRecentInsights(limit = 5).collect { insights ->
+                _uiState.update {
                     it.copy(insights = insights)
                 }
+            }
+        }
+    }
+
+    private fun observeStreak() {
+        viewModelScope.launch {
+            userPreferencesRepository.observePreferences()
+                .map { it.dailyGoalMinutes }
+                .distinctUntilChanged()
+                .collect { goal ->
+                    _uiState.update { it.copy(dailyGoalMinutes = goal) }
+                    loadStreak()
+                }
+        }
+    }
+
+    private fun loadStreak() {
+        viewModelScope.launch {
+            when (val result = getStreakUseCase()) {
+                is Result.Success -> _uiState.update { it.copy(streak = result.data) }
+                is Result.Error -> _uiState.update { it.copy(error = result.exception) }
             }
         }
     }
@@ -116,6 +142,7 @@ class DashboardViewModel @Inject constructor(
             }
         }
         loadAnalytics(_uiState.value.selectedPeriod)
+        loadStreak()
     }
 
     fun refresh() {
@@ -154,8 +181,22 @@ class DashboardViewModel @Inject constructor(
             val now = Clock.System.now()
 
             val thisWeekIds = mutableListOf<String>()
-            repeat(3) { i -> thisWeekIds += seedSession(now, daysAgo = i, focusMin = 25, focusRatio = 0.3f) }
-            repeat(3) { i -> thisWeekIds += seedSession(now, daysAgo = i, focusMin = 50, focusRatio = 0.6f) }
+            repeat(3) { i ->
+                thisWeekIds += seedSession(
+                    now,
+                    daysAgo = i,
+                    focusMin = 25,
+                    focusRatio = 0.3f
+                )
+            }
+            repeat(3) { i ->
+                thisWeekIds += seedSession(
+                    now,
+                    daysAgo = i,
+                    focusMin = 50,
+                    focusRatio = 0.6f
+                )
+            }
             repeat(3) { i -> seedSession(now, daysAgo = 10 + i, focusMin = 40, focusRatio = 0.9f) }
 
             val counts = listOf(1, 1, 1, 5)

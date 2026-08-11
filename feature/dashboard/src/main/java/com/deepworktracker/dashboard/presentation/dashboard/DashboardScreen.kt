@@ -28,6 +28,8 @@ import com.deepworktracker.dashboard.presentation.charts.GoalDistributionChart
 import com.deepworktracker.dashboard.presentation.analytics.FocusHeatmap
 import com.deepworktracker.dashboard.presentation.analytics.FocusSummaryCard
 import com.deepworktracker.dashboard.presentation.analytics.PeriodSelector
+import com.deepworktracker.dashboard.presentation.dashboard.streak.DailyGoalCard
+import com.deepworktracker.dashboard.presentation.dashboard.streak.StreakBadge
 import com.deepworktracker.dashboard.presentation.insights.InsightCarousel
 import com.deepworktracker.domain.model.FocusSession
 
@@ -50,41 +52,35 @@ fun DashboardScreen(
                 TopAppBar(
                     title = { Text(stringResource(R.string.dashboard_title)) },
                     actions = {
-                        IconButton(
-                            onClick = { viewModel.refresh() },
-                            enabled = !uiState.isLoading
-                        ) {
-                            if (uiState.isLoading) {
-                                CircularProgressIndicator(modifier = Modifier.size(24.dp))
-                            } else {
-                                Icon(
-                                    imageVector = Icons.Default.Refresh,
-                                    contentDescription = stringResource(
-                                        R.string.dashboard_refresh_content_description,
-                                    ),
-                                )
-                            }
-                        }
-                        IconButton(onClick = onNavigateToSession) {
-                            Icon(
-                                imageVector = Icons.Default.PlayArrow,
-                                contentDescription = stringResource(
-                                    R.string.dashboard_session_content_description,
-                                ),
-                            )
-                        }
+//                        IconButton(
+//                            onClick = { viewModel.refresh() },
+//                            enabled = !uiState.isLoading
+//                        ) {
+//                            if (uiState.isLoading) {
+//                                CircularProgressIndicator(modifier = Modifier.size(24.dp))
+//                            } else {
+//                                Icon(
+//                                    imageVector = Icons.Default.Refresh,
+//                                    contentDescription = stringResource(
+//                                        R.string.dashboard_refresh_content_description,
+//                                    ),
+//                                )
+//                            }
+//                        }
+//                        IconButton(onClick = onNavigateToSession) {
+//                            Icon(
+//                                imageVector = Icons.Default.PlayArrow,
+//                                contentDescription = stringResource(
+//                                    R.string.dashboard_session_content_description,
+//                                ),
+//                            )
+//                        }
+                        uiState.streak?.let{ StreakBadge(streak = it) }
+//                        IconButton(
+//                            onClick = { viewModel.refresh()}
+//                        )
                     }
                 )
-
-                // TEMPORARY DEBUG (M3.3b) — seeds session/interruption data only; go to
-                // Background Task Inspector -> generate_insights_periodic -> Run Now to
-                // exercise the REAL worker. Delete this button once verified.
-                Button(
-                    onClick = { viewModel.debugSeedTestData() },
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
-                ) {
-                    Text("DEBUG: Seed test data")
-                }
 
                 if (uiState.isLoading && uiState.focusAnalytics == null) {
                     Box(
@@ -138,6 +134,13 @@ fun DashboardScreen(
                             item(key = "insight"){
                                 InsightCarousel(insights = uiState.insights)
                             }
+                        }
+
+                        item( key = "daily_goal"){
+                            DailyGoalCard(
+                                streak = uiState.streak,
+                                goalMinutes = uiState.dailyGoalMinutes
+                            )
                         }
 
                         item {

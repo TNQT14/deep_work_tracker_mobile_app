@@ -61,4 +61,9 @@
     <string name="insight_day_fri">T6</string>
     <string name="insight_day_sat">T7</string>
     <string name="insight_day_sun">CN</string>
+    <string name="dashboard_streak_days">Chuỗi %1$d ngày</string>
+    <string name="dashboard_goal_title">Mục tiêu hôm nay</string>
+    <string name="dashboard_goal_progress">%1$d / %2$d phút tập trung</string>
+    <string name="dashboard_goal_best">Kỷ lục: %1$d ngày</string>
+    <string name="dashboard_goal_empty">Đặt mục tiêu mỗi ngày trong Cài đặt để bắt đầu chuỗi ngày.</string>
 </resources>

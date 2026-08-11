@@ -62,4 +62,9 @@
     <string name="insight_day_fri">Fri</string>
     <string name="insight_day_sat">Sat</string>
     <string name="insight_day_sun">Sun</string>
+    <string name="dashboard_streak_days">%1$d day streak</string>
+    <string name="dashboard_goal_title">Today\'s goal</string>
+    <string name="dashboard_goal_progress">%1$d / %2$d min focused</string>
+    <string name="dashboard_goal_best">Best streak: %1$d days</string>
+    <string name="dashboard_goal_empty">Set a daily goal in Settings to start building a streak.</string>
 </resources>

@@ -4,12 +4,15 @@ import com.deepworktracker.domain.analytics.AnalyticsPeriod
 import com.deepworktracker.domain.analytics.FocusAnalytics
 import com.deepworktracker.domain.model.FocusSession
 import com.deepworktracker.domain.model.Insight
+import com.deepworktracker.domain.streak.StreakResult
 
 data class DashboardUiState(
     val recentSessions: List<FocusSession> = emptyList(),
     val selectedPeriod: AnalyticsPeriod = AnalyticsPeriod.WEEK,
     val focusAnalytics: FocusAnalytics? = null,
     val allSessions: List<FocusSession> = emptyList(),
+    val streak: StreakResult? = null,
+    val dailyGoalMinutes: Int = 0,
 
     /**
      * [UiState]
