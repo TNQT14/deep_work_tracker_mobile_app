@@ -4,6 +4,7 @@ import android.content.Intent
 import android.content.pm.ServiceInfo
 import androidx.core.app.ServiceCompat
 import androidx.lifecycle.LifecycleService
+import com.deepworktracker.domain.repository.SessionRepository
 import com.deepworktracker.session.domain.usecase.EndSessionUseCase
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
