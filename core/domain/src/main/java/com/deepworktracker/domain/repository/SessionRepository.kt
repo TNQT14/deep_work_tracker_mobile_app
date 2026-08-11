@@ -1,5 +1,6 @@
 package com.deepworktracker.domain.repository
 
+import com.deepworktracker.domain.model.DailyStats
 import com.deepworktracker.domain.model.FocusSession
 import kotlinx.coroutines.flow.Flow
 import kotlinx.datetime.LocalDate
@@ -18,4 +19,5 @@ interface SessionRepository {
     suspend fun getRecentTags(limit: Int = 8): List<String>
     suspend fun getAllSessions(): List<FocusSession>
     fun getSessionsByTodoId(todoId: String): Flow<List<FocusSession>>
+    fun getDailyFocusedMillis(startDate: LocalDate, endDate: LocalDate): Flow<Map<LocalDate, Long>>
 }

@@ -11,4 +11,5 @@ interface UserPreferencesRepository {
     suspend fun setTheme(theme: ThemePreference): Result<Unit>
     suspend fun setLanguage(language: LanguagePreference): Result<Unit>
     suspend fun resetToDefaults(): Result<Unit>
+    suspend fun setDailyGoalMinutes(minutes: Int): Result<Unit>
 }

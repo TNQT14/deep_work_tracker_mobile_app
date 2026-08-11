@@ -123,4 +123,17 @@ class SessionRepositoryImpl @Inject constructor(
         return sessionDao.getSessionsByTodoId(todoId)
             .map { entities -> entities.map { mapper.toDomain(it) } }
     }
+
+    override fun getDailyFocusedMillis(
+        startDate: LocalDate,
+        endDate: LocalDate
+    ): Flow<Map<LocalDate, Long>> {
+        return sessionDao.getDailyFocusTotals(
+            startDate.toString(),
+            endDate.toString()
+        ).map { rows ->
+            rows.associate { LocalDate.parse(it.date) to it.totalMs }
+        }
+    }
+
 }

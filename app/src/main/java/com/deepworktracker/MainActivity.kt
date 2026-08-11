@@ -42,6 +42,7 @@ import com.deepworktracker.auth.navigation.authGraph
 import com.deepworktracker.dashboard.presentation.category.CategoryScreen
 import com.deepworktracker.dashboard.presentation.category_detail.CategoryDetailScreen
 import com.deepworktracker.dashboard.presentation.dashboard.DashboardScreen
+import com.deepworktracker.dashboard.presentation.day_history.DayHistoryScreen
 import com.deepworktracker.dashboard.presentation.goal_detail.GoalDetailScreen
 import com.deepworktracker.data.remote.auth.AuthSessionState
 import com.deepworktracker.preferences.LanguageManager
@@ -205,6 +206,9 @@ private fun MainAppScaffold(
                         onNavigateToGoal = { goal ->
                             navController.navigate("goal/${Uri.encode(goal)}")
                         },
+                        onNavigateToHistory = { date ->
+                            navController.navigate("history/$date")
+                        }
                     )
                 }
 
@@ -231,6 +235,13 @@ private fun MainAppScaffold(
                         onBack = { navController.popBackStack() },
                     )
                 }
+
+                composable("history/{date}") { backStackEntry ->
+                    DayHistoryScreen(
+                        onBack = { navController.popBackStack() }
+                    )
+                }
+
                 composable("profile") {
                     ProfileRoute(
                         onLogoutSuccess = {
@@ -242,6 +253,7 @@ private fun MainAppScaffold(
                         onNavigateToSettings = { navController.navigate(SETTINGS_ROUTE) },
                     )
                 }
+
 
                 composable(SETTINGS_ROUTE) {
                     SettingRoute(

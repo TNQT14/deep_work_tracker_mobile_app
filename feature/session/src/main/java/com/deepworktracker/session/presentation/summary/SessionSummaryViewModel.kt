@@ -4,7 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.deepworktracker.domain.repository.InterruptionRepository
-import com.deepworktracker.session.domain.usecase.GetSessionByIdUseCase
+import com.deepworktracker.domain.repository.SessionRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -24,7 +24,7 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class SessionSummaryViewModel @Inject constructor(
-    private val getSessionByIdUseCase: GetSessionByIdUseCase,
+    private val sessionRepository: SessionRepository,
     private val interruptionRepository: InterruptionRepository,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
@@ -40,7 +40,7 @@ class SessionSummaryViewModel @Inject constructor(
 
     private fun load() {
         viewModelScope.launch {
-            val session = getSessionByIdUseCase(sessionId)
+            val session = sessionRepository.getSessionById(sessionId)
             val interruptions = interruptionRepository.getInterruptionsBySession(sessionId).first()
             _uiState.update {
                 it.copy(session = session, interruptions = interruptions, isLoading = false)

@@ -48,7 +48,11 @@ import com.deepworktracker.profile.R
 import android.app.NotificationManager
 import android.provider.Settings
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Switch
 import androidx.compose.material3.TextButton
 
@@ -60,6 +64,7 @@ fun SettingScreen(
     onThemeSelected: (ThemePreference) -> Unit,
     onLanguageTagSelected: (String) -> Unit,
     onDndToggle: (Boolean) -> Unit,
+    onDailyGoalSelected: (Int) -> Unit,
     onClearError: () -> Unit,
     onNavigateToBlocklist: () -> Unit
 ) {
@@ -91,6 +96,7 @@ fun SettingScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .verticalScroll(rememberScrollState())
                 .padding(padding),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
@@ -125,6 +131,41 @@ fun SettingScreen(
             }
             if (uiState.isSaving) {
                 LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+            }
+
+            HorizontalDivider()
+
+            Text(
+                text = stringResource(R.string.settings_daily_goal),
+                style = MaterialTheme.typography.titleMedium,
+            )
+            Text(
+                text = stringResource(R.string.settings_daily_goal_desc),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                DAILY_GOAL_PRESETS.forEach { minutes ->
+                    FilterChip(
+                        selected = uiState.dailyGoalMinutes == minutes,
+                        enabled = !uiState.isSaving,
+                        onClick = { onDailyGoalSelected(minutes) },
+                        label = {
+                            Text(
+                                if (minutes == 0) {
+                                    stringResource(R.string.settings_daily_goal_off)
+                                } else {
+                                    stringResource(R.string.settings_daily_goal_minutes, minutes)
+                                }
+                            )
+                        },
+                    )
+                }
             }
 
             HorizontalDivider()
@@ -256,3 +297,4 @@ private fun isLanguageSelected(language: LanguagePreference, tag: String): Boole
         SupportedLocales.VIETNAMESE -> language == LanguagePreference.Fixed(SupportedLocales.VIETNAMESE)
         else -> false
     }
+private val DAILY_GOAL_PRESETS = listOf(0, 30, 60, 90, 120, 180)

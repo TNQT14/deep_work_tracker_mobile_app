@@ -4,8 +4,8 @@ import android.content.Intent
 import android.content.pm.ServiceInfo
 import androidx.core.app.ServiceCompat
 import androidx.lifecycle.LifecycleService
+import com.deepworktracker.domain.repository.SessionRepository
 import com.deepworktracker.session.domain.usecase.EndSessionUseCase
-import com.deepworktracker.session.domain.usecase.GetActiveSessionUseCase
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -33,7 +33,7 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class FocusSessionService : LifecycleService() {
 
-    @Inject lateinit var getActiveSessionUseCase: GetActiveSessionUseCase
+    @Inject lateinit var sessionRepository: SessionRepository
     @Inject lateinit var endSessionUseCase: EndSessionUseCase
     @Inject lateinit var notificationHelper: SessionNotificationHelper
     @Inject lateinit var ticker: SessionTicker
@@ -66,7 +66,7 @@ class FocusSessionService : LifecycleService() {
         if (observing) return
         observing = true
         scope.launch {
-            getActiveSessionUseCase().collect { session ->
+            sessionRepository.observeActiveSession().collect { session ->
                 if (session == null) {
                     dndController.onSessionEnded()
                     stopService()

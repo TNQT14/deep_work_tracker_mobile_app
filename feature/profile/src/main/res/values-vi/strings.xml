@@ -41,4 +41,8 @@
     <string name="blocklist_search">Tìm ứng dụng</string>
     <string name="blocklist_usage_access_needed">Cần cấp quyền Usage access để phát hiện xao nhãng.</string>
     <string name="blocklist_grant_usage_access">Cấp quyền</string>
+    <string name="settings_daily_goal">Mục tiêu mỗi ngày</string>
+    <string name="settings_daily_goal_desc">Số phút tập trung bạn muốn đạt mỗi ngày. Chuỗi ngày được tính theo mục tiêu này.</string>
+    <string name="settings_daily_goal_off">Tắt</string>
+    <string name="settings_daily_goal_minutes">%1$d phút</string>
 </resources>

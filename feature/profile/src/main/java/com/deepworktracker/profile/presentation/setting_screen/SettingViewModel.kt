@@ -37,6 +37,7 @@ class SettingViewModel @Inject constructor(
                     it.copy(
                         theme = prefs.theme,
                         language = prefs.language,
+                        dailyGoalMinutes = prefs.dailyGoalMinutes,
                         isSaving = false
                     )
                 }
@@ -71,6 +72,21 @@ class SettingViewModel @Inject constructor(
         }
     }
 
+    fun onDailyGoalSelected(minutes: Int) {
+        if (_uiState.value.dailyGoalMinutes == minutes) return
+        viewModelScope.launch {
+            _uiState.update { it.copy(isSaving = true, errorMsg = null) }
+            userPreferencesRepository.setDailyGoalMinutes(minutes).onFailure { error ->
+                _uiState.update {
+                    it.copy(
+                        isSaving = false,
+                        errorMsg = error.message ?: "Failed to save daily goal",
+                    )
+                }
+            }
+        }
+    }
+
     fun onLanguageTagSelected(languageTag: String) {
         onLanguageSelected(
             when (languageTag) {
@@ -98,8 +114,8 @@ class SettingViewModel @Inject constructor(
         }
     }
 
-    fun onDndToggle(enabled: Boolean){
-        if(_uiState.value.shieldDndEnabled == enabled) return
+    fun onDndToggle(enabled: Boolean) {
+        if (_uiState.value.shieldDndEnabled == enabled) return
         viewModelScope.launch {
             focusShieldRepository.setDndEnabled(enabled).onFailure {
                 _uiState.update {

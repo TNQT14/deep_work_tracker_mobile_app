@@ -19,6 +19,7 @@ fun SettingRoute(
         onThemeSelected = viewModel::onThemeSelected,
         onLanguageTagSelected = viewModel::onLanguageTagSelected,
         onDndToggle = viewModel::onDndToggle,
+        onDailyGoalSelected = viewModel::onDailyGoalSelected,
         onClearError = viewModel::clearError,
     )
 }

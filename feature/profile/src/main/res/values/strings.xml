@@ -41,4 +41,8 @@
     <string name="blocklist_search">Search apps</string>
     <string name="blocklist_usage_access_needed">Grant usage access so distractions can be detected.</string>
     <string name="blocklist_grant_usage_access">Grant usage access</string>
+    <string name="settings_daily_goal">Daily goal</string>
+    <string name="settings_daily_goal_desc">How many focused minutes you aim for each day. Your streak counts days you hit it.</string>
+    <string name="settings_daily_goal_off">Off</string>
+    <string name="settings_daily_goal_minutes">%1$d min</string>
 </resources>

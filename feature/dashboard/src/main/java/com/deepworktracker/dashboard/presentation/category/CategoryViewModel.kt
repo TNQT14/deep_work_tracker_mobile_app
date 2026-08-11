@@ -2,11 +2,10 @@ package com.deepworktracker.dashboard.presentation.category
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.deepworktracker.common.result.Result
-import com.deepworktracker.dashboard.domain.usecase.GetAllSessionUseCase
 import com.deepworktracker.domain.model.CategoryRule
 import com.deepworktracker.domain.model.FocusSession
 import com.deepworktracker.domain.repository.CategoryRuleRepository
+import com.deepworktracker.domain.repository.SessionRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -23,7 +22,7 @@ import java.util.UUID
 
 @HiltViewModel
 class CategoryViewModel @Inject constructor(
-    private val getAllSessionUseCase: GetAllSessionUseCase,
+    private val sessionRepository: SessionRepository,
     private val categoryRuleRepository: CategoryRuleRepository,
 ) : ViewModel() {
 
@@ -46,11 +45,12 @@ class CategoryViewModel @Inject constructor(
     fun refresh() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
-            when (val result = getAllSessionUseCase()) {
-                is Result.Success -> {
-                    val sessions = result.data.filter { !it.isActive }
+            runCatching { sessionRepository.getAllSessions() }
+                .onSuccess { all ->
+                    val sessions = all.filter { !it.isActive }
                     val summaries = buildCategorySummaries(sessions)
-                    val selected = _uiState.value.selectedCategory ?: summaries.firstOrNull()?.category
+                    val selected =
+                        _uiState.value.selectedCategory ?: summaries.firstOrNull()?.category
                     val computed = computeCategoryViews(sessions, selected)
                     _uiState.update {
                         it.copy(
@@ -64,10 +64,9 @@ class CategoryViewModel @Inject constructor(
                         )
                     }
                 }
-                is Result.Error -> {
-                    _uiState.update { it.copy(isLoading = false, error = result.exception) }
+                .onFailure { e ->
+                    _uiState.update { it.copy(isLoading = false, error = e) }
                 }
-            }
         }
     }
 

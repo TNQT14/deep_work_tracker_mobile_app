@@ -3,6 +3,7 @@ package com.deepworktracker.dashboard.presentation.goal_detail
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.deepworktracker.domain.repository.SessionRepository
+import com.deepworktracker.domain.streak.StreakCalculator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -35,7 +36,8 @@ class GoalDetailViewModel @Inject constructor(
                     isLoading = true,
                 )
 
-                val today = Clock.System.now().toLocalDateTime(TimeZone.Companion.currentSystemDefault()).date
+                val today = Clock.System.now()
+                    .toLocalDateTime(TimeZone.Companion.currentSystemDefault()).date
                 val onYearAgo = today.minus(1, DateTimeUnit.YEAR)
 
                 val list = sessionRepository.getSessionsByDateRange(onYearAgo, today).first()
@@ -72,9 +74,12 @@ class GoalDetailViewModel @Inject constructor(
                 val byWeek = weekOrder.map { key -> key to (byWeekMap[key] ?: 0L) }
 
                 val byMonthMap = filtered
-                    .groupBy { it.startTime.toLocalDateTime(zone).let { "${it.year}-${it.monthNumber}" } }
+                    .groupBy {
+                        it.startTime.toLocalDateTime(zone).let { "${it.year}-${it.monthNumber}" }
+                    }
                     .mapValues { (_, sessions) -> sessions.sumOf { it.totalDuration } }
-                val monthOrder = sortedDays.map { "${it.year}-${it.month.number}" }.distinct().takeLast(12)
+                val monthOrder =
+                    sortedDays.map { "${it.year}-${it.month.number}" }.distinct().takeLast(12)
                 val byMonth = monthOrder.map { key -> key to (byMonthMap[key] ?: 0L) }
 
                 val byYearMap = filtered
@@ -104,7 +109,7 @@ class GoalDetailViewModel @Inject constructor(
                     metrics = metrics,
                 )
             } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(error = e.localizedMessage,)
+                _uiState.value = _uiState.value.copy(error = e.localizedMessage)
             }
         }
     }
@@ -139,7 +144,13 @@ private fun computeGoalMetrics(
         }
     }
 
-    val (currentStreakDays, longestStreakDays) = computeStreaks(dailyMinutes)
+    val streak = StreakCalculator.calculate(
+        dailyMinutes = byDateMs.mapValues { (_, ms) ->
+            ms / 60_000
+        },
+        goalMinutes = 1,
+        today = endDate
+    )
     val avgMinutesPerActiveDay = if (activeDays > 0) totalMinutes.toFloat() / activeDays else 0f
     val avgMinutesPerCalendarDay = if (rangeDays > 0) totalMinutes.toFloat() / rangeDays else 0f
     val dailyCv = coefficientOfVariation(dailyMinutes.map { it.toFloat() })
@@ -169,8 +180,8 @@ private fun computeGoalMetrics(
         rangeDays = rangeDays,
         activeDays = activeDays,
         coverageRatio = coverageRatio,
-        currentStreakDays = currentStreakDays,
-        longestStreakDays = longestStreakDays,
+        currentStreakDays = if(streak.isTodayDone) streak.current else 0,
+        longestStreakDays = streak.longest,
         totalMinutes = totalMinutes,
         focusedMinutes = focusedMinutes,
         focusEfficiency = focusEfficiency,
@@ -184,8 +195,10 @@ private fun computeGoalMetrics(
     )
 }
 
-private fun daysBetweenInclusive(start: kotlinx.datetime.LocalDate, end: kotlinx.datetime.LocalDate): Int {
-    // Intended for small windows (e.g., 90 days).
+private fun daysBetweenInclusive(
+    start: kotlinx.datetime.LocalDate,
+    end: kotlinx.datetime.LocalDate
+): Int {
     if (end < start) return 0
     var d = start
     var count = 1
@@ -197,7 +210,7 @@ private fun daysBetweenInclusive(start: kotlinx.datetime.LocalDate, end: kotlinx
     return count
 }
 
-private fun computeStreaks(dailyMinutes: List<Long>): Pair<Int, Int> {
+private fun legacyComputeStreaks(dailyMinutes: List<Long>): Pair<Int, Int> {
     var current = 0
     var best = 0
     for (m in dailyMinutes) {
