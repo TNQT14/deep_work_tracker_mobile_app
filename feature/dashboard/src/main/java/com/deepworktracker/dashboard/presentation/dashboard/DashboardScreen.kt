@@ -102,6 +102,12 @@ fun DashboardScreen(
                             }
                         }
                     }
+                    item {
+                        PeriodSelector(
+                            selected = uiState.selectedPeriod,
+                            onSelect = viewModel::onPeriodSelected
+                        )
+                    }
                     // [UI — Screen] [UDF: state down] insights carousel — only added
                     // to the LazyColumn when non-empty; read-only, no dismiss action.
                     if (uiState.insights.isNotEmpty()) {
@@ -120,13 +126,6 @@ fun DashboardScreen(
                                 onNavigateToHistory(today.toString())
                             },
                             goalMinutes = uiState.dailyGoalMinutes
-                        )
-                    }
-
-                    item {
-                        PeriodSelector(
-                            selected = uiState.selectedPeriod,
-                            onSelect = viewModel::onPeriodSelected
                         )
                     }
 
