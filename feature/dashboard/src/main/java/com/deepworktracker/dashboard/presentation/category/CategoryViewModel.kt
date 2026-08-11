@@ -45,11 +45,12 @@ class CategoryViewModel @Inject constructor(
     fun refresh() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
-            when (val result = getAllSessionUseCase()) {
-                is Result.Success -> {
-                    val sessions = result.data.filter { !it.isActive }
+            runCatching { sessionRepository.getAllSessions() }
+                .onSuccess { all ->
+                    val sessions = all.filter { !it.isActive }
                     val summaries = buildCategorySummaries(sessions)
-                    val selected = _uiState.value.selectedCategory ?: summaries.firstOrNull()?.category
+                    val selected =
+                        _uiState.value.selectedCategory ?: summaries.firstOrNull()?.category
                     val computed = computeCategoryViews(sessions, selected)
                     _uiState.update {
                         it.copy(
@@ -63,10 +64,9 @@ class CategoryViewModel @Inject constructor(
                         )
                     }
                 }
-                is Result.Error -> {
-                    _uiState.update { it.copy(isLoading = false, error = result.exception) }
+                .onFailure { e ->
+                    _uiState.update { it.copy(isLoading = false, error = e) }
                 }
-            }
         }
     }
 
