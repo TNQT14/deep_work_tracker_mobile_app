@@ -1,16 +1,20 @@
 package com.deepworktracker.dashboard.presentation.day_history
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -31,6 +35,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.deepworktracker.dashboard.R
+import com.deepworktracker.dashboard.presentation.day_history.components.DayStatsGrid
 import com.deepworktracker.domain.model.FocusSession
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
@@ -40,6 +45,7 @@ import kotlinx.datetime.toLocalDateTime
 @Composable
 fun DayHistoryScreen(
     onBack: () -> Unit,
+    onNavigateToGoal: (String) -> Unit,
     viewModel: DayHistoryViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -76,7 +82,7 @@ fun DayHistoryScreen(
         ) {
             when {
                 uiState.isLoading -> CircularProgressIndicator(Modifier.align(Alignment.Center))
-                uiState.sessions.isEmpty() && uiState.activeSession == null -> Text(
+                uiState.groups.isEmpty() -> Text(
                     text = stringResource(R.string.day_history_empty),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -90,25 +96,12 @@ fun DayHistoryScreen(
                     contentPadding = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
-                    item(key = "count") {
-                        Text(
-                            text = stringResource(
-                                R.string.day_history_count,
-                                uiState.sessions.size,
-                            ),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
+                    item(key = "stats") {
+                        DayStatsGrid(stats = uiState.stats)
                     }
-                    items(uiState.sessions, key = { it.id }) { session ->
-                        SessionRow(session = session)
+                    items(uiState.groups, key = { it.first().id }) { groups ->
+                        SessionRow(groups = groups, onClick = onNavigateToGoal)
                     }
-                    uiState.activeSession?.let { active ->
-                        item(key = "active") {
-                            SessionRow(session = active)
-                        }
-                    }
-
                 }
             }
         }
@@ -116,52 +109,86 @@ fun DayHistoryScreen(
 }
 
 @Composable
-private fun SessionRow(session: FocusSession) {
-    Card(modifier = Modifier.fillMaxWidth()) {
-        Column(
+private fun SessionRow(groups: SessionGroup, onClick: (String) -> Unit) {
+    val first = groups.first()
+    val goal = first.goal.takeIf { it.isNotBlank() }
+    val focusedMinutes =
+        groups.filter { !it.isActive }.sumOf { it.focusedDuration } / MILLIS_PER_MINUTE
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .then(if (goal != null) Modifier.clickable { onClick(goal) } else Modifier)
+    ) {
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(14.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(
-                text = session.goal,
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.Bold,
-            )
-            Text(
-                text = timeRangeLabel(session),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Text(
-                text = if (session.isActive) {
-                    stringResource(R.string.day_history_running_note)
-                } else {
-                    stringResource(
-                        R.string.day_history_focused_minutes,
-                        session.focusedDuration / MILLIS_PER_MINUTE,
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = first.goal,
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.weight(1f),
                     )
-                },
-                style = MaterialTheme.typography.bodyMedium,
-            )
-            session.category?.takeIf { it.isNotBlank() }?.let { category ->
+                    groups.firstNotNullOfOrNull { it.category?.takeIf { c -> c.isNotBlank() } }
+                        ?.let { category ->
+                            Text(
+                                text = category,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.primary,
+                            )
+                        }
+                }
+
                 Text(
-                    text = category,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.primary,
+                    text = stringResource(R.string.day_history_focused_minutes, focusedMinutes),
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+                if (groups.size > 1 || first.isActive) {
+                    groups.forEach { session ->
+                        Text(
+                            text = "${timeRangeLabel(session)}  ·  " + if (session.isActive) {
+                                stringResource(R.string.day_history_running)
+                            } else {
+                                stringResource(
+                                    R.string.day_history_focused_minutes,
+                                    session.focusedDuration / MILLIS_PER_MINUTE,
+                                )
+                            },
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                } else {
+                    Text(
+                        text = timeRangeLabel(first),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+            if (goal != null) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
         }
     }
 }
 
-/** "09:00 – 09:52", hoặc "20:05 – đang chạy" khi phiên chưa kết thúc. */
 @Composable
 private fun timeRangeLabel(session: FocusSession): String {
     val start = formatClock(session.startTime)
     val end = session.endTime?.let { formatClock(it) }
-        ?: stringResource(R.string.day_history_running)
+        ?: stringResource(R.string.day_history_current)
     return "$start – $end"
 }
 

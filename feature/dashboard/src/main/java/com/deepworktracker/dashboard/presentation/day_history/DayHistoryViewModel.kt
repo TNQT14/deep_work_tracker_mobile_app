@@ -3,6 +3,8 @@ package com.deepworktracker.dashboard.presentation.day_history
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.deepworktracker.domain.analytics.FocusScoreCalculator
+import com.deepworktracker.domain.model.FocusSession
 import com.deepworktracker.domain.repository.SessionRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -31,11 +33,11 @@ class DayHistoryViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 sessionRepository.getSessionsByDate(date).collect { all ->
+                    val completed = all.filter { s -> !s.isActive }.sortedBy { s -> s.startTime }
                     _uiState.update {
                         it.copy(
-                            sessions = all.filter { s -> !s.isActive }
-                                .sortedBy { s -> s.startTime },
-                            activeSession = all.firstOrNull { s -> s.isActive },
+                            groups = groupSession(all),
+                            stats = computeStats(completed),
                             isLoading = false,
                             error = null
                         )
@@ -51,6 +53,23 @@ class DayHistoryViewModel @Inject constructor(
             }
         }
     }
+
+    private fun computeStats(sessions: List<FocusSession>): DayStats {
+        val totalMs = sessions.sumOf { it.totalDuration }.coerceAtLeast(0L)
+        val focusedMs = sessions.sumOf { it.focusedDuration }.coerceAtLeast(0L)
+        return DayStats(
+            sessionCount = sessions.size,
+            totalMs = totalMs,
+            interruptedMs = (totalMs - focusedMs).coerceAtLeast(0L),
+            focusScore = FocusScoreCalculator.score(sessions),
+        )
+    }
+
+    private fun groupSession(session: List<FocusSession>): List<SessionGroup> =
+        session.groupBy { it.todoId ?: it.goal }
+            .values
+            .map { it.sortedBy { s -> s.startTime } }
+            .sortedBy { it.first().startTime }
 
     companion object {
         const val ARG_DATE = "date"

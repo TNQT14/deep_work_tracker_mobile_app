@@ -71,6 +71,11 @@
     <string name="day_history_count">%1$d phiên đã hoàn thành</string>
     <string name="day_history_focused_minutes">%1$d phút tập trung</string>
     <string name="day_history_running">đang chạy</string>
+    <string name="day_history_current">hiện tại</string>
     <string name="day_history_running_note">Đang chạy — chưa tính vào mục tiêu</string>
     <string name="day_history_empty">Không có phiên nào trong ngày này.</string>
+    <string name="day_history_stat_sessions">Số phiên</string>
+    <string name="day_history_stat_total">Tổng thời gian</string>
+    <string name="day_history_stat_interrupted">Bị gián đoạn</string>
+    <string name="day_history_stat_score">Điểm tập trung</string>
 </resources>

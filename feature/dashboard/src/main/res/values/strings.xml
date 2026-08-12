@@ -72,6 +72,11 @@
     <string name="day_history_count">%1$d completed sessions</string>
     <string name="day_history_focused_minutes">%1$d min focused</string>
     <string name="day_history_running">running</string>
+    <string name="day_history_current">Current</string>
     <string name="day_history_running_note">In progress — not counted toward your goal yet</string>
     <string name="day_history_empty">No sessions on this day.</string>
+    <string name="day_history_stat_sessions">Sessions</string>
+    <string name="day_history_stat_total">Total time</string>
+    <string name="day_history_stat_interrupted">Interrupted</string>
+    <string name="day_history_stat_score">Focus score</string>
 </resources>
