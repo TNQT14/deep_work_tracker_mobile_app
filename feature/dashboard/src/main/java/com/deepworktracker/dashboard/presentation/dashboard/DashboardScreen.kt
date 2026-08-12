@@ -2,13 +2,11 @@
 
 package com.deepworktracker.dashboard.presentation.dashboard
 
-import com.deepworktracker.dashboard.presentation.dashboard.components.DailyGoalCard
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -17,17 +15,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.deepworktracker.dashboard.R
 import com.deepworktracker.dashboard.presentation.utils.durationWithInterruptionsLabel
 import com.deepworktracker.dashboard.presentation.utils.formatSessionTime
 import com.deepworktracker.dashboard.presentation.chart.AggregateBarChart
 import com.deepworktracker.dashboard.presentation.charts.GoalDistributionChart
 import com.deepworktracker.dashboard.presentation.analytics.FocusHeatmap
-import com.deepworktracker.dashboard.presentation.analytics.FocusSummaryCard
+import com.deepworktracker.dashboard.presentation.analytics.FocusHeroClusterCard
 import com.deepworktracker.dashboard.presentation.analytics.PeriodSelector
 import com.deepworktracker.dashboard.presentation.dashboard.components.StreakBadge
-import com.deepworktracker.dashboard.presentation.insights.InsightCarousel
 import com.deepworktracker.domain.model.FocusSession
+import com.deepworktracker.ui.theme.tokens.Spacing
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
@@ -40,7 +39,7 @@ fun DashboardScreen(
     onNavigateToGoal: (String) -> Unit = {},
     onNavigateToHistory: (String) -> Unit = {}
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -70,8 +69,8 @@ fun DashboardScreen(
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxWidth(),
-                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                    contentPadding = PaddingValues(horizontal = Spacing.md, vertical = Spacing.sm),
+                    verticalArrangement = Arrangement.spacedBy(Spacing.md)
                 ) {
                     uiState.error?.let { error ->
                         item(key = "error") {
@@ -108,31 +107,23 @@ fun DashboardScreen(
                             onSelect = viewModel::onPeriodSelected
                         )
                     }
-                    // [UI — Screen] [UDF: state down] insights carousel — only added
-                    // to the LazyColumn when non-empty; read-only, no dismiss action.
-                    if (uiState.insights.isNotEmpty()) {
-                        item(key = "insight") {
-                            InsightCarousel(insights = uiState.insights)
-                        }
-                    }
 
-                    item(key = "daily_goal") {
-                        DailyGoalCard(
+                    item(key = "hero") {
+                        FocusHeroClusterCard(
+                            insights = uiState.insights,
                             streak = uiState.streak,
-                            onClick = {
+                            dailyGoalMinutes = uiState.dailyGoalMinutes,
+                            analytics = uiState.focusAnalytics,
+                            onGoalClick = {
                                 val today = Clock.System.now()
                                     .toLocalDateTime(TimeZone.currentSystemDefault())
                                     .date
                                 onNavigateToHistory(today.toString())
                             },
-                            goalMinutes = uiState.dailyGoalMinutes
                         )
                     }
 
                     uiState.focusAnalytics?.let { analytics ->
-                        item {
-                            FocusSummaryCard(analytics = analytics)
-                        }
                         item {
                             FocusHeatmap(heatmap = analytics.heatmap)
                         }

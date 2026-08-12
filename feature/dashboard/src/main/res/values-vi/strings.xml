@@ -14,6 +14,7 @@
     <string name="dashboard_stat_avg">TB</string>
     <string name="dashboard_stat_best_hour">Giờ vàng</string>
     <string name="dashboard_best_hour_none">—</string>
+    <string name="dashboard_focus_score">Điểm tập trung</string>
 
     <string name="dashboard_heatmap_title">Bản đồ nhiệt tập trung</string>
     <string name="dashboard_focus_trend_title">Xu hướng tập trung</string>
@@ -66,6 +67,7 @@
     <string name="dashboard_goal_progress">%1$d / %2$d phút tập trung</string>
     <string name="dashboard_goal_best">Kỷ lục: %1$d ngày</string>
     <string name="dashboard_goal_empty">Đặt mục tiêu mỗi ngày trong Cài đặt để bắt đầu chuỗi ngày.</string>
+    <string name="dashboard_goal_open">Mở phiên hôm nay</string>
     <string name="day_history_title">Các phiên</string>
     <string name="day_history_back">Quay lại</string>
     <string name="day_history_count">%1$d phiên đã hoàn thành</string>

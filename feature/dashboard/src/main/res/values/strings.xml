@@ -14,6 +14,7 @@
     <string name="dashboard_stat_avg">Avg</string>
     <string name="dashboard_stat_best_hour">Best hour</string>
     <string name="dashboard_best_hour_none">—</string>
+    <string name="dashboard_focus_score">Focus score</string>
 
     <string name="dashboard_heatmap_title">Focus heatmap</string>
     <string name="dashboard_focus_trend_title">Focus trend</string>
@@ -67,6 +68,7 @@
     <string name="dashboard_goal_progress">%1$d / %2$d min focused</string>
     <string name="dashboard_goal_best">Best streak: %1$d days</string>
     <string name="dashboard_goal_empty">Set a daily goal in Settings to start building a streak.</string>
+    <string name="dashboard_goal_open">Open today\'s sessions</string>
     <string name="day_history_title">Sessions</string>
     <string name="day_history_back">Back</string>
     <string name="day_history_count">%1$d completed sessions</string>

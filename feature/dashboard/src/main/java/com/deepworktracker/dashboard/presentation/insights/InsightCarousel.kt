@@ -14,26 +14,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
-import com.deepworktracker.dashboard.R
+import androidx.compose.ui.text.font.FontWeight
 import com.deepworktracker.domain.model.Insight
-import com.deepworktracker.domain.model.InsightType
-import kotlin.math.abs
-import kotlin.math.roundToInt
+import com.deepworktracker.ui.theme.tokens.Spacing
 
 /**
- * [UI — Screen] (stateless composable, no ViewModel reference)
- * Horizontally-paged carousel of insight cards, shown at the top of the Dashboard.
- * No manual dismiss affordance — a card only disappears from the list when the
- * underlying insight's is_dismissed flips some other way, or the next
- * GenerateInsightsUseCase run replaces it (de-dup keeps at most one per type/day).
- *
- * Input: insights (List<Insight>, e.g. [Insight(type=BEST_TIME_WINDOW, ...)])
- * Process: early-returns (renders nothing) when insights is empty — the caller
- *          (DashboardScreen) also guards with `if (uiState.insights.isNotEmpty())`,
- *          this is a defensive second check.
- * Output: renders 0 or N horizontally paged, read-only cards.
+ * Horizontally-paged carousel of insight cards (standalone reuse).
+ * Dashboard hero embeds the same pattern inside [FocusHeroClusterCard].
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -46,11 +33,9 @@ fun InsightCarousel(
 
     HorizontalPager(
         state = pagerState,
-        // Key each page by the insight's own id (not its position) — keeps page
-        // identity stable if the underlying list ever reorders or shrinks.
         key = { insights[it].id },
-        contentPadding = PaddingValues(horizontal = 8.dp),
-        pageSpacing = 12.dp,
+        contentPadding = PaddingValues(horizontal = Spacing.sm),
+        pageSpacing = Spacing.sm + Spacing.xs,
         modifier = modifier.fillMaxWidth(),
     ) { page ->
         InsightCard(insight = insights[page])
@@ -60,71 +45,19 @@ fun InsightCarousel(
 @Composable
 private fun InsightCard(insight: Insight) {
     Card(modifier = Modifier.fillMaxWidth()) {
-        Column(Modifier.padding(16.dp)) {
+        Column(modifier = Modifier.padding(Spacing.md)) {
             Text(
                 text = insightTitle(insight.type),
-                style = MaterialTheme.typography.labelMedium,
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.primary,
             )
-            Spacer(Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(Spacing.xs))
             Text(
                 text = insightMessage(insight),
                 style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurface,
             )
         }
     }
-}
-
-/**
- * [UI] i18n label per InsightType. Static per-type strings, no `data` needed —
- * see insightMessage() below for the parameterized body text.
- */
-@Composable
-private fun insightTitle(type: InsightType): String = when (type) {
-    InsightType.BEST_TIME_WINDOW -> stringResource(R.string.insight_best_time_title)
-    InsightType.DISTRACTION_PATTERN -> stringResource(R.string.insight_distraction_title)
-    InsightType.OPTIMAL_SESSION_LENGTH -> stringResource(R.string.insight_optimal_title)
-    InsightType.PRODUCTIVITY_TREND -> stringResource(R.string.insight_trend_title)
-}
-
-/**
- * [UI]
- * Input: insight — reads insight.type + insight.data (Map<String, Any>?)
- * Process: builds the localized body text by pulling parameters straight out of
- *          `data` (e.g. data["hours"], data["dayOfWeek"]) into a stringResource
- *          placeholder (%1$s, %2$s in values/strings.xml + values-vi/strings.xml).
- *          Falls back to insight.message (English-only, non-localized) if `data`
- *          is null — should not normally happen since every rule always populates it.
- * Output: localized String, e.g. "Bạn tập trung tốt nhất khoảng 9,10 giờ" (vi) or
- *         "You focus best around 9,10 h" (en).
- */
-@Composable
-private fun insightMessage(insight: Insight): String {
-    val data = insight.data ?: return insight.message
-    return when (insight.type) {
-        InsightType.BEST_TIME_WINDOW ->
-            stringResource(R.string.insight_best_time_msg, data["hours"].toString())
-        InsightType.DISTRACTION_PATTERN ->
-            stringResource(R.string.insight_distraction_msg, dayLabel(data["dayOfWeek"]), data["ratio"].toString())
-        InsightType.OPTIMAL_SESSION_LENGTH ->
-            stringResource(R.string.insight_optimal_msg, data["bucketMinutes"].toString())
-        InsightType.PRODUCTIVITY_TREND ->
-            stringResource(R.string.insight_trend_msg, percentDrop(data["delta"]))
-    }
-}
-
-@Composable
-private fun dayLabel(value: Any?): String {
-    val index = (value as? Number)?.toInt() ?: return "?"
-    val ids = intArrayOf(
-        R.string.insight_day_mon, R.string.insight_day_tue, R.string.insight_day_wed,
-        R.string.insight_day_thu, R.string.insight_day_fri, R.string.insight_day_sat,
-        R.string.insight_day_sun,
-    )
-    return stringResource(ids[(index - 1).coerceIn(0, 6)])
-}
-
-private fun percentDrop(value: Any?): String {
-    val delta = (value as? Number)?.toDouble() ?: 0.0
-    return "${(abs(delta) * 100).roundToInt()}%"
 }
