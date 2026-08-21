@@ -67,11 +67,13 @@ fun DayHourAxis(
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.Top,
-                ) {
-                Column (modifier = Modifier.height(CHART_HEIGHT),
+            ) {
+                Column(
+                    modifier = Modifier.height(CHART_HEIGHT),
                     verticalArrangement = Arrangement.SpaceBetween,
-                    horizontalAlignment = Alignment.End,) {
-                    listOf( 60, 45, 30, 15, 0).forEach { minutes ->
+                    horizontalAlignment = Alignment.End,
+                ) {
+                    listOf(60, 45, 30, 15, 0).forEach { minutes ->
                         Text(
                             text = minutes.toString(),
                             style = MaterialTheme.typography.labelSmall,
@@ -79,7 +81,11 @@ fun DayHourAxis(
                         )
                     }
                 }
-                Column (){
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(start = 6.dp),
+                ) {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
