@@ -81,4 +81,8 @@
     <string name="day_history_stat_interrupted">Bị gián đoạn</string>
     <string name="day_history_stat_score">Điểm tập trung</string>
     <string name="day_history_interrupted_minutes">%1$d phút gián đoạn</string>
+    <string name="day_history_hour_axis">Phân bố tập trung</string>
+    <string name="day_history_hour_axis_cd">Số phút tập trung theo từng giờ trong 24 giờ</string>
+    <string name="day_history_hour_tick">%1$s giờ</string>
+
 </resources>

@@ -82,4 +82,8 @@
     <string name="day_history_stat_interrupted">Interrupted</string>
     <string name="day_history_stat_score">Focus score</string>
     <string name="day_history_interrupted_minutes">%1$d min interrupted</string>
+    <string name="day_history_hour_axis">Focus distribution</string>
+    <string name="day_history_hour_axis_cd">Focus minutes for each of 24 hours</string>
+    <string name="day_history_hour_tick">%1$s:00</string>
+
 </resources>

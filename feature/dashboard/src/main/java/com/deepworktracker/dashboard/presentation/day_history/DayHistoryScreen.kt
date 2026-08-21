@@ -37,6 +37,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.deepworktracker.dashboard.R
+import com.deepworktracker.dashboard.presentation.day_history.components.DayHourAxis
 import com.deepworktracker.dashboard.presentation.day_history.components.DayStatsGrid
 import com.deepworktracker.domain.model.FocusSession
 import kotlinx.datetime.Instant
@@ -100,6 +101,9 @@ fun DayHistoryScreen(
                 ) {
                     item(key = "stats") {
                         DayStatsGrid(stats = uiState.stats)
+                    }
+                    item(key = "hour_axis"){
+                        DayHourAxis(sessions = uiState.groups.flatten())
                     }
                     items(uiState.groups, key = { it.first().id }) { groups ->
                         SessionRow(groups = groups, onClick = onNavigateToGoal)
