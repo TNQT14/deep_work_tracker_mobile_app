@@ -37,6 +37,10 @@ import kotlin.math.roundToInt
 private const val MINUTES_PER_DAY = 24 * 60
 private val CHART_HEIGHT = 96.dp
 private val BAR_GAP = 2.dp
+private const val HOURS_PER_DAY = 24
+private const val MINUTES_PER_HOUR = 60
+private const val GRID_ROWS = 4
+
 
 @Composable
 fun DayHourAxis(
@@ -106,7 +110,7 @@ fun DayHourAxis(
                                 val colW = size.width / HOURS_PER_DAY
                                 val dash = PathEffect.dashPathEffect(floatArrayOf(8f, 6f), 0f)
                                 listOf(0, 6, 12, 18, 24).forEach { hour ->
-                                    val x = colW * hour
+                                    val x = (colW * hour).coerceAtMost(size.width - 1.dp.toPx())
                                     drawLine(
                                         color = gridLine,
                                         start = Offset(x, 0f),
@@ -115,7 +119,6 @@ fun DayHourAxis(
                                         pathEffect = dash,
                                     )
                                 }
-
                             },
                     ) {
                         Row(
@@ -181,8 +184,6 @@ fun DayHourAxis(
                     }
                 }
             }
-
-
         }
     }
 }
@@ -216,10 +217,6 @@ private fun minuteRangeOnDay(
 
 private data class MinuteRange(val startMin: Int, val durationMin: Int)
 
-private const val HOURS_PER_DAY = 24
-private const val MINUTES_PER_HOUR = 60
-private const val GRID_ROWS = 4
-
 internal data class HourBucket(
     val hour: Int,
     val focusedMin: Int,
@@ -236,7 +233,7 @@ internal fun List<FocusSession>.toHourBuckets(
     val interrupted = IntArray(HOURS_PER_DAY)
     forEach { session ->
         val range = minuteRangeOnDay(session, now, zone) ?: return@forEach
-        val hourMinutes = range.splitIntoHours() // IntArray(24), tổng = durationMin
+        val hourMinutes = range.splitIntoHours()
         val focusedRatio = when {
             session.isActive -> 1f
             session.totalDuration <= 0L -> 1f
