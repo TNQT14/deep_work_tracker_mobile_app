@@ -53,6 +53,7 @@ fun DayHourAxis(
     val buckets = remember(sessions) { sessions.toHourBuckets(now, zone) }
     val gridLine = MaterialTheme.colorScheme.outlineVariant
     val barColor = MaterialTheme.colorScheme.primary
+    val interruptedColor = MaterialTheme.colorScheme.outline
 
     Card(modifier = modifier.fillMaxWidth()) {
         Column(
@@ -131,6 +132,8 @@ fun DayHourAxis(
                             buckets.forEach { bucket ->
                                 val fraction = (bucket.totalMin.toFloat() / MINUTES_PER_HOUR)
                                     .coerceIn(0f, 1f)
+                                val focusedW = bucket.focusedMin.toFloat()
+                                val interruptedW = bucket.interruptedMin.toFloat()
                                 Box(
                                     modifier = Modifier
                                         .weight(1f)
@@ -138,12 +141,26 @@ fun DayHourAxis(
                                     contentAlignment = Alignment.BottomCenter,
                                 ) {
                                     if (fraction > 0f) {
-                                        Box(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .fillMaxHeight(fraction)
-                                                .background(barColor),
-                                        )
+                                        Column( modifier = Modifier
+                                            .fillMaxWidth()
+                                            .fillMaxHeight(fraction)) {
+                                            if (interruptedW > 0) {
+                                                Box(
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                        .fillMaxHeight(interruptedW)
+                                                        .background(interruptedColor)
+                                                )
+                                            }
+                                            if (focusedW > 0) {
+                                                Box(
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                        .fillMaxHeight(focusedW)
+                                                        .background(barColor),
+                                                )
+                                            }
+                                        }
                                     }
                                 }
                             }
