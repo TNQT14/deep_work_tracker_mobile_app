@@ -48,6 +48,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.todo.R
+import com.example.todo.presentation.components.SwitchTaskPickerDialog
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -58,6 +59,7 @@ fun TodoCountdownScreen(
     val uiState by viewModel.uiState.collectAsState()
     var showFinishDialog by remember { mutableStateOf(false) }
     var showBackConfirmDialog by remember { mutableStateOf(false) }
+    var showSwitchTaskPicker by remember { mutableStateOf(false) }
     val context = LocalContext.current
 
     BackHandler(enabled = uiState.isRunning || uiState.isPaused) {
@@ -189,41 +191,63 @@ fun TodoCountdownScreen(
                         }
 
                         uiState.isRunning -> {
-                            Row(
+                            Column(
                                 modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                verticalArrangement = Arrangement.spacedBy(12.dp),
                             ) {
-                                OutlinedButton(
-                                    onClick = { viewModel.pause() },
-                                    modifier = Modifier.weight(1f),
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp),
                                 ) {
-                                    Text(stringResource(R.string.countdown_pause))
+                                    OutlinedButton(
+                                        onClick = { viewModel.pause() },
+                                        modifier = Modifier.weight(1f),
+                                    ) {
+                                        Text(stringResource(R.string.countdown_pause))
+                                    }
+                                    OutlinedButton(
+                                        onClick = { viewModel.finish(markDone = true) },
+                                        modifier = Modifier.weight(1f),
+                                    ) {
+                                        Text(stringResource(R.string.countdown_end_early))
+                                    }
                                 }
                                 OutlinedButton(
-                                    onClick = { viewModel.finish(markDone = true) },
-                                    modifier = Modifier.weight(1f),
+                                    onClick = { showSwitchTaskPicker = true },
+                                    modifier = Modifier.fillMaxWidth(),
                                 ) {
-                                    Text(stringResource(R.string.countdown_end_early))
+                                    Text(stringResource(R.string.focus_switch_task))
                                 }
                             }
                         }
 
                         uiState.isPaused -> {
-                            Row(
+                            Column(
                                 modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                verticalArrangement = Arrangement.spacedBy(12.dp),
                             ) {
-                                Button(
-                                    onClick = { viewModel.resume() },
-                                    modifier = Modifier.weight(1f),
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp),
                                 ) {
-                                    Text(stringResource(R.string.countdown_resume))
+                                    Button(
+                                        onClick = { viewModel.resume() },
+                                        modifier = Modifier.weight(1f),
+                                    ) {
+                                        Text(stringResource(R.string.countdown_resume))
+                                    }
+                                    OutlinedButton(
+                                        onClick = { viewModel.finish(markDone = false) },
+                                        modifier = Modifier.weight(1f),
+                                    ) {
+                                        Text(stringResource(R.string.countdown_end))
+                                    }
                                 }
                                 OutlinedButton(
-                                    onClick = { viewModel.finish(markDone = false) },
-                                    modifier = Modifier.weight(1f),
+                                    onClick = { showSwitchTaskPicker = true },
+                                    modifier = Modifier.fillMaxWidth(),
                                 ) {
-                                    Text(stringResource(R.string.countdown_end))
+                                    Text(stringResource(R.string.focus_switch_task))
                                 }
                             }
                         }
@@ -231,6 +255,17 @@ fun TodoCountdownScreen(
                 }
             }
         }
+    }
+
+    if (showSwitchTaskPicker) {
+        SwitchTaskPickerDialog(
+            todos = uiState.switchableTodos,
+            onTodoSelected = { todo ->
+                showSwitchTaskPicker = false
+                viewModel.switchTask(todo)
+            },
+            onDismiss = { showSwitchTaskPicker = false },
+        )
     }
 
     if (showBackConfirmDialog) {

@@ -43,6 +43,7 @@ dependencies {
     implementation(project(":core:domain"))
     implementation(project(":core:data"))
     implementation(project(":core:common"))
+    implementation(project(":feature:session"))
     implementation(libs.hilt.android)
     implementation(libs.hilt.navigation.compose)
     implementation(libs.work.runtime.ktx)
