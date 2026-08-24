@@ -116,6 +116,7 @@ class TodoCountdownViewModel @Inject constructor(
                     focusedDuration = 0L,
                     tag = null,
                     note = null,
+                    todoId = todoId,
                 )
                 sessionRepository.saveSession(session)
                 activeSessionId = session.id
