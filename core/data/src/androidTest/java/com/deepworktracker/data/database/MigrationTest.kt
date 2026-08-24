@@ -42,6 +42,37 @@ class MigrationTest {
         }
     }
 
+    @Test
+    fun migrate8To9_backfillsSittingIdFromSessionId() {
+        helper.createDatabase(TEST_DB, 8).apply {
+            execSQL(
+                """
+                INSERT INTO focus_sessions (
+                    id, goal, category, start_time, end_time, total_duration, focused_duration,
+                    tag, note, date, created_at, updated_at, todo_id,
+                    focus_minutes, break_minutes, repeat, alert_mode,
+                    actual_focused_minutes, cycles
+                ) VALUES (
+                    's-old', 'Write thesis', NULL, 1000, 2000, 1000, 1000,
+                    NULL, NULL, '2026-08-14', 1000, 1000, 'todo-1',
+                    25, 5, 0, 'NOTIFY',
+                    0, 0
+                )
+                """.trimIndent()
+            )
+            close()
+        }
+
+        val db = helper.runMigrationsAndValidate(
+            TEST_DB, 9, true, DeepWorkDatabase.MIGRATION_8_9,
+        )
+
+        db.query("SELECT sitting_id FROM focus_sessions WHERE id = 's-old'").use { c ->
+            assertTrue(c.moveToFirst())
+            assertEquals("s-old", c.getString(0))
+        }
+    }
+
     private companion object {
         const val TEST_DB = "migration-test"
     }
