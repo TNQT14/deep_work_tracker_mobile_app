@@ -44,6 +44,10 @@
     <string name="focus_cycle">Vòng %1$d</string>
     <string name="focus_status_running">đang chạy</string>
     <string name="focus_end_session">Kết thúc phiên</string>
+    <string name="focus_switch_task">Chuyển task</string>
+    <string name="focus_switch_task_title">Chuyển sang task khác</string>
+    <string name="focus_switch_task_empty">Không còn task nào để chuyển.</string>
+    <string name="focus_switch_task_cancel">Hủy</string>
     <string name="focus_back_confirm_message">Bước ra ngoài sẽ kết thúc phiên tập trung hiện tại.</string>
     <string name="focus_back_confirm_end">Kết thúc phiên</string>
     <string name="focus_end_dialog_title">Kết thúc phiên tập trung?</string>

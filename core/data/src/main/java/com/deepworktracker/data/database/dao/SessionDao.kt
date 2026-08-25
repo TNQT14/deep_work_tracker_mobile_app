@@ -8,6 +8,7 @@ import androidx.room.Query
 import androidx.room.Update
 import com.deepworktracker.data.database.entity.DailyFocusTotal
 import com.deepworktracker.data.database.entity.FocusSessionEntity
+import com.deepworktracker.data.database.entity.SittingTotal
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -60,4 +61,19 @@ interface SessionDao {
         """
     )
     fun getDailyFocusTotals(startDate: String, endDate: String): Flow<List<DailyFocusTotal>>
+
+    @Query(
+        """
+        SELECT sitting_id AS sittingId,
+               SUM(total_duration) AS totalMs,
+               MIN(start_time) AS startMs,
+               MAX(end_time) AS endMs
+        FROM focus_sessions
+        WHERE end_time IS NOT NULL
+          AND date BETWEEN :startDate AND :endDate
+        GROUP BY sitting_id
+        ORDER BY startMs DESC
+        """
+    )
+    fun getSittingTotals(startDate: String, endDate: String): Flow<List<SittingTotal>>
 }

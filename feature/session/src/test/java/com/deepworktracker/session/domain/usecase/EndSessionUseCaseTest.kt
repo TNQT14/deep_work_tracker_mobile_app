@@ -40,6 +40,10 @@ private class FakeSessionRepository(activeSession: FocusSession?) : SessionRepos
     override suspend fun getRecentTags(limit: Int): List<String> = emptyList()
     override suspend fun getAllSessions(): List<FocusSession> = emptyList()
     override fun getSessionsByTodoId(todoId: String): Flow<List<FocusSession>> = flowOf(emptyList())
+    override fun getDailyFocusedMillis(
+        startDate: LocalDate,
+        endDate: LocalDate,
+    ): Flow<Map<LocalDate, Long>> = flowOf(emptyMap())
 }
 
 private class FakeInterruptionRepository(
@@ -51,6 +55,10 @@ private class FakeInterruptionRepository(
     override suspend fun saveInterruption(interruption: Interruption): kotlin.Result<Unit> = kotlin.Result.success(Unit)
     override suspend fun updateInterruption(interruption: Interruption): kotlin.Result<Unit> = kotlin.Result.success(Unit)
     override suspend fun deleteInterruptionsBySession(sessionId: String): kotlin.Result<Unit> = kotlin.Result.success(Unit)
+    override suspend fun getInterruptionsBetween(
+        from: kotlinx.datetime.Instant,
+        to: kotlinx.datetime.Instant,
+    ): List<Interruption> = emptyList()
 }
 
 class EndSessionUseCaseTest {

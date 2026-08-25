@@ -14,6 +14,7 @@ data class FocusSession(
     val note: String?,
     val interruptions: List<Interruption> = emptyList(),
     val todoId: String? = null,
+    val sittingId: String? = null,
     val focusMinutes: Int = 25,
     val breakMinutes: Int = 5,
     val repeat: Boolean = false,

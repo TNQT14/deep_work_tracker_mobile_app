@@ -3,10 +3,13 @@ package com.example.todo.presentation.countdown
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.deepworktracker.common.result.Result
 import com.deepworktracker.domain.model.FocusSession
+import com.deepworktracker.domain.model.Todo
 import com.deepworktracker.domain.model.TodoStatus
 import com.deepworktracker.domain.repository.SessionRepository
 import com.deepworktracker.domain.repository.TodoRepository
+import com.deepworktracker.session.domain.usecase.SwitchTaskUseCase
 import com.example.todo.notification.CountdownNotificationHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
@@ -15,9 +18,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -31,12 +33,13 @@ private const val DEFAULT_MINUTES = 25
 class TodoCountdownViewModel @Inject constructor(
     private val todoRepository: TodoRepository,
     private val sessionRepository: SessionRepository,
+    private val switchTaskUseCase: SwitchTaskUseCase,
     private val stateStore: CountdownStateStore,
     private val notificationHelper: CountdownNotificationHelper,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
-    private val todoId: String = savedStateHandle.get<String>("todoId").orEmpty()
+    private val observedTodoId = MutableStateFlow(savedStateHandle.get<String>("todoId").orEmpty())
 
     private val _uiState = MutableStateFlow(TodoCountdownUiState(isLoading = true))
     val uiState: StateFlow<TodoCountdownUiState> = _uiState.asStateFlow()
@@ -53,13 +56,12 @@ class TodoCountdownViewModel @Inject constructor(
 
     private fun observeTodo() {
         viewModelScope.launch {
-            val todoFlow = todoRepository.observeAllTodo()
-                .map { list -> list.firstOrNull { it.id == todoId } }
-
-            val initialTodo = todoFlow.first()
+            val allTodos = todoRepository.observeAllTodo()
+            val initialId = observedTodoId.value
+            val initialTodo = allTodos.first().firstOrNull { it.id == initialId }
             val saved = stateStore.load()
 
-            if (saved != null && saved.todoId == todoId) {
+            if (saved != null && saved.todoId == initialId) {
                 val remaining = ((saved.endEpochMillis - Clock.System.now().toEpochMilliseconds()) / 1000).toInt()
                 if (remaining > 0) {
                     activeSessionId = saved.sessionId
@@ -83,8 +85,12 @@ class TodoCountdownViewModel @Inject constructor(
                 setInitialTiming(initialTodo)
             }
 
-            todoFlow.collect { todo ->
-                _uiState.update { it.copy(todo = todo) }
+            combine(observedTodoId, allTodos) { currentId, list ->
+                val current = list.firstOrNull { it.id == currentId }
+                val switchable = list.filter { it.id != currentId && it.status != TodoStatus.DONE }
+                current to switchable
+            }.collect { (todo, switchable) ->
+                _uiState.update { it.copy(todo = todo, switchableTodos = switchable) }
             }
         }
     }
@@ -116,6 +122,7 @@ class TodoCountdownViewModel @Inject constructor(
                     focusedDuration = 0L,
                     tag = null,
                     note = null,
+                    todoId = observedTodoId.value,
                 )
                 sessionRepository.saveSession(session)
                 activeSessionId = session.id
@@ -132,7 +139,7 @@ class TodoCountdownViewModel @Inject constructor(
             val totalSec = _uiState.value.totalSeconds
             val endEpoch = Clock.System.now().toEpochMilliseconds() + (totalSec * 1000L)
             stateStore.save(
-                todoId = todoId,
+                todoId = observedTodoId.value,
                 sessionId = activeSessionId!!,
                 endEpochMillis = endEpoch,
                 totalSeconds = totalSec,
@@ -140,6 +147,35 @@ class TodoCountdownViewModel @Inject constructor(
 
             _uiState.update { it.copy(isRunning = true, isPaused = false) }
             startTimer()
+        }
+    }
+
+    fun switchTask(todo: Todo) {
+        if (todo.id == observedTodoId.value) return
+        viewModelScope.launch {
+            when (val result = switchTaskUseCase(todo.id, todo.title)) {
+                is Result.Success -> {
+                    activeSessionId = result.data.id
+                    observedTodoId.value = todo.id
+                    val state = _uiState.value
+                    val endEpoch = Clock.System.now().toEpochMilliseconds() +
+                        (state.remainingSeconds * 1000L)
+                    stateStore.save(
+                        todoId = todo.id,
+                        sessionId = result.data.id,
+                        endEpochMillis = endEpoch,
+                        totalSeconds = state.totalSeconds,
+                    )
+                    if (todo.status == TodoStatus.TODO) {
+                        todoRepository.updateTodo(
+                            todo.copy(status = TodoStatus.IN_PROGRESS, updatedAt = Clock.System.now())
+                        )
+                    }
+                }
+                is Result.Error -> {
+                    _uiState.update { it.copy(error = result.exception) }
+                }
+            }
         }
     }
 
@@ -164,7 +200,7 @@ class TodoCountdownViewModel @Inject constructor(
         val endEpoch = Clock.System.now().toEpochMilliseconds() + (remaining * 1000L)
         viewModelScope.launch {
             stateStore.save(
-                todoId = todoId,
+                todoId = observedTodoId.value,
                 sessionId = activeSessionId ?: "",
                 endEpochMillis = endEpoch,
                 totalSeconds = totalSec,

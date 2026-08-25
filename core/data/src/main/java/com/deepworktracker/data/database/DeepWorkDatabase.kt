@@ -26,7 +26,7 @@ import com.deepworktracker.data.database.entity.TodoEntity
         CategoryRuleEntity::class,
         TodoEntity::class
     ],
-    version = 8,
+    version = 9,
     exportSchema = true
 )
 abstract class DeepWorkDatabase : RoomDatabase() {
@@ -213,6 +213,13 @@ abstract class DeepWorkDatabase : RoomDatabase() {
         val MIGRATION_7_8: Migration = object : Migration(7,8){
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL("ALTER TABLE interruptions ADD COLUMN distraction_package TEXT")
+            }
+        }
+
+        val MIGRATION_8_9: Migration = object : Migration(8, 9) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE focus_sessions ADD COLUMN sitting_id TEXT")
+                db.execSQL("UPDATE focus_sessions SET sitting_id = id WHERE sitting_id IS NULL")
             }
         }
     }
