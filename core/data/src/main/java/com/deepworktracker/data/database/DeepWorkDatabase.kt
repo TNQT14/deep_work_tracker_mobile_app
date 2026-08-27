@@ -219,6 +219,8 @@ abstract class DeepWorkDatabase : RoomDatabase() {
         val MIGRATION_8_9: Migration = object : Migration(8, 9) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL("ALTER TABLE focus_sessions ADD COLUMN sitting_id TEXT")
+
+                // Each existing session is its own sitting — backfill sitting_id = id
                 db.execSQL("UPDATE focus_sessions SET sitting_id = id WHERE sitting_id IS NULL")
             }
         }
