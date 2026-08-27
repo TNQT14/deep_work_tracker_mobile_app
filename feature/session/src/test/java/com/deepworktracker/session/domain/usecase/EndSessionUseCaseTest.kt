@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
+import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import org.junit.Assert.assertEquals
@@ -49,11 +50,16 @@ private class FakeSessionRepository(activeSession: FocusSession?) : SessionRepos
 private class FakeInterruptionRepository(
     private val interruptionsBySession: Map<String, List<Interruption>> = emptyMap(),
 ) : InterruptionRepository {
+    val updated = mutableListOf<Interruption>()
+
     override fun getInterruptionsBySession(sessionId: String): Flow<List<Interruption>> =
         flowOf(interruptionsBySession[sessionId].orEmpty())
     override suspend fun getActiveInterruption(sessionId: String): Interruption? = null
     override suspend fun saveInterruption(interruption: Interruption): kotlin.Result<Unit> = kotlin.Result.success(Unit)
-    override suspend fun updateInterruption(interruption: Interruption): kotlin.Result<Unit> = kotlin.Result.success(Unit)
+    override suspend fun updateInterruption(interruption: Interruption): kotlin.Result<Unit> {
+        updated += interruption
+        return kotlin.Result.success(Unit)
+    }
     override suspend fun deleteInterruptionsBySession(sessionId: String): kotlin.Result<Unit> = kotlin.Result.success(Unit)
     override suspend fun getInterruptionsBetween(
         from: kotlinx.datetime.Instant,
@@ -129,5 +135,37 @@ class EndSessionUseCaseTest {
 
         assertTrue(result is Result.Error)
         assertEquals(DeepWorkError.DatabaseError, (result as Result.Error).exception)
+    }
+
+    @Test
+    fun `open interruption is closed and subtracted from focused duration`() = runBlocking {
+        val now = Clock.System.now()
+        val start = now - 10.minutes
+        val interruptionStart = now - 2.minutes
+        val active = session(startTime = start)
+        val interruptionRepo = FakeInterruptionRepository(
+            mapOf(
+                active.id to listOf(
+                    Interruption(
+                        id = "i-open",
+                        sessionId = active.id,
+                        startTime = interruptionStart,
+                        endTime = null,
+                        type = InterruptionType.APP_SWITCH,
+                        duration = 0,
+                    ),
+                ),
+            ),
+        )
+        val useCase = EndSessionUseCase(FakeSessionRepository(active), interruptionRepo)
+
+        val result = useCase()
+
+        assertTrue(result is Result.Success)
+        val ended = (result as Result.Success).data
+        val closed = interruptionRepo.updated.single()
+        assertTrue(closed.endTime != null)
+        assertEquals(ended.totalDuration - ended.focusedDuration, closed.duration)
+        assertTrue(closed.duration >= 90_000L)
     }
 }

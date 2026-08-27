@@ -11,7 +11,9 @@ import com.deepworktracker.domain.model.Todo
 import com.deepworktracker.domain.model.TodoStatus
 import com.deepworktracker.domain.repository.SessionRepository
 import com.deepworktracker.domain.repository.TodoRepository
+import com.deepworktracker.session.domain.usecase.EndSessionUseCase
 import com.deepworktracker.session.domain.usecase.SwitchTaskUseCase
+import com.deepworktracker.session.service.SessionServiceController
 import com.example.todo.notification.FocusNotificationHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
@@ -40,6 +42,8 @@ class FocusViewModel @Inject constructor(
     private val todoRepository: TodoRepository,
     private val sessionRepository: SessionRepository,
     private val switchTaskUseCase: SwitchTaskUseCase,
+    private val endSessionUseCase: EndSessionUseCase,
+    private val sessionServiceController: SessionServiceController,
     private val notificationHelper: FocusNotificationHelper,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
@@ -156,6 +160,7 @@ class FocusViewModel @Inject constructor(
             } else {
                 activeSessionId = existing.id
             }
+            sessionServiceController.start()
             resumeTimer()
         }
     }
@@ -247,19 +252,35 @@ class FocusViewModel @Inject constructor(
 
             val sid = activeSessionId
             if (sid != null) {
-                val session = sessionRepository.getSessionById(sid)
-                if (session != null) {
-                    val elapsed = (now - session.startTime).inWholeMilliseconds
-                    sessionRepository.updateSession(
-                        session.copy(
-                            endTime = now,
-                            totalDuration = elapsed,
-                            focusedDuration = (state.actualFocusedSeconds * 1000L),
-                            actualFocusedMinutes = actualMinutes,
-                            cycles = state.cycles,
+                when (val result = endSessionUseCase()) {
+                    is Result.Success -> {
+                        val timerMs = state.actualFocusedSeconds * 1000L
+                        val focused = minOf(result.data.focusedDuration, timerMs).coerceAtLeast(0L)
+                        sessionRepository.updateSession(
+                            result.data.copy(
+                                focusedDuration = focused,
+                                actualFocusedMinutes = (focused / 60_000L).toInt(),
+                                cycles = state.cycles,
+                            )
                         )
-                    )
+                    }
+                    is Result.Error -> {
+                        val session = sessionRepository.getSessionById(sid)
+                        if (session != null) {
+                            val elapsed = (now - session.startTime).inWholeMilliseconds
+                            sessionRepository.updateSession(
+                                session.copy(
+                                    endTime = now,
+                                    totalDuration = elapsed,
+                                    focusedDuration = (state.actualFocusedSeconds * 1000L),
+                                    actualFocusedMinutes = actualMinutes,
+                                    cycles = state.cycles,
+                                )
+                            )
+                        }
+                    }
                 }
+                sessionServiceController.stop()
             }
 
             notificationHelper.showCompleted(todo?.title, actualMinutes, state.cycles)

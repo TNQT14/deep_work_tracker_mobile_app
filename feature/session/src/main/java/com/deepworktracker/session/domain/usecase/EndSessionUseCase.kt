@@ -21,7 +21,17 @@ class EndSessionUseCase @Inject constructor(
 
             val now = Clock.System.now()
             val totalDuration = (now - activeSession.startTime).inWholeMilliseconds
-            val interruptions = interruptionRepository.getInterruptionsBySession(activeSession.id).first()
+            val interruptions = interruptionRepository.getInterruptionsBySession(activeSession.id)
+                .first()
+                .map { open ->
+                    if (open.endTime != null) return@map open
+                    val closed = open.copy(
+                        endTime = now,
+                        duration = (now - open.startTime).inWholeMilliseconds.coerceAtLeast(0),
+                    )
+                    interruptionRepository.updateInterruption(closed)
+                    closed
+                }
             val focusedDuration = calculateFocusedDuration(totalDuration, interruptions)
 
             val endedSession = activeSession.copy(

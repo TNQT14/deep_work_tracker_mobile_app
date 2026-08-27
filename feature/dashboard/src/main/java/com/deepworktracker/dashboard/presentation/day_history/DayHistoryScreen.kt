@@ -35,10 +35,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.deepworktracker.dashboard.R
 import com.deepworktracker.dashboard.presentation.day_history.components.DayHourAxis
 import com.deepworktracker.dashboard.presentation.day_history.components.DayStatsGrid
+import com.deepworktracker.domain.analytics.FocusScoreCalculator
 import com.deepworktracker.domain.model.FocusSession
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
@@ -120,9 +120,9 @@ private fun SessionRow(groups: SessionGroup, onClick: (String) -> Unit) {
     val goal = first.goal.takeIf { it.isNotBlank() }
 
     val done = groups.filter { !it.isActive }
-    val totalMs = done.sumOf { it.totalDuration }
     val focusedMs = done.sumOf { it.focusedDuration }
-    val interruptedMs = (totalMs - focusedMs).coerceAtLeast(0L)
+    val interruptedMs = FocusScoreCalculator.interruptedMs(done)
+    val totalMs = focusedMs + interruptedMs
     val focusedMinutes = focusedMs / MILLIS_PER_MINUTE
     val interruptedMinutes = interruptedMs / MILLIS_PER_MINUTE
     Card(

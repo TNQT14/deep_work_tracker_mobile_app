@@ -55,12 +55,12 @@ class DayHistoryViewModel @Inject constructor(
     }
 
     private fun computeStats(sessions: List<FocusSession>): DayStats {
-        val totalMs = sessions.sumOf { it.totalDuration }.coerceAtLeast(0L)
         val focusedMs = sessions.sumOf { it.focusedDuration }.coerceAtLeast(0L)
+        val interruptedMs = FocusScoreCalculator.interruptedMs(sessions)
         return DayStats(
             sessionCount = sessions.size,
-            totalMs = totalMs,
-            interruptedMs = (totalMs - focusedMs).coerceAtLeast(0L),
+            totalMs = focusedMs + interruptedMs,
+            interruptedMs = interruptedMs,
             focusScore = FocusScoreCalculator.score(sessions),
         )
     }
