@@ -49,6 +49,9 @@ data class FocusSessionEntity(
     @ColumnInfo(name = "todo_id")
     val todoId: String? = null,
 
+    @ColumnInfo(name = "sitting_id")
+    val sittingId: String? = null,
+
     @ColumnInfo(name = "focus_minutes")
     val focusMinutes: Int = 25,
 

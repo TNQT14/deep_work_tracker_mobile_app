@@ -138,3 +138,4 @@ LEVEL_ASSESSMENT.md
 /.tokensave
 interview/topics/sessions/2026-07-15-room-database-migration.json
 /.cursor
+/core/data/schemas/com.deepworktracker.data.database.DeepWorkDatabase

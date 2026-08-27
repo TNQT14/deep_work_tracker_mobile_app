@@ -4,6 +4,7 @@ import com.deepworktracker.domain.model.Todo
 
 data class TodoCountdownUiState(
     val todo: Todo? = null,
+    val switchableTodos: List<Todo> = emptyList(),
     val totalSeconds: Int = 25 * 60,
     val remainingSeconds: Int = 25 * 60,
     val isRunning: Boolean = false,

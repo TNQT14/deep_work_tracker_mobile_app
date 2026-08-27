@@ -44,6 +44,10 @@
     <string name="focus_cycle">Cycle %1$d</string>
     <string name="focus_status_running">running</string>
     <string name="focus_end_session">End session</string>
+    <string name="focus_switch_task">Switch task</string>
+    <string name="focus_switch_task_title">Switch to another task</string>
+    <string name="focus_switch_task_empty">No other tasks to switch to.</string>
+    <string name="focus_switch_task_cancel">Cancel</string>
     <string name="focus_back_confirm_message">Leaving will end the current focus session.</string>
     <string name="focus_back_confirm_end">End session</string>
     <string name="focus_end_dialog_title">End focus session?</string>

@@ -236,9 +236,12 @@ private fun MainAppScaffold(
                     )
                 }
 
-                composable("history/{date}") { backStackEntry ->
+                composable("history/{date}") {
                     DayHistoryScreen(
-                        onBack = { navController.popBackStack() }
+                        onBack = { navController.popBackStack() },
+                        onNavigateToGoal = { goal ->
+                            navController.navigate("goal/${Uri.encode(goal)}")
+                        },
                     )
                 }
 

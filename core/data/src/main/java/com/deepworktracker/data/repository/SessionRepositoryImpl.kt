@@ -1,5 +1,7 @@
 package com.deepworktracker.data.repository
 
+import androidx.room.withTransaction
+import com.deepworktracker.data.database.DeepWorkDatabase
 import com.deepworktracker.data.database.dao.SessionDao
 import com.deepworktracker.data.mapper.SessionMapper
 import com.deepworktracker.domain.model.FocusSession
@@ -11,6 +13,7 @@ import kotlinx.datetime.LocalDate
 import javax.inject.Inject
 
 class SessionRepositoryImpl @Inject constructor(
+    private val database: DeepWorkDatabase,
     private val sessionDao: SessionDao,
     private val mapper: SessionMapper
 ) : SessionRepository {
@@ -55,6 +58,18 @@ class SessionRepositoryImpl @Inject constructor(
         return try {
             val entity = mapper.toEntity(session)
             sessionDao.updateSession(entity)
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun switchActiveSession(ended: FocusSession, next: FocusSession): Result<Unit> {
+        return try {
+            database.withTransaction {
+                sessionDao.updateSession(mapper.toEntity(ended))
+                sessionDao.insertSession(mapper.toEntity(next))
+            }
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)

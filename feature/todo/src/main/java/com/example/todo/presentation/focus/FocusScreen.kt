@@ -56,6 +56,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.deepworktracker.domain.model.AlertMode
 import com.deepworktracker.ui.theme.tokens.ComponentColors
 import com.example.todo.R
+import com.example.todo.presentation.components.SwitchTaskPickerDialog
 
 /**
  * [UI — Route]
@@ -75,6 +76,7 @@ fun FocusScreen(
 
     var showEndDialog by remember { mutableStateOf(false) }
     var showBackConfirmDialog by remember { mutableStateOf(false) }
+    var showSwitchTaskPicker by remember { mutableStateOf(false) }
     val configSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     // [Effect] Keep screen awake while timer is running
@@ -157,10 +159,22 @@ fun FocusScreen(
                     onPause = { viewModel.pause() },
                     onResume = { viewModel.resume() },
                     onSkipBreak = { viewModel.skipBreak() },
+                    onSwitchTaskClick = { showSwitchTaskPicker = true },
                     onEndClick = { showEndDialog = true },
                 )
             }
         }
+    }
+
+    if (showSwitchTaskPicker) {
+        SwitchTaskPickerDialog(
+            todos = uiState.switchableTodos,
+            onTodoSelected = { todo ->
+                showSwitchTaskPicker = false
+                viewModel.switchTask(todo)
+            },
+            onDismiss = { showSwitchTaskPicker = false },
+        )
     }
 
     if (showEndDialog) {
@@ -218,6 +232,7 @@ private fun PhaseContent(
     onPause: () -> Unit,
     onResume: () -> Unit,
     onSkipBreak: () -> Unit,
+    onSwitchTaskClick: () -> Unit,
     onEndClick: () -> Unit,
 ) {
     // Type: Color | green accent for break phase (design token, not hardcoded)
@@ -368,6 +383,14 @@ private fun PhaseContent(
                     ) {
                         Text(stringResource(R.string.focus_skip_break))
                     }
+                }
+            }
+            if (phase == FocusPhase.FOCUS) {
+                OutlinedButton(
+                    onClick = onSwitchTaskClick,
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text(stringResource(R.string.focus_switch_task))
                 }
             }
             OutlinedButton(

@@ -46,7 +46,8 @@ class FocusHistoryViewModel @Inject constructor(
             sessionRepository.getSessionsByTodoId(todoId).collect { sessions ->
                 val zone = TimeZone.currentSystemDefault()
                 // Only finished sessions; DAO already sorts start_time DESC (latest first)
-                val items = sessions.filter { it.endTime != null }.map { it.toItem() }
+                val completed = sessions.filter { it.endTime != null }
+                val items = completed.map { it.toItem() }
                 val sections = items
                     .groupBy { it.startTime.toLocalDateTime(zone).date }
                     .entries
@@ -56,7 +57,7 @@ class FocusHistoryViewModel @Inject constructor(
                     it.copy(
                         isLoading = false,
                         sections = sections,
-                        totalFocusedMinutes = items.sumOf { i -> i.focusedMinutes },
+                        totalFocusedSeconds = (completed.sumOf { it.focusedDuration } / 1_000L).toInt(),
                         sessionCount = items.size,
                         totalCycles = items.sumOf { i -> i.cycles },
                     )

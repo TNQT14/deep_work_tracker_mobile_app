@@ -40,4 +40,14 @@ object ComponentColors {
     val focusBreak = RawColors.Emerald500
 
     fun focusBreakBackground(): Color = focusBreak.copy(alpha = 0.15f)
+
+    fun percentProgress(fraction: Float): Color {
+        val t = fraction.coerceIn(0f, 1f)
+        val hue = if (t <= 0.5f) {
+            55f * (t / 0.5f)
+        } else {
+            55f + 80f * ((t - 0.5f) / 0.5f)
+        }
+        return Color.hsv(hue = hue, saturation = 1f, value = 1f)
+    }
 }

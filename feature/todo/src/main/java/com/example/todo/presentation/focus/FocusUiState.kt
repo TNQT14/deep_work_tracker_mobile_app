@@ -21,6 +21,11 @@ data class FocusUiState(
     val todo: Todo? = null,
 
     /**
+     * Type: List<Todo> | Sample: other incomplete todos offered by "Switch task"
+     */
+    val switchableTodos: List<Todo> = emptyList(),
+
+    /**
      * Type: Boolean | Sample: false after todo is loaded from repository
      */
     val isLoading: Boolean = true,

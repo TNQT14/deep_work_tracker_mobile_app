@@ -7,7 +7,7 @@ import kotlinx.datetime.LocalDate
 data class FocusAnalytics(
     val period: AnalyticsPeriod,
     val focusScore: Float,
-    val totalFocusedMinutes: Long,
+    val totalFocusedSeconds: Long,
     val sessionCount: Int,
     val avgSessionMinutes: Long,
     val bestFocusHour: Int?,
@@ -19,7 +19,7 @@ data class FocusAnalytics(
         fun empty(period: AnalyticsPeriod) = FocusAnalytics(
             period = period,
             focusScore = 0f,
-            totalFocusedMinutes = 0L,
+            totalFocusedSeconds = 0L,
             sessionCount = 0,
             avgSessionMinutes = 0L,
             bestFocusHour = null,

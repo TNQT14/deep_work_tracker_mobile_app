@@ -41,7 +41,7 @@ import com.deepworktracker.common.datetime.toHhMm
 import com.deepworktracker.common.time.TimeFormatter
 import com.deepworktracker.ui.theme.tokens.ComponentColors
 import com.example.todo.R
-import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * [UI — Route]
@@ -117,7 +117,7 @@ private fun SummaryHeader(uiState: FocusHistoryUiState) {
         MetricCard(
             modifier = Modifier.weight(1f),
             label = stringResource(R.string.focus_history_total_label),
-            value = TimeFormatter.formatDurationShort(uiState.totalFocusedMinutes.minutes),
+            value = TimeFormatter.formatDuration(uiState.totalFocusedSeconds.seconds),
         )
         MetricCard(
             modifier = Modifier.weight(1f),

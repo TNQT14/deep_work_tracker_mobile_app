@@ -14,6 +14,7 @@
     <string name="dashboard_stat_avg">TB</string>
     <string name="dashboard_stat_best_hour">Giờ vàng</string>
     <string name="dashboard_best_hour_none">—</string>
+    <string name="dashboard_focus_score">Điểm tập trung</string>
 
     <string name="dashboard_heatmap_title">Bản đồ nhiệt tập trung</string>
     <string name="dashboard_focus_trend_title">Xu hướng tập trung</string>
@@ -66,11 +67,22 @@
     <string name="dashboard_goal_progress">%1$d / %2$d phút tập trung</string>
     <string name="dashboard_goal_best">Kỷ lục: %1$d ngày</string>
     <string name="dashboard_goal_empty">Đặt mục tiêu mỗi ngày trong Cài đặt để bắt đầu chuỗi ngày.</string>
+    <string name="dashboard_goal_open">Mở phiên hôm nay</string>
     <string name="day_history_title">Các phiên</string>
     <string name="day_history_back">Quay lại</string>
     <string name="day_history_count">%1$d phiên đã hoàn thành</string>
     <string name="day_history_focused_minutes">%1$d phút tập trung</string>
     <string name="day_history_running">đang chạy</string>
+    <string name="day_history_current">hiện tại</string>
     <string name="day_history_running_note">Đang chạy — chưa tính vào mục tiêu</string>
     <string name="day_history_empty">Không có phiên nào trong ngày này.</string>
+    <string name="day_history_stat_sessions">Số phiên</string>
+    <string name="day_history_stat_total">Tổng thời gian</string>
+    <string name="day_history_stat_interrupted">Bị gián đoạn</string>
+    <string name="day_history_stat_score">Điểm tập trung</string>
+    <string name="day_history_interrupted_minutes">%1$d phút gián đoạn</string>
+    <string name="day_history_hour_axis">Phân bố tập trung</string>
+    <string name="day_history_hour_axis_cd">Số phút tập trung theo từng giờ trong 24 giờ</string>
+    <string name="day_history_hour_tick">%1$s giờ</string>
+
 </resources>
