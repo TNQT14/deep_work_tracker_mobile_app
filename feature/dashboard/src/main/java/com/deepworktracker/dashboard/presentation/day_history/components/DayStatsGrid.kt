@@ -30,14 +30,14 @@ fun DayStatsGrid(stats: DayStats) {
             )
             StatTile(
                 label = stringResource(R.string.day_history_stat_total),
-                value = TimeFormatter.formatDurationShort(stats.totalMs.milliseconds),
+                value = TimeFormatter.formatDuration(stats.totalMs.milliseconds),
                 modifier = Modifier.weight(1f),
             )
         }
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             StatTile(
                 label = stringResource(R.string.day_history_stat_interrupted),
-                value = TimeFormatter.formatDurationShort(stats.interruptedMs.milliseconds),
+                value = TimeFormatter.formatDuration(stats.interruptedMs.milliseconds),
                 highlight = stats.interruptedMs > 0,
                 modifier = Modifier.weight(1f),
             )

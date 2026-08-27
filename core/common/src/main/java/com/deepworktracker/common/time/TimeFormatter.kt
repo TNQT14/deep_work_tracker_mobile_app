@@ -10,11 +10,12 @@ object TimeFormatter {
         val hours = totalSeconds / 3600
         val minutes = (totalSeconds % 3600) / 60
         val seconds = totalSeconds % 60
-        
-        return when {
-            hours > 0 -> String.format("%d:%02d:%02d", hours, minutes, seconds)
-            else -> String.format("%d:%02d", minutes, seconds)
-        }
+
+        return buildList {
+            if (hours > 0) add("${hours}h")
+            if (minutes > 0) add("${minutes}p")
+            if (seconds > 0 || isEmpty()) add("${seconds}s")
+        }.joinToString(" ")
     }
     
     fun formatDurationShort(duration: Duration): String {

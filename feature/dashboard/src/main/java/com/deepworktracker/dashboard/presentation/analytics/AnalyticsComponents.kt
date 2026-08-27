@@ -35,6 +35,7 @@ import com.deepworktracker.domain.analytics.AnalyticsPeriod
 import com.deepworktracker.domain.analytics.FocusAnalytics
 import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.seconds
 
 /** Segmented Day / Week / Month selector (roadmap #6, M6.2). Controls the whole analytics section. */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -80,7 +81,7 @@ fun FocusSummaryCard(
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     StatItem(
                         label = stringResource(R.string.dashboard_stat_focused),
-                        value = TimeFormatter.formatDurationShort(analytics.totalFocusedMinutes.minutes),
+                        value = TimeFormatter.formatDuration(analytics.totalFocusedSeconds.seconds),
                         modifier = Modifier.weight(1f),
                     )
                     StatItem(

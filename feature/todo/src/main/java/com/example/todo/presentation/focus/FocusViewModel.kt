@@ -8,10 +8,12 @@ import com.deepworktracker.domain.model.AlertMode
 import com.deepworktracker.domain.model.FocusConfig
 import com.deepworktracker.domain.model.FocusSession
 import com.deepworktracker.domain.model.Todo
-import com.deepworktracker.domain.model.Todo
 import com.deepworktracker.domain.model.TodoStatus
 import com.deepworktracker.domain.repository.SessionRepository
 import com.deepworktracker.domain.repository.TodoRepository
+import com.deepworktracker.session.domain.usecase.EndSessionUseCase
+import com.deepworktracker.session.domain.usecase.SwitchTaskUseCase
+import com.deepworktracker.session.service.SessionServiceController
 import com.example.todo.notification.FocusNotificationHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
@@ -39,13 +41,17 @@ import javax.inject.Inject
 class FocusViewModel @Inject constructor(
     private val todoRepository: TodoRepository,
     private val sessionRepository: SessionRepository,
+    private val switchTaskUseCase: SwitchTaskUseCase,
+    private val endSessionUseCase: EndSessionUseCase,
+    private val sessionServiceController: SessionServiceController,
     private val notificationHelper: FocusNotificationHelper,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
     /**
      * [Nav]
-     * Type: String | Sample: "todo-uuid-123" from route todo/{todoId}/focus
+     * Type: String | Sample: "todo-uuid-123" from route todo/{todoId}/focus;
+     *         updated after switchTask() so observation follows the new todo
      */
     private val observedTodoId = MutableStateFlow(savedStateHandle.get<String>("todoId").orEmpty())
 
@@ -98,11 +104,18 @@ class FocusViewModel @Inject constructor(
      */
     private fun loadTodo() {
         viewModelScope.launch {
-            val todoFlow = todoRepository.observeAllTodo()
-                .map { list -> list.firstOrNull { it.id == todoId } }
-            val todo = todoFlow.first()
-            _uiState.update { it.copy(todo = todo, isLoading = false) }
-            todoFlow.collect { updated -> _uiState.update { it.copy(todo = updated) } }
+            combine(
+                observedTodoId,
+                todoRepository.observeAllTodo(),
+            ) { currentId, list ->
+                val current = list.firstOrNull { it.id == currentId }
+                val switchable = list.filter { it.id != currentId && it.status != TodoStatus.DONE }
+                current to switchable
+            }.collect { (todo, switchable) ->
+                _uiState.update {
+                    it.copy(todo = todo, switchableTodos = switchable, isLoading = false)
+                }
+            }
         }
     }
 
@@ -149,33 +162,6 @@ class FocusViewModel @Inject constructor(
             }
             sessionServiceController.start()
             resumeTimer()
-        }
-    }
-
-    /**
-     * [ViewModel] [UDF]
-     * Input: todo — another incomplete task chosen from the switch-task picker
-     * Process: end the current FocusSession row and start a new one that shares sittingId;
-     *          timer keeps running; observation retargets to [todo]
-     * Output: activeSessionId + uiState.todo follow the new task
-     */
-    fun switchTask(todo: Todo) {
-        if (todo.id == observedTodoId.value) return
-        viewModelScope.launch {
-            when (val result = switchTaskUseCase(todo.id, todo.title)) {
-                is Result.Success -> {
-                    activeSessionId = result.data.id
-                    observedTodoId.value = todo.id
-                    if (todo.status == TodoStatus.TODO) {
-                        todoRepository.updateTodo(
-                            todo.copy(status = TodoStatus.IN_PROGRESS, updatedAt = Clock.System.now())
-                        )
-                    }
-                }
-                is Result.Error -> {
-                    _uiState.update { it.copy(error = result.exception) }
-                }
-            }
         }
     }
 

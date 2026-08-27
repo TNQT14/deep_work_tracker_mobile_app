@@ -50,6 +50,7 @@ import com.deepworktracker.ui.theme.tokens.ComponentColors
 import com.deepworktracker.ui.theme.tokens.Spacing
 import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * Hero cluster order: focus score → today's goal → insight tips (horizontal pager).
@@ -120,7 +121,7 @@ private fun FocusScoreSection(analytics: FocusAnalytics) {
                     horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
                 ) {
                     StatTile(
-                        value = TimeFormatter.formatDurationShort(analytics.totalFocusedMinutes.minutes),
+                        value = TimeFormatter.formatDuration(analytics.totalFocusedSeconds.seconds),
                         label = stringResource(R.string.dashboard_stat_focused),
                         modifier = Modifier.weight(1f),
                     )
@@ -135,7 +136,7 @@ private fun FocusScoreSection(analytics: FocusAnalytics) {
                     horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
                 ) {
                     StatTile(
-                        value = TimeFormatter.formatDurationShort(analytics.avgSessionMinutes.minutes),
+                        value = TimeFormatter.formatDuration(analytics.avgSessionMinutes.minutes),
                         label = stringResource(R.string.dashboard_stat_avg),
                         modifier = Modifier.weight(1f),
                     )
@@ -413,7 +414,7 @@ private fun FocusHeroClusterCardPreview() {
             analytics = FocusAnalytics(
                 period = AnalyticsPeriod.WEEK,
                 focusScore = 0.71f,
-                totalFocusedMinutes = 4984,
+                totalFocusedSeconds = 4984,
                 sessionCount = 135,
                 avgSessionMinutes = 36,
                 bestFocusHour = 11,

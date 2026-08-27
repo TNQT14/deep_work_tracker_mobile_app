@@ -35,7 +35,7 @@ data class FocusHistoryUiState(
     val isLoading: Boolean = true,
     val todoTitle: String = "",
     val sections: List<FocusDaySection> = emptyList(),
-    val totalFocusedMinutes: Int = 0,
+    val totalFocusedSeconds: Int = 0,
     val sessionCount: Int = 0,
     val totalCycles: Int = 0,
 )
