@@ -21,6 +21,7 @@ private class RecordingSessionRepository(activeSession: FocusSession?) : Session
     private val active = MutableStateFlow(activeSession)
     val saved = mutableListOf<FocusSession>()
     val updated = mutableListOf<FocusSession>()
+    val switched = mutableListOf<Pair<FocusSession, FocusSession>>()
 
     override suspend fun getActiveSession(): FocusSession? = active.value
     override fun observeActiveSession(): Flow<FocusSession?> = active
@@ -44,6 +45,15 @@ private class RecordingSessionRepository(activeSession: FocusSession?) : Session
         } else {
             active.value = session
         }
+        return kotlin.Result.success(Unit)
+    }
+
+    override suspend fun switchActiveSession(
+        ended: FocusSession,
+        next: FocusSession,
+    ): kotlin.Result<Unit> {
+        switched += ended to next
+        active.value = next
         return kotlin.Result.success(Unit)
     }
 
@@ -100,7 +110,8 @@ class SwitchTaskUseCaseTest {
 
         assertTrue(result is Result.Success)
         val next = (result as Result.Success).data
-        val ended = repo.updated.single()
+        val (ended, inserted) = repo.switched.single()
+        assertEquals(next, inserted)
         assertEquals("sit-1", ended.sittingId)
         assertEquals("sit-1", next.sittingId)
         assertEquals("todo-old", ended.todoId)
@@ -109,6 +120,8 @@ class SwitchTaskUseCaseTest {
         assertNotNull(ended.endTime)
         assertEquals(ended.endTime, next.startTime)
         assertEquals(null, next.endTime)
+        assertTrue(repo.saved.isEmpty())
+        assertTrue(repo.updated.isEmpty())
     }
 
     @Test
@@ -121,7 +134,9 @@ class SwitchTaskUseCaseTest {
 
         assertTrue(result is Result.Success)
         assertEquals("s-first", (result as Result.Success).data.sittingId)
-        assertEquals("s-first", repo.updated.single().id)
+        assertEquals("s-first", repo.switched.single().first.id)
+        assertTrue(repo.saved.isEmpty())
+        assertTrue(repo.updated.isEmpty())
     }
 
     @Test
@@ -134,5 +149,19 @@ class SwitchTaskUseCaseTest {
         assertTrue(result is Result.Error)
         assertEquals(DeepWorkError.NoActiveSession, (result as Result.Error).exception)
         assertTrue(repo.saved.isEmpty())
+        assertTrue(repo.switched.isEmpty())
+    }
+
+    @Test
+    fun `does not call saveSession or updateSession separately`() = runBlocking {
+        val repo = RecordingSessionRepository(session(sittingId = "sit-1"))
+        val useCase = SwitchTaskUseCase(repo, EndSessionUseCase(repo, EmptyInterruptionRepository()))
+
+        val result = useCase(newTodoId = "todo-new", newGoal = "Write methods")
+
+        assertTrue(result is Result.Success)
+        assertEquals(1, repo.switched.size)
+        assertTrue(repo.saved.isEmpty())
+        assertTrue(repo.updated.isEmpty())
     }
 }

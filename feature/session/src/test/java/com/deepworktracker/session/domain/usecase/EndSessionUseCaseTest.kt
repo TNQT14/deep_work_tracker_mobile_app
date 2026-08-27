@@ -35,6 +35,10 @@ private class FakeSessionRepository(activeSession: FocusSession?) : SessionRepos
         lastUpdated = session
         return if (updateShouldFail) kotlin.Result.failure(IllegalStateException()) else kotlin.Result.success(Unit)
     }
+    override suspend fun switchActiveSession(
+        ended: FocusSession,
+        next: FocusSession,
+    ): kotlin.Result<Unit> = kotlin.Result.success(Unit)
     override suspend fun deleteSession(id: String): kotlin.Result<Unit> = kotlin.Result.success(Unit)
     override suspend fun getRecentGoal(): List<String> = emptyList()
     override suspend fun getRecentCategories(limit: Int): List<String> = emptyList()

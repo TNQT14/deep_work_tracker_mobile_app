@@ -14,7 +14,12 @@ class EndSessionUseCase @Inject constructor(
     private val sessionRepository: SessionRepository,
     private val interruptionRepository: InterruptionRepository,
 ) {
-    suspend operator fun invoke(): Result<FocusSession> {
+    /**
+     * Builds the ended [FocusSession] and closes open interruptions.
+     * Does **not** persist the session row — [invoke] does that, and
+     * [SwitchTaskUseCase] persists it atomically with the next row.
+     */
+    internal suspend fun computeEndedSession(): Result<FocusSession> {
         return try {
             val activeSession = sessionRepository.observeActiveSession().first()
                 ?: return Result.Error(DeepWorkError.NoActiveSession)
@@ -34,20 +39,26 @@ class EndSessionUseCase @Inject constructor(
                 }
             val focusedDuration = calculateFocusedDuration(totalDuration, interruptions)
 
-            val endedSession = activeSession.copy(
-                endTime = now,
-                totalDuration = totalDuration,
-                focusedDuration = focusedDuration,
-                actualFocusedMinutes = (focusedDuration / 60_000L).toInt(),
-                interruptions = interruptions,
+            Result.Success(
+                activeSession.copy(
+                    endTime = now,
+                    totalDuration = totalDuration,
+                    focusedDuration = focusedDuration,
+                    actualFocusedMinutes = (focusedDuration / 60_000L).toInt(),
+                    interruptions = interruptions,
+                ),
             )
+        } catch (e: Exception) {
+            Result.Error(DeepWorkError.UnknownError(e.message ?: "Unknown error"))
+        }
+    }
 
-            val updateResult = sessionRepository.updateSession(endedSession)
-            if (updateResult.isSuccess) {
-                Result.Success(endedSession)
-            } else {
-                Result.Error(DeepWorkError.DatabaseError)
-            }
+    suspend operator fun invoke(): Result<FocusSession> {
+        return try {
+            val computed = computeEndedSession()
+            if (computed !is Result.Success) return computed
+            val updateResult = sessionRepository.updateSession(computed.data)
+            if (updateResult.isSuccess) computed else Result.Error(DeepWorkError.DatabaseError)
         } catch (e: Exception) {
             Result.Error(DeepWorkError.UnknownError(e.message ?: "Unknown error"))
         }

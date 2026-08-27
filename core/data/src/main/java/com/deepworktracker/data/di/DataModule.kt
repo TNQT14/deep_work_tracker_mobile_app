@@ -111,10 +111,11 @@ object DataModule {
     @Provides
     @Singleton
     fun provideSessionRepository(
+        database: DeepWorkDatabase,
         sessionDao: SessionDao,
         mapper: SessionMapper
     ): SessionRepository {
-        return SessionRepositoryImpl(sessionDao, mapper)
+        return SessionRepositoryImpl(database, sessionDao, mapper)
     }
     
     @Provides
